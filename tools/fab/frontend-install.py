@@ -524,6 +524,17 @@ for line in f:
 	split = line.split(":", 1)
 	attributes[split[0]] = split[1]
 
+with open('/etc/os-release') as fi:
+	for li in fi.readlines():
+		pair = li.strip().split('=')
+		if len(pair) != 2:
+			continue
+		k, v = pair
+		if k == 'VERSION_ID':
+			v = v.strip().replace('"', '')
+			attributes['os.version'] = v.split('.')[0] + '.x'
+			break
+
 # Reject frontend and backend as hostnames
 hostname = attributes['Kickstart_PrivateHostname'].lower()
 if hostname in ['frontend', 'backend']:
