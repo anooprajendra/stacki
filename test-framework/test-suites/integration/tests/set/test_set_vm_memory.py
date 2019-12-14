@@ -1,0 +1,70 @@
+import json
+import pytest
+
+class TestSetVmMemory:
+	def test_no_vm(self, host):
+		result = host.run('stack set vm memory')
+		assert result.rc != 0
+
+	def test_no_parameters(self, add_hypervisor, add_vm, host):
+		result = host.run('stack set vm memory vm-backend-0-3')
+		assert result.rc != 0
+
+	INVALID_PARAMS = [
+		'',
+		'-2048',
+		'0',
+		'512.5'
+	]
+
+	@pytest.mark.parametrize('params', INVALID_PARAMS)
+	def test_invalid_parameters(self, add_hypervisor, add_vm, host, params):
+		result = host.run(f'stack set vm memory vm-backend-0-3 memory={params}')
+		assert result.rc != 0
+
+	def test_invalid_vm(self, host):
+		result = host.run('stack set vm memory fake-backend-0-0 memory=2048')
+		assert result.rc != 0
+
+	def test_single_host(self, add_hypervisor, add_vm, host):
+		result = host.run('stack set vm memory vm-backend-0-3 memory=4096')
+		assert result.rc == 0
+
+		# Check that it made it into the database
+		result = host.run('stack list vm vm-backend-0-3 output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [{
+			'virtual machine': 'vm-backend-0-3',
+			'hypervisor': 'hypervisor-0-1',
+			'memory': 4096,
+			'cpu': 1,
+			'pending deletion': False,
+			'status': 'Connection failed to hypervisor'
+		}]
+
+	def test_multiple_hosts(self, add_hypervisor, add_vm_multiple, host):
+
+		result = host.run('stack set vm memory vm-backend-0-3 vm-backend-0-4 memory=4096')
+		assert result.rc == 0
+
+		# Check that it made it into the database
+		result = host.run('stack list vm vm-backend-0-3 vm-backend-0-4 output-format=json')
+		assert result.rc == 0
+		assert json.loads(result.stdout) == [
+			{
+				'virtual machine': 'vm-backend-0-3',
+				'hypervisor': 'hypervisor-0-1',
+				'memory': 4096,
+				'cpu': 1,
+				'pending deletion': False,
+				'status': 'Connection failed to hypervisor'
+			},
+			{
+				'virtual machine': 'vm-backend-0-4',
+				'hypervisor': 'hypervisor-0-1',
+				'memory': 4096,
+				'cpu': 2,
+				'pending deletion': False,
+				'status': 'Connection failed to hypervisor'
+			}
+		]
