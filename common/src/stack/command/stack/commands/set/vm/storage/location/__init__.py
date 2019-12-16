@@ -6,10 +6,9 @@
 #
 
 import stack.commands
-from stack.argument_processors.vm import VmArgumentProcessor
 from stack.exception import CommandError, ParamError
 
-class Command(stack.commands.set.vm.command, VmArgumentProcessor):
+class Command(stack.commands.set.vm.command):
 	"""
 	Set the VM disk location on the hypervisor.
 

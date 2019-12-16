@@ -6,6 +6,11 @@
 #
 
 import stack.commands
+from stack.argument_processors.vm import VmArgumentProcessor
 
-class command(stack.commands.HostArgumentProcessor, stack.commands.set.command):
+class command(
+	stack.commands.HostArgumentProcessor,
+	stack.commands.set.command,
+	VmArgumentProcessor
+):
 	pass
