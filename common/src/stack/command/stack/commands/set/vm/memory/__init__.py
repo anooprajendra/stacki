@@ -6,10 +6,9 @@
 #
 
 import stack.commands
-from stack.argument_processors.vm import VmArgumentProcessor
 from stack.exception import ParamError
 
-class Command(stack.commands.set.vm.Command, VmArgumentProcessor):
+class Command(stack.commands.set.vm.command):
 	"""
 	Allocate memory to a virtual machine host.
 
