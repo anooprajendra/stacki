@@ -12,7 +12,6 @@ class command(stack.commands.HostArgumentProcessor,
 		stack.commands.remove.command):
 	pass
 
-
 class Command(command, VmArgumentProcessor):
 	"""
 	Mark a vm for removal from the database and hypervisor.
@@ -51,9 +50,10 @@ class Command(command, VmArgumentProcessor):
 			('force', False)
 		])
 
+		list_args = [*args, 'expanded=y']
 		force = self.str2bool(force)
 		nukedisks = self.str2bool(nukedisks)
-		hosts = self.call('list.vm', args)
+		hosts = self.call('list.vm', list_args)
 		disks = self.call('list.vm.storage', args)
 
 		if not hosts:
@@ -69,7 +69,7 @@ class Command(command, VmArgumentProcessor):
 		if len(host_id) != len(hosts) and not force:
 			self.notify('Skipping virtual machines that are on')
 
-		# Don't remove the frontend if it's defined as a the virtual machine
+		# Don't remove the frontend if it's defined as a virtual machine
 		me = self.db.getHostname()
 		if me in hosts:
 			raise CommandError(self, 'cannot remove "%s"' % me)

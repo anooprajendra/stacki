@@ -40,16 +40,18 @@ class Command(stack.commands.set.vm.command):
 
 		for vm in hosts:
 			vm_id = self.vm_id_by_name(vm)
-			vm_disks = self.vm_disk_names([vm], disk_attr = 'Name')
-			vm_images = self.vm_disk_names([vm], disk_attr = 'Image Name')
+			vm_disks = [ disk for disk in self.call(f'list.vm.storage', [vm]) ]
+			disk_names = [ disk['Name'] for disk in vm_disks ]
+			disk_images = [ disk['Image Name'] for disk in vm_disks if disk['Image Name'] ]
+
 
 			# A mountpoint won't be in the image list, so don't raise
 			# an error if it's not there
-			if backing not in vm_images and '/dev' not in backing:
+			if backing not in disk_images and '/dev' not in backing:
 				raise ParamError(self, 'backing', f'{backing} not found for {vm}, is the backing a defined disk for that host?')
 
 			# No disks with the same device name
-			if disk_name in vm_disks:
+			if disk_name in disk_names:
 				raise CommandError(self, f'Disk with name {disk_name} already exists for {vm}')
 
 			# Handle mountpoints

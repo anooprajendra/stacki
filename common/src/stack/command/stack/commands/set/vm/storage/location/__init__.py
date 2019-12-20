@@ -38,7 +38,8 @@ class Command(stack.commands.set.vm.command):
 		])
 
 		for vm in hosts:
-			host_disks = self.vm_disk_names([vm])
+			disks = self.call('list.vm.storage', hosts)
+			host_disks = [disk['Name'] for disk in disks]
 			if disk_name not in host_disks:
 				raise ParamError(self, 'disk', f'{disk_name} is not a valid disk for {vm}')
 			vm_id = self.vm_id_by_name(vm)

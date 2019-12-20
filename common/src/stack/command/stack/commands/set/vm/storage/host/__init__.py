@@ -48,11 +48,18 @@ class Command(stack.commands.set.vm.command):
 
 		vm_id = self.vm_id_by_name(vm)
 		new_vm_id = self.vm_id_by_name(new_vm)
-		vm_disks = self.vm_disk_names([vm], disk_attr = 'Name')
-		new_vm_disks = self.vm_disk_names([new_vm], disk_attr = 'Name')
+		vm_disks = self.call(f'list.vm.storage', [vm, new_vm])
 
-		if disk_name not in vm_disks:
+		disk_names = [ disk['Name'] for disk in vm_disks if disk['Virtual Machine'] == vm ]
+		new_vm_disks = [ disk['Name'] for disk in vm_disks if disk['Virtual Machine'] == new_vm ]
+
+		# Check if the disk name parameter
+		# is a defined disk on the current host
+		if disk_name not in disk_names:
 			raise ParamError(self, 'disk', f'Disk {disk_name} not found defined for {vm}')
+
+		# Check the new host doesn't have
+		# a disk with the same name
 		if disk_name in new_vm_disks:
 			raise ParamError(self, 'disk', f'Disk {disk_name} found already defined on {new_vm}')
 

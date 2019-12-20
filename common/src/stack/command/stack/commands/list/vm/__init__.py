@@ -40,16 +40,14 @@ class Command(command, VmArgumentProcessor):
 
 	def run(self, param, args):
 		vm_hosts = self.valid_vm_args(args)
-		privkey, hypervisor, no_status = self.fillParams([
-			('private_key', '/root/.ssh/id_rsa'),
+		hypervisor, expanded = self.fillParams([
 			('hypervisor', ''),
-			('no-status', False)
+			('expanded', False)
 		])
 
-		# no_status forgos the status column
-		# to speed up execution of the command
-		# as ssh to each hypervisor is expensive
-		no_status = self.str2bool(no_status)
+		# Expanded shows the actual VM
+		# status on the hypervisor
+		expanded = self.str2bool(expanded)
 
 		if hypervisor and not self.is_hypervisor(hypervisor):
 			raise ParamError(self, param = 'hypervisor', msg = f'{hypervisor} is not a valid hypervisor')
@@ -67,7 +65,7 @@ class Command(command, VmArgumentProcessor):
 
 		# Run the various plugins for VM information and gather the results
 		# for output
-		for (provides, result) in self.runPlugins((vm_values.keys(), privkey, no_status)):
+		for (provides, result) in self.runPlugins((vm_values.keys(), expanded)):
 			header.extend(result['keys'])
 			for vm_host, vm_value in result['values'].items():
 				vm_values[vm_host].extend(vm_value)

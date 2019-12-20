@@ -23,7 +23,7 @@ def add_vm():
 		)
 		vm_result = _exec(add_vm, shlexsplit = True)
 		if vm_result.returncode != 0:
-			pytest.fail(f'Unable to add VM {hostname}')
+			pytest.fail(f'Unable to add VM {hostname}:\n{vm_result.stderr}')
 
 	_inner(
 		'vm-backend-0-3',
@@ -64,7 +64,7 @@ def add_vm_multiple():
 		)
 		vm_result = _exec(add_vm, shlexsplit = True)
 		if vm_result.returncode != 0:
-			pytest.fail(f'Unable to add VM {hostname}')
+			pytest.fail(f'Unable to add VM {hostname}:\n{vm_result.stderr}')
 
 	_inner(
 		'vm-backend-0-3',
