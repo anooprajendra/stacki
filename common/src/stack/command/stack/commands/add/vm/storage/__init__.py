@@ -56,17 +56,18 @@ class Command(stack.commands.add.vm.Command):
 			('storage_directory', ''),
 			('disks', '100')
 		])
+		vm_disks = self.call('list.vm.storage', vm_host)
+		disk_names = [ disk['Name'] for disk in vm_disks ]
+		disk_names.sort()
 
 		# Get the name of all disks for the VM
-		disk_names = self.vm_disk_names(vm_host, disk_attr = 'Name')
-		disk_names.sort()
 		image_formats = ['.qcow2', '.raw']
 
 		for disk in disks.split(','):
 			image_archive = None
 			disk_size = None
 			mount_disk = None
-
+			curr_images = [ disk['Image Name'] for disk in vm_disks if disk['Image Name'] and disk['Type'] == 'disk']
 			# The calculated names of newly created disks
 			vol_names = []
 
@@ -79,7 +80,7 @@ class Command(stack.commands.add.vm.Command):
 
 			# Only want storage of type disk (i.e. created volumes) that match the default
 			# naming scheme in order to determine the next disk name, ignoring custom names
-			for name in self.vm_disk_names(vm_host, disk_type = 'disk', disk_attr = 'Image Name'):
+			for name in curr_images:
 				if vol_name in name:
 					vol_names.append(name)
 

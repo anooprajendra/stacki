@@ -1,5 +1,5 @@
 from stack.exception import CommandError
-import copy
+from collections import defaultdict
 
 class VmArgumentProcessor():
 	"""
@@ -116,88 +116,50 @@ class VmArgumentProcessor():
 			""", (hypervisor, )
 		)
 
-	def vm_info(self, hosts, hypervisor = '', no_status = ''):
+	def vm_info(self, hosts):
 		"""
-		Get the output of 'list vm' arranged by hostname
-		Can be sorted optionally by hypervisor or exclude
-		current vm status for speeding up execution time
+		Get virtual specific attributes
+		from the database and return it
+		with the hostnames as keys
 		"""
+
+		vm_info = defaultdict(list)
 
 		# Copy the hosts arg to append extra
 		# parameters
-		args = copy.copy(hosts)
-		args.append(f'hypervisor={hypervisor}')
-		args.append(f'no-status={no_status}')
-		try:
-			vm_hosts = self.call('list.vm', args)
-		except CommandError:
-			return {}
-		vm_by_hostname = {}
+		for row in self.db.select(
+			"""
+			nodes.name, (SELECT name FROM nodes WHERE nodes.id = vm.hypervisor_id)
+			AS hypervisor, vm.memory_size, vm.cpu_cores, vm.vm_delete FROM nodes INNER JOIN virtual_machines vm
+			ON nodes.id = vm.node_id
+			"""):
+			if row[0] in hosts:
+				vm_info[row[0]].extend(row[1:-1])
 
-		# Arrange as a dict sorted by hostname
-		for vm in vm_hosts:
-			vm_name = vm['virtual machine']
-			vm_attr = vm.pop('virtual machine', None)
-			vm_by_hostname[vm_name] = vm
+				# Turn the integer value stored in the database to a
+				# boolean for display
+				vm_info[row[0]].append(bool(row[-1]))
 
-		return vm_by_hostname
-
-	def vm_disks(self, hosts):
-		"""
-		Get the output of 'list vm storage' arranged
-		by vm host name
-		"""
-
-		try:
-			vm_hosts = self.call('list.vm.storage', hosts)
-		except CommandError:
-			return {}
-
-		vm_by_hostname = {}
-
-		for vm in vm_hosts:
-			vm_name = vm['Virtual Machine']
-			vm_attr = vm.pop('Virtual Machine', None)
-			vm_by_hostname.setdefault(vm_name, []).append(vm)
-
-		return vm_by_hostname
-
-	def vm_disk_names(self, host, disk_type = '', disk_attr = 'Name'):
-		"""
-		Return a flat list of one vm disk attr for all given hosts
-		Defaults to the disk name, can optionally be
-		a different value and only for a certain disk type
-		(disk, image, or mountpoint)
-		"""
-
-		disk_names = []
-		if disk_type and disk_type not in ['disk', 'image', 'mountpoint']:
-			return disk_names
-		host_disks = self.call('list.vm.storage', host)
-		for disk in host_disks:
-			if disk_type and disk['Type'] != disk_type:
-				continue
-			else:
-				disk_names.append(disk[disk_attr])
-		return disk_names
+		return vm_info
 
 	def get_all_disks(self, hosts):
 		"""
 		Return a dict of vm disk info ordered by hostname
 		"""
 
-		disks = dict.fromkeys(hosts, [])
-		for host in hosts:
-			host_id = self.vm_id_by_name(host)
-			for row in self.db.select(
-				"""
-				disk_name, disk_type, disk_size, disk_location, disk_delete,
-				image_file_name, image_archive_name, mount_disk from virtual_machine_disks
-				WHERE virtual_machine_id = %s
-				""", (host_id, )
-			):
-				disks[host].append(row)
+		disks = defaultdict(dict)
+		for row in self.db.select(
+			"""
+			nodes.name, vmd.id, disk_name, disk_type, disk_location, disk_size, image_file_name, image_archive_name,
+			mount_disk, vmd.disk_delete FROM virtual_machine_disks vmd INNER JOIN virtual_machines vm
+			ON vmd.virtual_machine_id = vm.id INNER JOIN nodes ON vm.node_id = nodes.id
+			"""):
+				if row[0] in hosts:
+					disks[row[0]][row[1]] = list(row[2:-1])
 
+					# Turn disk deletion value into a bool
+					# for display
+					disks[row[0]][row[1]].append(bool(row[-1]))
 		return disks
 
 	def delete_pending_disk(self, host, disk_name):

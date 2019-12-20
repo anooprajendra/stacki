@@ -23,8 +23,7 @@ class TestRemoveVM:
 			'hypervisor': 'hypervisor-0-1',
 			'memory': 2048,
 			'cpu': 1,
-			'pending deletion': True,
-			'status': 'Connection failed to hypervisor'
+			'pending deletion': True
 		}]
 
 	def test_multiple_hosts(self, add_hypervisor, add_vm_multiple, host):
@@ -40,16 +39,14 @@ class TestRemoveVM:
 				'hypervisor': 'hypervisor-0-1',
 				'memory': 2048,
 				'cpu': 1,
-				'pending deletion': True,
-				'status': 'Connection failed to hypervisor'
+				'pending deletion': True
 			},
 			{
 				'virtual machine': 'vm-backend-0-4',
 				'hypervisor': 'hypervisor-0-1',
 				'memory': 2048,
 				'cpu': 2,
-				'pending deletion': True,
-				'status': 'Connection failed to hypervisor'
+				'pending deletion': True
 			}
 		]
 

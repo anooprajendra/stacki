@@ -11,6 +11,9 @@ class TestAddVM:
 	STOR_POOL = '/export/pools/stacki'
 
 	def test_add_vm(self, add_hypervisor, host):
+		"""
+		Test adding a VM with all possible parameters
+		"""
 
 		# The host must be added to the database before adding as a VM
 		add_host = host.run(f'stack add host vm-backend-0-3 appliance=backend rank=0 rack=1')
@@ -28,11 +31,15 @@ class TestAddVM:
 			'hypervisor': 'hypervisor-0-1',
 			'memory': 4096,
 			'cpu': 4,
-			'pending deletion': False,
-			'status': 'Connection failed to hypervisor'
+			'pending deletion': False
 		}]
 
 	def test_add_vm_minimal(self, add_hypervisor, host):
+		"""
+		Test adding a VM with just the required
+		parameters. Cpu, memory, and storage
+		should be filled in by the default values.
+		"""
 
 		# The host must be added to the database before adding as a VM
 		add_host = host.run(f'stack add host vm-backend-0-3 appliance=backend rank=0 rack=1')
@@ -50,8 +57,7 @@ class TestAddVM:
 			'hypervisor': 'hypervisor-0-1',
 			'memory': 3072,
 			'cpu': 1,
-			'pending deletion': False,
-			'status': "Connection failed to hypervisor"
+			'pending deletion': False
 		}]
 
 	ADD_VM_BAD_DATA = [
@@ -72,6 +78,9 @@ class TestAddVM:
 
 	@pytest.mark.parametrize('host_name, params', ADD_VM_BAD_DATA)
 	def test_add_vm_bad(self, add_hypervisor, host, host_name, params):
+		"""
+		Test add vm with bad input
+		"""
 
 		# The host must be added to the database before adding as a VM
 		if host_name:

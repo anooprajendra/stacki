@@ -8,6 +8,7 @@ import stack.commands
 import stack.kvm
 from stack.kvm import VmException
 from stack.argument_processors.vm import VmArgumentProcessor
+from collections import defaultdict
 
 class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 
@@ -18,15 +19,13 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		return ['basic']
 
 	def run(self, args):
-		hosts, privkey, no_status = args
-		vm_status = dict.fromkeys(hosts, '')
-		for vm in hosts:
-			vm_status[vm] = []
+		hosts, expanded = args
+		hypervisors = defaultdict()
+		vm_status = defaultdict(list)
 		keys = ['status']
-		hypervisor_status = {}
 
 		# Skip this plugin if no_status is set
-		if no_status:
+		if not expanded:
 			return {'keys': [], 'values': {} }
 
 		for host in hosts:
@@ -34,21 +33,34 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 
 			# Get the hypervisor hostname
 			host_hypervisor = self.get_hypervisor_by_name(host)
-			try:
-				conn = stack.kvm.VM(host_hypervisor, privkey)
 
-				# returns a dict of all vm's saying if they are on or off
-				guest_status = conn.guests()
-				if host in guest_status:
-					vm_status[host].append(guest_status[host])
+			# If we already got the hypervisor status
+			# from another host use that information
+			# instead of reaching out to the hypervisor
+			if hypervisors.get(host_hypervisor):
+				guests = hypervisors[host_hypervisor]
+				if guests.get(host):
+					vm_status[host].append(guests[host])
 				else:
-					vm_status[host].append('undefined')
-				conn.close()
+					vm_status[host] = 'undefined'
+			else:
+				try:
+					conn = stack.kvm.Hypervisor(host_hypervisor)
 
-			# If an exception was raised, set the status
-			# to connection failed
-			except VmException as error:
-				if conn:
+					# A dict of the current status
+					# of all VM's on the hypervisor
+					guest_status = conn.guests()
+					hypervisors[host_hypervisor].append(guest_status)
+					if host in guest_status:
+						vm_status[host].append(guest_status[host])
+					else:
+						vm_status[host].append('undefined')
 					conn.close()
-				vm_status[host].append('Connection failed to hypervisor')
+
+				# If an exception was raised, set the status
+				# to connection failed
+				except VmException as error:
+					if conn:
+						conn.close()
+					vm_status[host].append('Connection failed to hypervisor')
 		return { 'keys' : keys, 'values': vm_status }
