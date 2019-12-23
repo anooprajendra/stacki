@@ -164,6 +164,9 @@ class Command(command, VmArgumentProcessor):
 		given host
 		"""
 
+		# Intalize the boot ordering of the vm
+		self.bootorder = 1
+
 		memsize = int(info['memory']) * 1024
 		numcpus = info['cpu']
 
@@ -238,8 +241,6 @@ class Command(command, VmArgumentProcessor):
 		self.beginOutput()
 		vm_hosts = self.valid_vm_args(args)
 
-		# Intalize the boot ordering of the vm
-		self.bootorder = 1
 		out = []
 
 		# Strip the SUX tags if set to true
@@ -248,8 +249,12 @@ class Command(command, VmArgumentProcessor):
 			('hypervisor', '')
 		])
 		bare_output = self.str2bool(bare_output)
-		vm_info = self.vm_info(vm_hosts)
-		vm_disks = self.vm_disks(vm_hosts)
+		vm_info =  {vm['virtual machine']: vm for vm in self.call('list.vm', vm_hosts)}
+		vm_disks = {}
+		for disk in self.call('list.vm.storage', vm_hosts):
+			host = disk['Virtual Machine']
+			disk.pop('Virtual Machine')
+			vm_disks.setdefault(host, []).append(disk)
 
 		# Check if the hypervisor is valid
 		# if the param is set

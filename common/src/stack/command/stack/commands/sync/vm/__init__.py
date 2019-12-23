@@ -20,11 +20,6 @@ class Command(command, VmArgumentProcessor):
 	One or more virtual machine hosts to sync.
 	</arg>
 
-	<param type='string' name='privkey'>
-	Private ssh key to talk to the hyper visor.
-	Defaults to /root/.ssh/id_rsa if not set.
-	</param>
-
 	<param type='string' name='debug'>
 	Display additional debugging information when syncing the
 	virtual machines. Defaults to false if not set.
@@ -67,8 +62,7 @@ class Command(command, VmArgumentProcessor):
 	"""
 
 	def run(self, params, args):
-		privkey, debug, hypervisor, force, autostart, sync_ssh = self.fillParams([
-			('private_key', '/root/.ssh/id_rsa'),
+		debug, hypervisor, force, autostart, sync_ssh = self.fillParams([
 			('debug', False),
 			('hypervisor', ''),
 			('force', False),
@@ -86,25 +80,29 @@ class Command(command, VmArgumentProcessor):
 		# Gather the required info for each vm
 		# If the force parameter isn't set, skip
 		# vm's currently on
-		for vm, info in self.vm_info(args, hypervisor=hypervisor).items():
-			if info['status'] != 'on':
-				vm_hosts[vm] = info
+		for vm in self.call('list.vm', [*args, 'expanded=True', f'hypervisor={hypervisor}']):
+			vm_name = vm['virtual machine']
+			if vm['status'] != 'on':
+				vm_hosts[vm_name] = vm
 			elif force:
-				self.notify(f'Force turning off {vm}')
-				self.call(f'set.host.power', args =[vm, 'command=off', 'method=kvm'])
-				info['status']= 'off'
-				vm_hosts[vm] = info
+				self.notify(f'Force turning off {vm_name}')
+				self.call(f'set.host.power', args = [vm_name, 'command=off', 'method=kvm'])
+				vm['status'] = 'off'
+				vm_hosts[vm_name] = vm
 			else:
-				self.notify(f'VM host {vm} is on, skipping')
+				self.notify(f'VM host {vm_name} is on, skipping')
+
+		# Gather each host's disk information
+		for disk in self.call('list.vm.storage', [*vm_hosts]):
+			vm_disks.setdefault(disk['Virtual Machine'], []).append(disk)
 
 		# Raise an error if there are no hosts
 		# to sync
 		if not vm_hosts:
 			raise CommandError(self, 'No virtual machines found to sync')
-		vm_disks = self.vm_disks([*vm_hosts])
 		self.notify('Sync Virtual Machines')
 		self.beginOutput()
-		plugin_args = (vm_hosts, vm_disks, debug, privkey, sync_ssh, force, autostart)
+		plugin_args = (vm_hosts, vm_disks, debug, sync_ssh, force, autostart)
 
 		# Gather plugin info and output any errors found
 		# if the debug flag is set

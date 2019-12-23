@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="no"?>
+
+<graph>
+
+	<description>
+	Add ability for machine to
+	host KVM virtual machines
+	</description>
+
+	<copyright>
+	Copyright (c) 2006 - 2019 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</copyright>
+
+	<edge from="hypervisor">
+		<to>backend</to>
+	</edge>
+
+</graph>

@@ -88,19 +88,19 @@ vm-backend-0-4 <stack:file stack:name=/etc/libvirt/qemu/vm-backend-0-4.xml>
 <mac address="52:54:00:7a:f0:1f"/>
 <source bridge="eth0"/>
 <model type="virtio"/>
-<boot order="3"/>
+<boot order="1"/>
 </interface>
 <disk device="disk" type="file">
 <driver cache="none" type="qcow2" name="qemu" io="native"/>
 <source file="/export/pools/stacki/vm-backend-0-4_disk1.qcow2"/>
 <target dev="sda" bus="sata"/>
-<boot order="4"/>
+<boot order="2"/>
 </disk>
 <disk device="disk" type="file">
 <driver cache="none" type="qcow2" name="qemu" io="native"/>
 <source file="/export/pools/stacki/vm-backend-0-4_disk2.qcow2"/>
 <target dev="sdb" bus="sata"/>
-<boot order="5"/>
+<boot order="3"/>
 </disk>
 <serial type="pty">
 <target port="0"/>
@@ -152,19 +152,19 @@ vm-backend-0-5 <stack:file stack:name=/etc/libvirt/qemu/vm-backend-0-5.xml>
 <mac address="52:54:00:bf:9f:e8"/>
 <source bridge="eth0"/>
 <model type="virtio"/>
-<boot order="6"/>
+<boot order="1"/>
 </interface>
 <disk device="disk" type="file">
 <driver cache="none" type="qcow2" name="qemu" io="native"/>
 <source file="/export/pools/stacki/vm-backend-0-5_disk1.qcow2"/>
 <target dev="sda" bus="sata"/>
-<boot order="7"/>
+<boot order="2"/>
 </disk>
 <disk device="disk" type="file">
 <driver cache="none" type="qcow2" name="qemu" io="native"/>
 <source file="/export/pools/stacki/vm-backend-0-5_disk2.qcow2"/>
 <target dev="sdb" bus="sata"/>
-<boot order="8"/>
+<boot order="3"/>
 </disk>
 <serial type="pty">
 <target port="0"/>

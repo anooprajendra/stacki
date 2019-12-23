@@ -34,16 +34,14 @@ class TestSyncVM:
 				'hypervisor': 'hypervisor-0-1',
 				'memory': 2048,
 				'cpu': 1,
-				'pending deletion': False,
-				'status': 'Connection failed to hypervisor'
+				'pending deletion': False
 			},
 			{
 				'virtual machine': 'vm-backend-0-4',
 				'hypervisor': 'hypervisor-0-1',
 				'memory': 2048,
 				'cpu': 2,
-				'pending deletion': True,
-				'status': 'Connection failed to hypervisor'
+				'pending deletion': True
 			}
 
 		]
@@ -68,8 +66,7 @@ class TestSyncVM:
 			'hypervisor': 'hypervisor-0-1',
 			'memory': 2048,
 			'cpu': 1,
-			'pending deletion': False,
-			'status': 'Connection failed to hypervisor'
+			'pending deletion': False
 		}]
 
 	# Test syncing per hypervisor
@@ -98,23 +95,20 @@ class TestSyncVM:
 				'hypervisor': 'hypervisor-0-1',
 				'memory': 2048,
 				'cpu': 1,
-				'pending deletion': False,
-				'status': 'Connection failed to hypervisor'
+				'pending deletion': False
 			},
 			{
 				'virtual machine': 'vm-backend-0-4',
 				'hypervisor': 'hypervisor-0-1',
 				'memory': 2048,
 				'cpu': 2,
-				'pending deletion': True,
-				'status': 'Connection failed to hypervisor'
+				'pending deletion': True
 			},
 			{
 				'virtual machine': 'vm-backend-0-5',
 				'hypervisor': 'hypervisor-0-2',
 				'memory': 3072,
 				'cpu': 3,
-				'pending deletion': False,
-				'status': 'Connection failed to hypervisor'
+				'pending deletion': False
 			}
 		]

@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-from stack.kvm import VM
+from stack.kvm import Hypervisor
 from stack.kvm import VmException
 from stack.argument_processors.vm import VmArgumentProcessor
 from stack.util import _exec
@@ -42,7 +42,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 			return [pack_image.stderr]
 		return []
 
-	def add_disk(self, hypervisor, disk, sync_ssh, privkey, debug):
+	def add_disk(self, hypervisor, disk, sync_ssh, debug):
 		"""
 		Add a given disk to a hypervisor
 		Returns any errors that occurred.
@@ -56,7 +56,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		if disk_type == 'disk':
 			pool = image_loc.name
 			try:
-				conn = stack.kvm.VM(hypervisor, privkey)
+				conn = stack.kvm.Hypervisor(hypervisor)
 				add_pool = conn.add_pool(image_loc.name, image_loc)
 				if not add_pool and debug:
 					self.owner.notify(f'Pool {pool} already created, skipping')
@@ -83,7 +83,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 			else:
 				copy_file = disk['Image Name']
 			try:
-				conn = stack.kvm.VM(hypervisor, privkey)
+				conn = stack.kvm.Hypervisor(hypervisor)
 				if debug:
 					self.owner.notify(f'Transferring file {copy_file}')
 
@@ -114,7 +114,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		if disk_type == 'disk':
 			vol_name = disk['Image Name']
 			try:
-				conn = stack.kvm.VM(hypervisor, privkey)
+				conn = stack.kvm.Hypervisor(hypervisor)
 				if debug:
 					self.owner.notify(f'Removing disk {vol_name}')
 
@@ -129,7 +129,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		elif disk_type == 'image':
 			image_name = Path(disk['Image Name']).name
 			try:
-				conn = stack.kvm.VM(hypervisor, privkey)
+				conn = stack.kvm.Hypervisor(hypervisor)
 				if debug:
 					self.owner.notify(f'Removing image {image_name}')
 				conn.remove_image(f'{image_loc}/{image_name}')
@@ -138,7 +138,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		return remove_errors
 
 	def run(self, args):
-		hosts, host_disks, debug, privkey, sync_ssh, force, hypervisor = args
+		hosts, host_disks, debug, sync_ssh, force, hypervisor = args
 		config_errors = []
 		self.owner.notify('Sync VM Storage')
 		for host, disks in host_disks.items():
@@ -147,11 +147,11 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 
 				# Remove any disks assigned to a vm marked for deletion
 				if self.owner.str2bool(disk['Pending Deletion']):
-					remove_output = self.remove_disk(hypervisor, disk, privkey, debug)
+					remove_output = self.remove_disk(hypervisor, disk, debug)
 					config_errors.extend(remove_output)
 
 				# Otherwise try to add it
 				else:
-					add_output = self.add_disk(hypervisor, disk, sync_ssh, privkey, debug)
+					add_output = self.add_disk(hypervisor, disk, sync_ssh, debug)
 					config_errors.extend(add_output)
 		return config_errors

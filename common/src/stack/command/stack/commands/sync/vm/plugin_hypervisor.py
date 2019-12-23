@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-from stack.kvm import VM
+from stack.kvm import Hypervisor
 from stack.kvm import VmException
 
 class Plugin(stack.commands.Plugin):
@@ -17,7 +17,7 @@ class Plugin(stack.commands.Plugin):
 	def provides(self):
 		return 'hypervisor'
 
-	def add_vm(self, host, debug, hypervisor, privkey):
+	def add_vm(self, host, debug, hypervisor):
 		"""
 		Add a host to a hypervisor
 		Returns any hypervisor errors encountered
@@ -31,13 +31,13 @@ class Plugin(stack.commands.Plugin):
 			# the bare parameter gets removes the SUX tags
 		vm_config = self.owner.call('report.vm', [host, 'bare=y'])
 		try:
-			conn = stack.kvm.VM(hypervisor, privkey)
+			conn = stack.kvm.Hypervisor(hypervisor)
 			conn.add_domain(vm_config[0]['col-1'])
 		except VmException as error:
 			add_errors.append(str(error))
 		return add_errors
 
-	def remove_vm(self, host, debug, hypervisor, privkey):
+	def remove_vm(self, host, debug, hypervisor):
 		"""
 		Remove a given host from a hypervisor
 		Returns any hypervisor errors encountered
@@ -45,14 +45,14 @@ class Plugin(stack.commands.Plugin):
 
 		remove_errors = []
 		try:
-			conn = stack.kvm.VM(hypervisor, privkey)
+			conn = stack.kvm.Hypervisor(hypervisor)
 			conn.remove_domain(host)
 		except VmException as error:
 			remove_errors.append(str(error))
 		return remove_errors
 
 	def run(self, args):
-		vm_hosts, host_disks, debug, privkey, sync_ssh, force, autostart = args
+		vm_hosts, host_disks, debug, sync_ssh, force, autostart = args
 		hypervisor_errors = []
 		self.owner.notify('Sync VM Definitions')
 		for host, values in vm_hosts.items():
@@ -65,14 +65,14 @@ class Plugin(stack.commands.Plugin):
 				# with a new config file as libvirt lacks
 				# the ability to do this otherwise
 				if status != 'undefined':
-					hypervisor_errors.append('\n'.join(self.remove_vm(host, debug, kvm_name, privkey)))
+					hypervisor_errors.append('\n'.join(self.remove_vm(host, debug, kvm_name)))
 
 				# If a virtual machine is pending for deletion
 				# don't add it again
 				if not delete_vm:
 					if status == 'undefined':
 						self.owner.notify(f'Adding VM {host} to {kvm_name}')
-					hypervisor_errors.append('\n'.join(self.add_vm(host, debug, kvm_name, privkey)))
+					hypervisor_errors.append('\n'.join(self.add_vm(host, debug, kvm_name)))
 			else:
 				self.owner.notify(f'Skipping VM {host} on hypervisor {kvm_name}, vm is on')
 		return hypervisor_errors

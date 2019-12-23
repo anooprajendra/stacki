@@ -1,0 +1,29 @@
+<stack:stack>
+
+<stack:description>
+Install and configure packages
+for hosting KVM based virtual machines
+</stack:description>
+
+<stack:copyright>
+Copyright (c) 2006 - 2019 Teradata
+All rights reserved. Stacki(r) v5.x stacki.com
+https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+</stack:copyright>
+
+<stack:package>
+libvirt
+qemu
+virt-viewer
+dosfstools
+guestfs-tools
+kpartx
+ansible
+virt-manager
+</stack:package>
+
+<stack:script stack:stage="install-post">
+stack add appliance hypervisor node=hypervisor
+</stack:script>
+
+</stack:stack>

@@ -5,12 +5,11 @@
 # @copyright@
 
 import stack.commands
-from stack.kvm import VM
+from stack.kvm import Hypervisor
 from stack.kvm import VmException
 from stack.util import _exec
-from stack.argument_processors.vm import VmArgumentProcessor
 
-class Plugin(stack.commands.Plugin, VmArgumentProcessor):
+class Plugin(stack.commands.Plugin):
 	"""
 	Plugin that syncs the database
 	values with the current state
@@ -27,7 +26,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		return ['hypervisor', 'storage']
 
 	def run(self, args):
-		vm_hosts, host_disks, debug, privkey, sync_ssh, force, autostart = args
+		vm_hosts, host_disks, debug, sync_ssh, force, autostart = args
 		config_errors = []
 		self.owner.notify('Sync VM Config')
 
@@ -44,7 +43,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 				# isn't any files to delete
 				if disk['Type'] == 'mountpoint':
 					if delete_disk:
-						self.delete_pending_disk(host, disk_name)
+						self.owner.delete_pending_disk(host, disk_name)
 					continue
 				disk_loc = f'{disk["Location"]}/{disk["Image Name"]}'
 
@@ -52,31 +51,33 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 				# meaning it can be deleted from the database
 				disk_on_hypervisor = _exec(f'ssh {hypervisor} "ls {disk_loc}"', shlexsplit=True)
 				if delete_disk and (force or disk_on_hypervisor.returncode != 0):
-					self.delete_pending_disk(host, disk_name)
+					self.owner.delete_pending_disk(host, disk_name)
 
 		# Start any virtual machines that have been defined
 		# if the autostart parameter isn't set to False
-		for host, values in vm_hosts.items():
-			delete_vm = self.owner.str2bool(values['pending deletion'])
-			hypervisor = values['hypervisor']
-			try:
-				conn = VM(hypervisor, privkey)
-				guest_list = conn.guests()
-				if host in guest_list and guest_list[host] == 'off':
+		for host in self.owner.call('list.vm', [*vm_hosts, 'expanded=True']):
+			hostname = host['virtual machine']
+			delete_vm = self.owner.str2bool(host['pending deletion'])
+			hypervisor_host = host['hypervisor']
+			status = host['status']
+			if status == 'off':
+				try:
+					conn = Hypervisor(hypervisor_host)
 					if autostart:
-						self.owner.notify(f'Starting {host} on {hypervisor}')
-						conn.start_domain(host)
+						self.owner.notify(f'Starting {hostname} on {hypervisor}')
+						conn.start_domain(hostname)
 
 					# Always set the vm to start on boot
-					conn.autostart(host, True)
+					# of hypervisor
+					conn.autostart(hostname, True)
+				except VmException as error:
+					config_errors.append(f'Could not start VM {hostname}:\n{str(error)}')
 
-				# Remove any virtual machines pending for deletion
-				# from the database
-				if (force or host not in guest_list) and delete_vm:
-					self.delete_pending_vm(host)
-					self.owner.notify(f'Removing VM {host}')
-			except VmException as error:
-				if force and delete_vm:
-					self.delete_pending_vm(host)
-					config_errors.append(f'Removing VM {host} with force enabled but encountered: {str(error)}')
+			# Remove any virtual machines pending for deletion
+			# from the database if the status can be retrieved
+			# or the force parameter was set
+			if (force or (status in ['undefined', 'off'])) and delete_vm:
+				self.owner.delete_pending_vm(hostname)
+				self.owner.notify(f'Removing VM {hostname}')
+
 		return config_errors
