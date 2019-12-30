@@ -133,3 +133,13 @@ class TestReportVM:
 		)
 
 		assert sub_uuid == expect_output
+
+	def test_report_vm_config_location(self, add_hypervisor, add_vm_multiple, host):
+		set_attr = host.run('stack set host attr hypervisor-0-1 attr="vm.config.location" value="/export/stacki/libvirt/qemu/"')
+		assert set_attr.rc == 0
+
+		conf = host.run('stack report vm vm-backend-0-3')
+		assert conf.rc == 0
+
+		expect_line = '<stack:file stack:name=/export/stacki/libvirt/qemu/vm-backend-0-3.xml>'
+		assert expect_line in conf.stdout

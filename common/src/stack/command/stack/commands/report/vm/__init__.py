@@ -36,12 +36,12 @@ class Command(command, VmArgumentProcessor):
 	def run(self, param, args):
 		self.beginOutput()
 		vm_hosts = self.valid_vm_args(args)
+		conf_loc = '/etc/libvirt/qemu/'
 		out = []
 
-		bare_output, hypervisor, loc = self.fillParams([
+		bare_output, hypervisor = self.fillParams([
 			('bare', False),
-			('hypervisor', ''),
-			('location', '/etc/libvirt/qemu/')
+			('hypervisor', '')
 		])
 
 		template_conf = Path('/opt/stack/share/templates/libvirt.conf.j2')
@@ -66,12 +66,19 @@ class Command(command, VmArgumentProcessor):
 
 		for vm in vm_hosts:
 			self.bootorder = 1
+			curr_hypervisor = self.get_hypervisor_by_name(vm)
+			loc = conf_loc
 
 			# If the hypervisor param is set
 			# ignore any VM not belonging to the
 			# specified hypervisor host
-			if hypervisor and self.get_hypervisor_by_name(vm) != hypervisor:
+			if hypervisor and curr_hypervisor != hypervisor:
 				continue
+
+			conf_loc_attr = self.getHostAttr(curr_hypervisor, 'vm.config.location')
+
+			if conf_loc_attr:
+				loc = conf_loc_attr
 
 			# Handle if no disks are defined for a
 			# virtual machine
@@ -95,8 +102,8 @@ class Command(command, VmArgumentProcessor):
 
 			vm_config = libvirt_template.render(template_vars)
 			if not bare_output:
-
 				config_file = Path(f'{loc}/{vm}.xml')
+
 				# Output SUX
 				if len(vm_hosts) > 1:
 					self.addOutput(vm, f'<stack:file stack:name={config_file}>')
