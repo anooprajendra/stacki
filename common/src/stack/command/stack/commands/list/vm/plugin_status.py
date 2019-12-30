@@ -30,7 +30,6 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 
 		for host in hosts:
 			conn = None
-
 			# Get the hypervisor hostname
 			host_hypervisor = self.get_hypervisor_by_name(host)
 
@@ -42,7 +41,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 				if guests.get(host):
 					vm_status[host].append(guests[host])
 				else:
-					vm_status[host] = 'undefined'
+					vm_status[host].append('undefined')
 			else:
 				try:
 					conn = stack.kvm.Hypervisor(host_hypervisor)
@@ -50,7 +49,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 					# A dict of the current status
 					# of all VM's on the hypervisor
 					guest_status = conn.guests()
-					hypervisors[host_hypervisor].append(guest_status)
+					hypervisors[host_hypervisor] = guest_status
 					if host in guest_status:
 						vm_status[host].append(guest_status[host])
 					else:
