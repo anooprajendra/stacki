@@ -38,7 +38,8 @@ class VmArgumentProcessor():
 			WHERE nodes.name = %s
 			""", (vm_name)
 		)
-		return list(*result)[0]
+		if result:
+			return result[0][0]
 
 	def valid_vm(self, vm_name):
 		"""
@@ -90,7 +91,8 @@ class VmArgumentProcessor():
 			virtual_machines.id = %s
 			""", (vm_id, )
 		)
-		return list(*result)[0]
+		if result:
+			return result[0][0]
 
 	def is_hypervisor(self, hypervisor):
 		"""
