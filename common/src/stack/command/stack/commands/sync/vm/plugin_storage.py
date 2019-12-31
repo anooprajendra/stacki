@@ -101,7 +101,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 					add_errors.append(f'Failed to pack frontend ssh key: {pack_ssh_errors}')
 		return add_errors
 
-	def remove_disk(self, hypervisor, disk, privkey, debug):
+	def remove_disk(self, hypervisor, disk, debug):
 		"""
 		Remove the given disk volume or image from the
 		hypervisor host

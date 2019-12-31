@@ -1,29 +1,60 @@
 <stack:stack>
 
-<stack:description>
-Install and configure packages
-for hosting KVM based virtual machines
-</stack:description>
+	<stack:description>
+	Add required packages for
+	hosting virtual machines
+	</stack:description>
 
-<stack:copyright>
-Copyright (c) 2006 - 2019 Teradata
-All rights reserved. Stacki(r) v5.x stacki.com
-https://github.com/Teradata/stacki/blob/master/LICENSE.txt
-</stack:copyright>
+	<stack:copyright>
+	Copyright (c) 2006 - 2019 Teradata
+	All rights reserved. Stacki(r) v5.x stacki.com
+	https://github.com/Teradata/stacki/blob/master/LICENSE.txt
+	</stack:copyright>
 
-<stack:package>
-libvirt
-qemu
-virt-viewer
-dosfstools
-guestfs-tools
-kpartx
-ansible
-virt-manager
-</stack:package>
+	<stack:package>
+		virt-viewer
+		ansible
+		virt-manager
+		qemu-kvm
+		libvirt
+		dosfstools
+		kpartx
+	</stack:package>
 
+	<stack:package stack:cond="os == 'sles' and os.version == '12.x'">
+		guestfs-tools
+	</stack:package>
+
+	<stack:package stack:cond="os == 'redhat'">
+		libguestfs-tools
+	</stack:package>
+
+<!-- Transfer the floppy for the new frontend -->
 <stack:script stack:stage="install-post">
-stack add appliance hypervisor node=hypervisor
+
+mkdir -p /export/images
+
+curl http://&Kickstart_PrivateKickstartHost;/install/&hostname;/stacki-floppy.img \
+	-o /export/images/stacki-floppy.img
+
+if [ ! -f /export/images/stacki-floppy.img ]; then
+	touch /export/images/stacki-floppy.img
+fi
+
+</stack:script>
+
+<stack:script stack:stage="boot-post">
+# create ssh keys that the Stacki frontend will use to communicate
+# with this hypervisor
+
+ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa
+cat /root/.ssh/id_rsa.pub &gt;&gt; /root/.ssh/authorized_keys
+
+mkdir /mnt
+mount /export/images/stacki-floppy.img /mnt
+cp /root/.ssh/id_rsa /mnt/id_rsa_vms
+umount /mnt
+
 </stack:script>
 
 </stack:stack>
