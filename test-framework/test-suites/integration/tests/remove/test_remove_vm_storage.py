@@ -3,16 +3,15 @@ import pytest
 from tempfile import TemporaryDirectory
 
 class TestRemoveVmStorage:
-	def test_no_vm(self, host):
-		result = host.run('stack remove vm storage')
-		assert result.rc != 0
 
-	def test_no_parameters(self, host, add_hypervisor, add_vm):
-		result = host.run('stack remove vm storage vm-backend-0-3')
-		assert result.rc != 0
-
-	def test_invalid_vm(self, host):
-		result = host.run('stack remove vm storage fake-backend-0-0 disk=sda')
+	REMOVE_VM_BAD_DATA = [
+		('', ''),
+		('fake-backend-0-0', 'disk=sda'),
+		('vm-backend-0-3', 'disk=sde')
+	]
+	@pytest.mark.parametrize('hostname, params', REMOVE_VM_BAD_DATA)
+	def test_bad_input(self, host, add_hypervisor, add_vm, hostname, params):
+		result = host.run('stack remove vm storage {hostname} {params}')
 		assert result.rc != 0
 
 	def test_single_host(self, add_hypervisor, add_vm, host):
@@ -34,7 +33,6 @@ class TestRemoveVmStorage:
 			'Mountpoint': None,
 			'Pending Deletion': True
 		}]
-
 
 	@pytest.mark.parametrize('disk', ['sdc', 'sde', 'sdg'])
 	def test_multiple_disks(self, add_hypervisor, add_vm, create_image_files, add_vm_storage, disk, host):

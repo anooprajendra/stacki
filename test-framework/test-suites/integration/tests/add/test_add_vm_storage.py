@@ -100,3 +100,24 @@ class TestAddVMStorage:
 
 		actual_output = json.loads(list_result.stdout)
 		assert expect_output == actual_output
+
+	def test_add_vm_storage_bad(self, add_hypervisor, add_vm, host, create_image_files, create_invalid_image):
+		"""
+		Test adding storage with bad input
+		"""
+
+		temp_dir = TemporaryDirectory()
+		valid_images = create_image_files(temp_dir)
+		invalid_image = create_invalid_image(temp_dir)
+
+		add_stor_disk = host.run(f'stack add vm storage vm-backend-0-3 disks=200')
+		assert add_stor_disk.rc != 0
+
+		add_stor_tar = host.run(f'stack add vm storage vm-backend-0-3 disks={valid_images["image.qcow2"]}')
+		assert add_stor_tar.rc != 0
+
+		add_stor_image = host.run(f'stack add vm storage vm-backend-0-3 disks={valid_images["image5.qcow2"]}')
+		assert add_stor_image.rc != 0
+
+		add_stor_invalid = host.run(f'stack add vm storage vm-backend-0-3 disks={invalid_image}')
+		assert add_stor_invalid.rc != 0

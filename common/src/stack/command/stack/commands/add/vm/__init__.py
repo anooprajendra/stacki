@@ -63,7 +63,7 @@ class Command(command, VmArgumentProcessor):
 		# Cpu and Memory input must be valid numbers and be one or greater
 		# No guarantees your vm will boot with 1 MB of memory though
 		if not cpu.isdigit() or int(cpu) < 1 or not memory.isdigit() or int(memory) < 1:
-			raise ParamError(self, 'cpu and memory must be a number greater than 0')
+			raise CommandError(self, 'cpu and memory must be a number greater than 0')
 
 		# Check if the virtual machine is already defined
 		# Raise a CommandError if it is

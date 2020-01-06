@@ -71,6 +71,6 @@ class Command(command, VmArgumentProcessor):
 
 		# Don't remove the frontend if it's defined as a virtual machine
 		me = self.db.getHostname()
-		if me in hosts:
+		if me in host_id:
 			raise CommandError(self, 'cannot remove "%s"' % me)
 		self.runPlugins((host_id, disks, nukedisks))

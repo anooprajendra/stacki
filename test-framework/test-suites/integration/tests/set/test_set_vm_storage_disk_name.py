@@ -1,6 +1,7 @@
 import json
 import pytest
 from collections import namedtuple
+from tempfile import TemporaryDirectory
 
 class TestSetVmStorageName:
 	def test_no_vm(self, host):
@@ -17,10 +18,17 @@ class TestSetVmStorageName:
 		Disk('fake_disk.qcow2', 'sda'),
 		Disk('image.qcow2', 'sda')
 	]
-
 	@pytest.mark.parametrize('params', INVALID_PARAMS)
 	def test_invalid_parameters(self, add_hypervisor, add_vm, host, params):
 		result = host.run(f'stack set vm storage name vm-backend-0-3 backing={params.backing} name={params.name}')
+		assert result.rc != 0
+
+	def test_disk_already_defined(self, add_hypervisor, add_vm, add_vm_storage, create_image_files, host):
+		temp_dir = TemporaryDirectory()
+		disks = create_image_files(temp_dir)
+		add_storage = add_vm_storage(disks, 'vm-backend-0-3')
+
+		result = host.run('stack set vm storage name vm-backend-0-3 backing=image.qcow2 name=sda')
 		assert result.rc != 0
 
 	def test_invalid_vm(self, host):
