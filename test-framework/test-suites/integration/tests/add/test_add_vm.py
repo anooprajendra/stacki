@@ -77,7 +77,7 @@ class TestAddVM:
 	]
 
 	@pytest.mark.parametrize('host_name, params', ADD_VM_BAD_DATA)
-	def test_add_vm_bad(self, add_hypervisor, host, host_name, params):
+	def test_add_vm_bad(self, add_hypervisor, add_host, host, host_name, params):
 		"""
 		Test add vm with bad input
 		"""
@@ -89,3 +89,14 @@ class TestAddVM:
 
 		add_result = host.run(f'stack add vm {host_name} {params}')
 		assert add_result.rc != 0
+
+	def test_add_vm_twice(self, add_hypervisor, add_vm, host):
+		"""
+		Test adding a VM already defined
+		"""
+
+		# Add VM should raise an error
+		# when adding an already defined
+		# virtual machine
+		add_host_again = host.run(f'stack add vm vm-backend-0-3')
+		assert add_host_again.rc != 0

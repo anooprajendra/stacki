@@ -3,12 +3,30 @@ import pytest
 from tempfile import TemporaryDirectory
 
 class TestRemoveVM:
-	def test_no_vm(self, host):
-		result = host.run('stack remove vm')
+
+	REMOVE_VM_BAD_DATA = ['', 'fake-backend-0-0', 'backend-0-0']
+	@pytest.mark.parametrize('hostname', REMOVE_VM_BAD_DATA)
+	def test_bad_input(self, host, add_host, hostname):
+		result = host.run(f'stack remove vm {hostname}')
 		assert result.rc != 0
 
-	def test_invalid_vm(self, host):
+	def test_dont_remove_frontend_vm(self, host, add_hypervisor):
+
+		# Add the frontend as a virtual machine
+		add_cmd = 'stack add vm frontend-0-0 hypervisor=hypervisor-0-1 storage_directory=/export/pools/stacki'
+		add_frontend_vm = host.run(add_cmd)
+		assert add_frontend_vm.rc == 0
+
+		# Ensure the frontend cannot be removed as a virtual machine
+		remove_frontend_vm = host.run('stack remove vm frontend-0-0')
+		assert remove_frontend_vm.rc != 0
+
+	def test_invalid_host(self, host):
 		result = host.run('stack remove vm fake-backend-0-0')
+		assert result.rc != 0
+
+	def test_no_vm(self, host, add_host):
+		result = host.run('stack remove vm backend-0-0')
 		assert result.rc != 0
 
 	def test_single_host(self, add_hypervisor, add_vm, host):
