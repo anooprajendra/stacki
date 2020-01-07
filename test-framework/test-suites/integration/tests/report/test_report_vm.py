@@ -47,6 +47,7 @@ class TestReportVM:
 
 	BAD_LIST_VM_DATA = [
 	'backend-0-0',
+	'hypervisor=backend-0-0',
 	'vm-backend-0-1 hypervisor=hypervisor-0-3',
 	'fake-backend-0-0',
 	'hypervisor=hypervisor-0-3'

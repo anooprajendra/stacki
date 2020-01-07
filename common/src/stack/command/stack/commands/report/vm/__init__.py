@@ -10,7 +10,7 @@ import random
 import uuid
 import jinja2
 from pathlib import Path
-from stack.exception import CommandError
+from stack.exception import CommandError, ParamError
 from stack.argument_processors.vm import VmArgumentProcessor
 from stack.util import _exec
 
@@ -223,7 +223,7 @@ class Command(command, VmArgumentProcessor):
 				continue
 			if network:
 
-				# If the network isn't set for pxe, don't useit has a boot target in the bootorder
+				# If the network isn't set for pxe, don't use it for the bootorder
 				network_pxe = self.str2bool(self.call('list.network', args = [network])[0].get('pxe'))
 			out['mac'] = interface['mac']
 			out['name'] = host_interface

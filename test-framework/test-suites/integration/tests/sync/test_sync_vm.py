@@ -16,6 +16,10 @@ class TestSyncVM:
 		result = host.run(f'stack sync vm {params}')
 		assert result.rc != 0
 
+	def test_no_vm(self, add_host, host):
+		result = host.run(f'stack sync vm')
+		assert result.rc != 0
+
 	# Test VM's marked for deletion
 	# aren't removed without using force
 	def test_remove_after_sync(self, add_hypervisor, add_vm_multiple, host):
@@ -43,7 +47,6 @@ class TestSyncVM:
 				'cpu': 2,
 				'pending deletion': True
 			}
-
 		]
 
 	# Test with the force parameter
