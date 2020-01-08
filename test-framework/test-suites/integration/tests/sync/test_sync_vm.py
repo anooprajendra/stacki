@@ -7,18 +7,18 @@ class TestSyncVM:
 	"""
 
 	BAD_SYNC_VM_INPUT = [
-	'fake-backend-0-0',
-	'backend-0-0',
-	'hypervisor=backend-0-0'
+	('fake-backend-0-0', 'cannot resolve host'),
+	('backend-0-0', 'not a valid virtual machine'),
+	('hypervisor=backend-0-0', 'not a valid hypervisor')
 	]
-	@pytest.mark.parametrize('params', BAD_SYNC_VM_INPUT)
-	def test_invalid_parameters(self, add_hypervisor, add_vm_multiple, add_host, host, params):
+	@pytest.mark.parametrize('params, msg', BAD_SYNC_VM_INPUT)
+	def test_invalid_parameters(self, add_hypervisor, add_vm_multiple, add_host, host, params, msg):
 		result = host.run(f'stack sync vm {params}')
-		assert result.rc != 0
+		assert result.rc != 0 and msg in result.stderr
 
 	def test_no_vm(self, add_host, host):
 		result = host.run(f'stack sync vm')
-		assert result.rc != 0
+		assert result.rc != 0 and 'No virtual machines' in result.stderr
 
 	# Test VM's marked for deletion
 	# aren't removed without using force
