@@ -54,7 +54,7 @@ class Command(stack.commands.add.vm.Command):
 		vol_id = 0
 		disk_loc, disks = self.fillParams([
 			('storage_directory', ''),
-			('disks', '100')
+			('disks', '', True)
 		])
 		vm_disks = self.call('list.vm.storage', vm_host)
 		disk_names = [ disk['Name'] for disk in vm_disks ]
@@ -68,6 +68,7 @@ class Command(stack.commands.add.vm.Command):
 			disk_size = None
 			mount_disk = None
 			curr_images = [ disk['Image Name'] for disk in vm_disks if disk['Image Name'] and disk['Type'] == 'disk']
+
 			# The calculated names of newly created disks
 			vol_names = []
 
@@ -107,7 +108,7 @@ class Command(stack.commands.add.vm.Command):
 
 			# A path existing on the frontend is a compressed/uncompressed disk file
 			# First check if it's a valid tar file
-			elif disk_path.exists() and tarfile.is_tarfile(disk_path):
+			elif disk_path.exists() and not disk_path.is_dir() and tarfile.is_tarfile(disk_path):
 				if not disk_loc:
 					raise ParamError(self, 'storage_directory', 'needed for defined disks or images')
 				disk_type = 'image'

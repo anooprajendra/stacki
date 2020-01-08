@@ -5,13 +5,13 @@ from collections import namedtuple
 class TestSetVmStorageHost:
 	def test_no_vm(self, host):
 		result = host.run('stack set vm storage host')
-		assert result.rc != 0
+		assert result.rc != 0 and 'argument is required' in result.stderr
 
 	def test_no_parameters(self, add_hypervisor, add_vm, host):
 		result = host.run('stack set vm storage host vm-backend-0-3')
-		assert result.rc != 0
+		assert result.rc != 0 and 'parameter is required' in result.stderr
 
-	Disk = namedtuple('disk', 'name new_host')
+	Disk = namedtuple('disk', 'name new_host msg')
 
 	# Test various bad input:
 	# 1. Blank parameters
@@ -20,21 +20,21 @@ class TestSetVmStorageHost:
 	# 4. When a disk of the same device name
 	#    is present on the new host
 	INVALID_PARAMS = [
-		Disk('', ''),
-		Disk('sda', 'fake-backend-0-3'),
-		Disk('sdb', 'vm-backend-0-4'),
-		Disk('sda', 'vm-backend-0-4')
+		Disk('', '', ''),
+		Disk('sda', 'fake-backend-0-3', 'not a valid virtual host'),
+		Disk('sdb', 'vm-backend-0-4', 'not found defined'),
+		Disk('sda', 'vm-backend-0-4', 'found already defined')
 	]
 
 	@pytest.mark.parametrize('params', INVALID_PARAMS)
 	def test_invalid_parameters(self, add_hypervisor, add_vm_multiple, host, params):
 		cmd = f'stack set vm storage host vm-backend-0-3 disk={params.name} newhost={params.new_host}'
 		result = host.run(cmd)
-		assert result.rc != 0
+		assert result.rc != 0 and params.msg in result.stderr
 
 	def test_invalid_vm(self, add_hypervisor, add_vm_multiple, host):
 		result = host.run('stack set vm storage host fake-backend-0-0 disk=sda newhost=vm_backend-0-4')
-		assert result.rc != 0
+		assert result.rc != 0 and 'cannot resolve host' in result.stderr
 
 	# Test moving disk sdb of virtual-backend-0-4
 	# to another host with only one disk

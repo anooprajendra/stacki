@@ -111,13 +111,13 @@ class TestAddVMStorage:
 		invalid_image = create_invalid_image(temp_dir)
 
 		add_stor_disk = host.run(f'stack add vm storage vm-backend-0-3 disks=200')
-		assert add_stor_disk.rc != 0
+		assert add_stor_disk.rc != 0 and 'parameter needed for' in add_stor_disk.stderr
 
 		add_stor_tar = host.run(f'stack add vm storage vm-backend-0-3 disks={valid_images["image.qcow2"]}')
-		assert add_stor_tar.rc != 0
+		assert add_stor_disk.rc != 0 and 'parameter needed for' in add_stor_disk.stderr
 
 		add_stor_image = host.run(f'stack add vm storage vm-backend-0-3 disks={valid_images["image5.qcow2"]}')
-		assert add_stor_image.rc != 0
+		assert add_stor_disk.rc != 0 and 'parameter needed for' in add_stor_disk.stderr
 
 		add_stor_invalid = host.run(f'stack add vm storage vm-backend-0-3 disks={invalid_image}')
-		assert add_stor_invalid.rc != 0
+		assert add_stor_disk.rc != 0 and 'parameter needed for' in add_stor_disk.stderr

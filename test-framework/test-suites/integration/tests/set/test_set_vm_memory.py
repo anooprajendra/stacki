@@ -11,20 +11,20 @@ class TestSetVmMemory:
 		assert result.rc != 0
 
 	INVALID_PARAMS = [
-		'',
-		'-2048',
-		'0',
-		'512.5'
+		('', 'parameter must be'),
+		('-2048', 'parameter must be'),
+		('0', 'parameter must be'),
+		('512.5', 'parameter must be')
 	]
 
-	@pytest.mark.parametrize('params', INVALID_PARAMS)
-	def test_invalid_parameters(self, add_hypervisor, add_vm, host, params):
+	@pytest.mark.parametrize('params, msg', INVALID_PARAMS)
+	def test_invalid_parameters(self, add_hypervisor, add_vm, host, params, msg):
 		result = host.run(f'stack set vm memory vm-backend-0-3 memory={params}')
-		assert result.rc != 0
+		assert result.rc != 0 and msg in result.stderr
 
 	def test_invalid_vm(self, host):
 		result = host.run('stack set vm memory fake-backend-0-0 memory=2048')
-		assert result.rc != 0
+		assert result.rc != 0 and 'cannot resolve host' in result.stderr
 
 	def test_single_host(self, add_hypervisor, add_vm, host):
 		result = host.run('stack set vm memory vm-backend-0-3 memory=4096')

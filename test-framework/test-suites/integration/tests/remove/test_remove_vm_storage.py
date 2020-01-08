@@ -5,14 +5,14 @@ from tempfile import TemporaryDirectory
 class TestRemoveVmStorage:
 
 	REMOVE_VM_BAD_DATA = [
-		('', ''),
-		('fake-backend-0-0', 'disk=sda'),
-		('vm-backend-0-3', 'disk=sde')
+		('', '', 'argument is required'),
+		('fake-backend-0-0', 'disk=sda', 'cannot resolve host'),
+		('vm-backend-0-3', 'disk=sde', 'not a defined disk')
 	]
-	@pytest.mark.parametrize('hostname, params', REMOVE_VM_BAD_DATA)
-	def test_bad_input(self, host, add_hypervisor, add_vm, hostname, params):
-		result = host.run('stack remove vm storage {hostname} {params}')
-		assert result.rc != 0
+	@pytest.mark.parametrize('hostname, params, msg', REMOVE_VM_BAD_DATA)
+	def test_bad_input(self, host, add_hypervisor, add_vm, hostname, params, msg):
+		result = host.run(f'stack remove vm storage {hostname} {params}')
+		assert result.rc != 0 and msg in result.stderr
 
 	def test_single_host(self, add_hypervisor, add_vm, host):
 		result = host.run('stack remove vm storage vm-backend-0-3 disk=sda')

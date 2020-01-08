@@ -11,16 +11,16 @@ class TestSetVmCPU:
 		assert result.rc != 0
 
 	INVALID_PARAMS = [
-		'',
-		'-1',
-		'0',
-		'3.5'
+		('', 'parameter must be'),
+		('-1', 'parameter must be'),
+		('0', 'parameter must be'),
+		('3.5', 'parameter must be')
 	]
 
-	@pytest.mark.parametrize('params', INVALID_PARAMS)
-	def test_invalid_parameters(self, add_hypervisor, add_vm, host, params):
+	@pytest.mark.parametrize('params, msg', INVALID_PARAMS)
+	def test_invalid_parameters(self, add_hypervisor, add_vm, host, params, msg):
 		result = host.run(f'stack set vm cpu vm-backend-0-3 cpu={params}')
-		assert result.rc != 0
+		assert result.rc != 0 and msg in result.stderr
 
 	def test_invalid_vm(self, host):
 		result = host.run('stack set vm cpu fake-backend-0-0 cpu=2')

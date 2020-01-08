@@ -4,11 +4,15 @@ from tempfile import TemporaryDirectory
 
 class TestRemoveVM:
 
-	REMOVE_VM_BAD_DATA = ['', 'fake-backend-0-0', 'backend-0-0']
-	@pytest.mark.parametrize('hostname', REMOVE_VM_BAD_DATA)
-	def test_bad_input(self, host, add_host, hostname):
+	REMOVE_VM_BAD_DATA = [
+		('', 'argument is required'),
+		('fake-backend-0-0', 'cannot resolve host'),
+		('backend-0-0', 'not a valid virtual machine')
+	]
+	@pytest.mark.parametrize('hostname, msg', REMOVE_VM_BAD_DATA)
+	def test_bad_input(self, host, add_host, hostname, msg):
 		result = host.run(f'stack remove vm {hostname}')
-		assert result.rc != 0
+		assert result.rc != 0 and msg in result.stderr
 
 	def test_dont_remove_frontend_vm(self, host, add_hypervisor):
 

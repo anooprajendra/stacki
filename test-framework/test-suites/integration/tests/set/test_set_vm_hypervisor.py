@@ -11,14 +11,15 @@ class TestSetVmHypervisor:
 		assert result.rc != 0
 
 	INVALID_PARAMS = [
-		'',
-		'fake-hypervisor-0-1'
+		('', 'not a valid hypervisor'),
+		('fake-hypervisor-0-1', 'cannot resolve host'),
+		('backend-0-0', 'not a valid hypervisor')
 	]
 
-	@pytest.mark.parametrize('params', INVALID_PARAMS)
-	def test_invalid_parameters(self, add_hypervisor, add_vm, host, params):
+	@pytest.mark.parametrize('params, msg', INVALID_PARAMS)
+	def test_invalid_parameters(self, add_hypervisor, add_vm, add_host, host, params, msg):
 		result = host.run(f'stack set vm hypervisor vm-backend-0-3 hypervisor={params}')
-		assert result.rc != 0
+		assert result.rc != 0 and msg in result.stderr
 
 	def test_invalid_vm(self, add_hypervisor, host):
 		result = host.run('stack set vm hypervisor fake-backend-0-0 hypervisor=hypervisor-0-1')
