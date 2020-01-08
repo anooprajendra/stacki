@@ -61,23 +61,23 @@ class TestAddVM:
 		}]
 
 	ADD_VM_BAD_DATA = [
-	('', ''),
-	('virtual-backend-0-3', ''),
-	('virtual-backend-0-3', f'hypervisor=backend-0-0 storage_directory={STOR_POOL}'),
-	('virtual-backend-0-3', f'hypervisor=fake-host-0-0 storage_directory={STOR_POOL}'),
-	('virtual-backend-0-3', f'storage_directory={STOR_POOL}'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=2 memory=3072'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=2 memory=3072 storage_directory='),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=a storage_directory={STOR_POOL}'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory=a storage_directory={STOR_POOL}'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory= storage_directory={STOR_POOL}'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu= storage_directory={STOR_POOL}'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=-1 storage_directory={STOR_POOL}'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory=-1 storage_directory={STOR_POOL}')
+	('', '', 'argument is required'),
+	('virtual-backend-0-3', '', 'parameter is required'),
+	('virtual-backend-0-3', f'hypervisor=backend-0-0 storage_directory={STOR_POOL}', 'non valid hypervisor'),
+	('virtual-backend-0-3', f'hypervisor=fake-host-0-0 storage_directory={STOR_POOL}', 'cannot resolve host'),
+	('virtual-backend-0-3', f'storage_directory={STOR_POOL}', 'parameter is required'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=2 memory=3072 disks=', 'parameter needed for'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=2 memory=3072 storage_directory=', 'parameter needed for' ),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=a storage_directory={STOR_POOL}', 'greater than 0'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory=a storage_directory={STOR_POOL}', 'greater than 0'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory= storage_directory={STOR_POOL}', 'greater than 0'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu= storage_directory={STOR_POOL}', 'greater than 0'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=-1 storage_directory={STOR_POOL}', 'greater than 0'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory=-1 storage_directory={STOR_POOL}', 'greater than 0')
 	]
 
-	@pytest.mark.parametrize('host_name, params', ADD_VM_BAD_DATA)
-	def test_add_vm_bad(self, add_hypervisor, add_host, host, host_name, params):
+	@pytest.mark.parametrize('host_name, params, msg', ADD_VM_BAD_DATA)
+	def test_add_vm_bad(self, add_hypervisor, add_host, host, host_name, params, msg):
 		"""
 		Test add vm with bad input
 		"""
@@ -88,7 +88,7 @@ class TestAddVM:
 			assert add_host.rc == 0
 
 		add_result = host.run(f'stack add vm {host_name} {params}')
-		assert add_result.rc != 0
+		assert add_result.rc != 0 and msg in add_result.stderr
 
 	def test_add_vm_twice(self, add_hypervisor, add_vm, host):
 		"""

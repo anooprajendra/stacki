@@ -33,7 +33,7 @@ class Command(stack.commands.set.vm.command):
 		])
 
 		if not memory.isdigit() or int(memory) < 1:
-			raise ParamError(self, 'memory', 'Must be a valid integer and greater than or equal to one')
+			raise ParamError(self, 'memory', 'must be a valid integer and greater than or equal to one')
 
 		for vm in hosts:
 			vm_id = self.vm_id_by_name(vm)

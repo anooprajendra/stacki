@@ -35,7 +35,7 @@ class Command(stack.commands.set.vm.command):
 		])
 
 		if not cpu_cores.isdigit() or int(cpu_cores) < 1:
-			raise ParamError(self, 'cpu', 'Must be a valid integer and greater than or equal to 1.')
+			raise ParamError(self, 'cpu', 'must be a valid integer and greater than or equal to 1.')
 
 		for vm in hosts:
 			vm_id = self.vm_id_by_name(vm)

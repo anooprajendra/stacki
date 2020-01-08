@@ -55,10 +55,6 @@ class Command(command, VmArgumentProcessor):
 		nukedisks = self.str2bool(nukedisks)
 		hosts = self.call('list.vm', list_args)
 		disks = self.call('list.vm.storage', args)
-
-		if not hosts:
-			raise ArgRequired(self, 'host')
-
 		host_id = {}
 
 		for host in hosts:

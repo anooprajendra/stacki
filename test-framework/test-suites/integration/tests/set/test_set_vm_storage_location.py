@@ -5,34 +5,34 @@ from collections import namedtuple
 class TestSetVmStorageLocation:
 	def test_no_vm(self, host):
 		result = host.run('stack set vm storage location')
-		assert result.rc != 0
+		assert result.rc != 0 and 'argument is required' in result.stderr
 
 	def test_no_parameters(self, add_hypervisor, add_vm, host):
 		result = host.run('stack set vm storage location vm-backend-0-3')
-		assert result.rc != 0
+		assert result.rc != 0 and 'parameter is required' in result.stderr
 
 	def test_invalid_vm(self, host):
 		result = host.run('stack set vm storage location fake-backend-0-0 disk=sda location=/export/pools/stacki2')
-		assert result.rc != 0
+		assert result.rc != 0 and 'cannot resolve host' in result.stderr
 
-	Disk = namedtuple('param', 'name loc')
+	Disk = namedtuple('param', 'name loc msg')
 
 	# We assume vm-backend-0-3 lacks a third disk
 	INVALID_PARAMS = [
-                Disk('', ''),
-		Disk('', '/export/stack/pools/stacki2'),
-		Disk('sdc', '/export/stack/pools/stacki2')
-        ]
+		Disk('', '', 'not a valid disk'),
+		Disk('', '/export/stack/pools/stacki2', 'not a valid disk'),
+		Disk('sdc', '/export/stack/pools/stacki2', 'not a valid disk')
+	]
 
 	@pytest.mark.parametrize('params', INVALID_PARAMS)
 	def test_invalid_parameters(self, add_hypervisor, add_vm, host, params):
 		result = host.run(f'stack set vm storage location vm-backend-0-3 disk={params.name} location={params.loc}')
-		assert result.rc != 0
+		assert result.rc != 0 and params.msg in result.stderr
 
 	VALID_PARAMS = [
-		Disk('sda', '/export/stack/pools/stacki2'),
-		Disk('sda', '')
-        ]
+		Disk('sda', '/export/stack/pools/stacki2', ''),
+		Disk('sda', '', '')
+	]
 
 	@pytest.mark.parametrize('params', VALID_PARAMS)
 	def test_single_host(self, add_hypervisor, add_vm_multiple, host, params):

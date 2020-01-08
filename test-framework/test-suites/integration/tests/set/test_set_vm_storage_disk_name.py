@@ -12,16 +12,15 @@ class TestSetVmStorageName:
 		result = host.run('stack set vm storage name vm-backend-0-3')
 		assert result.rc != 0
 
-	Disk = namedtuple('disk', 'backing name')
+	Disk = namedtuple('disk', 'backing name msg')
 	INVALID_PARAMS = [
-		Disk('', ''),
-		Disk('fake_disk.qcow2', 'sda'),
-		Disk('image.qcow2', 'sda')
+		Disk('', '', 'not found for'),
+		Disk('fake_disk.qcow2', 'sda', 'not found for'),
 	]
 	@pytest.mark.parametrize('params', INVALID_PARAMS)
 	def test_invalid_parameters(self, add_hypervisor, add_vm, host, params):
 		result = host.run(f'stack set vm storage name vm-backend-0-3 backing={params.backing} name={params.name}')
-		assert result.rc != 0
+		assert result.rc != 0 and params.msg in result.stderr
 
 	def test_disk_already_defined(self, add_hypervisor, add_vm, add_vm_storage, create_image_files, host):
 		temp_dir = TemporaryDirectory()
@@ -29,11 +28,11 @@ class TestSetVmStorageName:
 		add_storage = add_vm_storage(disks, 'vm-backend-0-3')
 
 		result = host.run('stack set vm storage name vm-backend-0-3 backing=image.qcow2 name=sda')
-		assert result.rc != 0
+		assert result.rc != 0 and 'already exists for' in result.stderr
 
 	def test_invalid_vm(self, host):
-		result = host.run('stack set vm memory fake-backend-0-0 backing=images.qcow2 name=sda')
-		assert result.rc != 0
+		result = host.run('stack set vm storage name fake-backend-0-0 backing=images.qcow2 name=sda')
+		assert result.rc != 0 and 'cannot resolve host' in result.stderr
 
 	def test_single_host(self, add_hypervisor, add_vm_multiple, host):
 		result = host.run('stack set vm storage name vm-backend-0-3 backing=vm-backend-0-3_disk1.qcow2 name=sdb')

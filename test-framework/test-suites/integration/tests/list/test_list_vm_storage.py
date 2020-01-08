@@ -36,20 +36,22 @@ class TestListStorageVM:
 		assert expect_output == actual_output
 
 	BAD_LIST_VM_DATA = [
-	'backend-0-0',
-	'vm-backend-0-1 hypervisor=hypervisor-0-3',
-	'fake-backend-0-0',
-	'hypervisor=hypervisor-0-3'
+	('backend-0-0', 'not a valid virtual machine'),
+	('hypervisor=backend-0-0', 'not a valid hypervisor'),
+	('vm-backend-0-1 hypervisor=hypervisor-0-3', 'cannot resolve host'),
+	('fake-backend-0-0', 'cannot resolve host'),
+	('hypervisor=hypervisor-0-3', 'cannot resolve host')
 	]
 
-	@pytest.mark.parametrize('params', BAD_LIST_VM_DATA)
+	@pytest.mark.parametrize('params, msg', BAD_LIST_VM_DATA)
 	def test_list_vm_negative(
 		self,
 		add_hypervisor,
 		add_vm_multiple,
 		add_host,
 		host,
-		params
+		params,
+		msg
 	):
 		"""
 		Test the command fails with
@@ -57,4 +59,4 @@ class TestListStorageVM:
 		"""
 
 		list_result = host.run(f'stack list vm storage {params}')
-		assert list_result.rc != 0
+		assert list_result.rc != 0 and msg in list_result.stderr

@@ -44,7 +44,7 @@ class Command(stack.commands.set.vm.command):
 		])
 
 		if not self.valid_vm(new_vm):
-			raise ParamError(self, 'vm', f'{vm} is not a valid virtual host')
+			raise ParamError(self, 'newhost', f'{new_vm} is not a valid virtual host')
 
 		vm_id = self.vm_id_by_name(vm)
 		new_vm_id = self.vm_id_by_name(new_vm)
