@@ -1,0 +1,24 @@
+[{{ alias }}]
+name={{ name }}
+{% if is_mirrorlist != 0 %}
+mirrorlist={{ uri }}
+{% else %}
+baseurl={{ uri }}
+{% endif %}
+enabled={{ is_enabled }}
+{% if type is not none %}
+type={{ type }}
+{% endif %}
+
+{% if autorefresh != 0 %}
+autorefresh={{ autorefresh }}
+{% endif %}
+{% if assumeyes != 0 %}
+assumeyes={{ assumeyes }}
+{% endif %}
+{% if gpgkey %}
+gpgkey={{ gpgkey }}
+{% endif %}
+
+gpgcheck={{ gpgcheck }}
+
