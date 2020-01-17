@@ -8,7 +8,7 @@ import stack.commands
 from stack.kvm import Hypervisor
 from stack.kvm import VmException
 from stack.argument_processors.vm import VmArgumentProcessor
-from stack.util import _exec
+from stack.util import _exec, copy_remote_file, remove_remote_file
 from pathlib import Path
 
 class Plugin(stack.commands.Plugin, VmArgumentProcessor):
@@ -32,7 +32,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		if copy_key.returncode != 0:
 			return [copy_key.stderr]
 		pack_image = _exec(
-			f'ssh {hypervisor} "image_packer.py --files=/tmp/authorized_keys --image_locations=/root/.ssh/ {location}/{image}"',
+			f'ssh {hypervisor} "/usr/bin/virt-copy-in -d {host} /tmp/authorized_keys /root/.ssh/"',
 			shlexsplit=True
 		)
 		if pack_image.returncode != 0:
@@ -42,7 +42,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 			return [pack_image.stderr]
 		return []
 
-	def add_disk(self, hypervisor, disk, sync_ssh, debug):
+	def add_disk(self, host, hypervisor, disk, sync_ssh, debug):
 		"""
 		Add a given disk to a hypervisor
 		Returns any errors that occurred.
@@ -88,7 +88,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 					self.owner.notify(f'Transferring file {copy_file}')
 
 				# Copy the image
-				conn.copy_image(copy_file, image_loc, image_name)
+				copy_remote_file(copy_file, image_loc, image_name, hypervisor)
 			except VmException as error:
 				add_errors.append(str(error))
 
@@ -96,7 +96,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 			if sync_ssh:
 				if debug:
 					self.owner.notify(f'Adding frontend ssh key to {image_name}')
-				pack_ssh_errors = self.pack_ssh_key(hypervisor, disk, image_loc, image_name)
+				pack_ssh_errors = self.pack_ssh_key(host, hypervisor, disk, image_loc, image_name)
 				if pack_ssh_errors and debug:
 					add_errors.append(f'Failed to pack frontend ssh key: {pack_ssh_errors}')
 		return add_errors
@@ -132,7 +132,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 				conn = stack.kvm.Hypervisor(hypervisor)
 				if debug:
 					self.owner.notify(f'Removing image {image_name}')
-				conn.remove_image(f'{image_loc}/{image_name}')
+				remove_remote_file(f'{image_loc}/{image_name}', hypervisor)
 			except VmException as error:
 				remove_errors.append(str(error))
 		return remove_errors
@@ -152,6 +152,6 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 
 				# Otherwise try to add it
 				else:
-					add_output = self.add_disk(hypervisor, disk, sync_ssh, debug)
+					add_output = self.add_disk(host, hypervisor, disk, sync_ssh, debug)
 					config_errors.extend(add_output)
 		return config_errors
