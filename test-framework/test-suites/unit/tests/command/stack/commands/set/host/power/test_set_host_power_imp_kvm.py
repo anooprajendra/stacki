@@ -1,4 +1,5 @@
-import pytest from collections import namedtuple
+import pytest
+from collections import namedtuple
 from stack.kvm import Hypervisor, VmException
 from unittest.mock import create_autospec, patch
 from stack.commands import DatabaseConnection
