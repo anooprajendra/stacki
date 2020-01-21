@@ -1,6 +1,7 @@
 import json
 import pytest
 from collections import namedtuple
+from tempfile import TemporaryDirectory
 
 class TestSetVmStorageHost:
 	def test_no_vm(self, host):
@@ -66,6 +67,61 @@ class TestSetVmStorageHost:
 				"Image Name": "vm-backend-0-4_disk2.qcow2",
 				"Image Archive": None,
 				"Mountpoint": None,
+				"Pending Deletion": False
+			}
+		]
+
+	# Test moving multiple types of disks to different hosts
+	def test_multiple_host(self, add_hypervisor, add_vm_multiple, add_vm_storage, create_image_files, host):
+		temp_dir = TemporaryDirectory()
+		disks = create_image_files(temp_dir)
+
+		# Add several image and mount based
+		# images to vm-backend-0-4
+		add_vm_storage(disks, 'vm-backend-0-4')
+		result = host.run('stack list vm storage vm-backend-0-4 output-format=json')
+
+		result = host.run('stack set vm storage host vm-backend-0-4 disk=sde newhost=vm-backend-0-3')
+		assert result.rc == 0
+
+		result = host.run('stack set vm storage host vm-backend-0-4 disk=sdh newhost=vm-backend-0-3')
+		assert result.rc == 0
+
+		result = host.run('stack list vm storage vm-backend-0-3 output-format=json')
+		assert result.rc == 0
+
+		assert json.loads(result.stdout) == [
+			{
+				'Virtual Machine': 'vm-backend-0-3',
+				'Name': 'sda',
+				'Type': 'disk',
+				'Location': '/export/pools/stacki',
+				'Size': 100,
+				'Image Name': 'vm-backend-0-3_disk1.qcow2',
+				'Image Archive': None,
+				'Mountpoint': None,
+				'Pending Deletion': False
+			},
+			{
+				"Virtual Machine": "vm-backend-0-3",
+				"Name": "sde",
+				"Type": "image",
+				"Location": '/export/pools/stacki',
+				"Size": None,
+				"Image Name": "image3.qcow2",
+				"Image Archive": str(disks['image3.qcow2']),
+				"Mountpoint": None,
+				"Pending Deletion": False
+			},
+			{
+				"Virtual Machine": "vm-backend-0-3",
+				"Name": "sdh",
+				"Type": "mountpoint",
+				"Location": "/export/pools/stacki",
+				"Size": None,
+				"Image Name": '',
+				"Image Archive": None,
+				"Mountpoint": '/dev/sdb',
 				"Pending Deletion": False
 			}
 		]
