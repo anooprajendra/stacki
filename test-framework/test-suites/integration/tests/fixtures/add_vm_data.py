@@ -204,7 +204,6 @@ def add_vm_storage():
 		cmd =(
 			f'stack add vm storage {host} '
 			f'storage_directory=/export/pools/stacki disks={",".join(disks)},/dev/sdb'
-
 		)
 		add_stor = _exec(cmd, shlexsplit = True)
 		assert add_stor.returncode == 0
