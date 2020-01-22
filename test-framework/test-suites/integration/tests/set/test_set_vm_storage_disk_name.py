@@ -53,6 +53,110 @@ class TestSetVmStorageName:
 			'Pending Deletion': False
 		}]
 
+	def test_host_multiple_disk(
+		self,
+		add_hypervisor,
+		add_vm_multiple,
+		add_vm_storage,
+		create_image_files,
+		host
+	):
+		temp_dir = TemporaryDirectory()
+		disks = create_image_files(temp_dir)
+		add_vm_storage(disks, 'vm-backend-0-3')
+
+		# Change the disk names of all three
+		# types of storage backings
+		result = host.run('stack set vm storage name vm-backend-0-3 backing=vm-backend-0-3_disk1.qcow2 name=sdi')
+		assert result.rc == 0
+
+		result = host.run('stack set vm storage name vm-backend-0-3 backing=image3.qcow2 name=sda')
+		assert result.rc == 0
+
+		result = host.run('stack set vm storage name vm-backend-0-3 backing=/dev/sdb name=sdd')
+		assert result.rc == 0
+
+		# Check that it made it into the database
+		result = host.run('stack list vm storage vm-backend-0-3 output-format=json')
+		assert result.rc == 0
+		[
+			{
+				'VirtualMachine': 'vm-backend-0-3',
+				'Name': 'sdi',
+				'Type': 'disk',
+				'Location': '/export/pools/stacki',
+				'Size': 100,
+				'ImageName': 'vm-backend-0-3_disk1.qcow2',
+				'ImageArchive': None,
+				'Mountpoint': None,
+				'PendingDeletion': False
+			},
+			{
+				'VirtualMachine': 'vm-backend-0-3',
+				'Name': 'sdb',
+				'Type': 'image',
+				'Location': '/export/pools/stacki',
+				'Size': None,
+				'ImageName': 'image.qcow2',
+				'ImageArchive': disks['image.qcow2'],
+				'Mountpoint': None,
+				'PendingDeletion': False
+			},
+			{
+				'VirtualMachine': 'vm-backend-0-3',
+				'Name': 'sdc',
+				'Type': 'image',
+				'Location': '/export/pools/stacki',
+				'Size': None,
+				'ImageName': 'image2.raw',
+				'ImageArchive': disks['image2.raw'],
+				'Mountpoint': None, 'PendingDeletion': False
+			},
+			{
+				'VirtualMachine': 'vm-backend-0-3',
+				'Name': 'sda',
+				'Type': 'image',
+				'Location': '/export/pools/stacki',
+				'Size': None,
+				'ImageName': 'image3.qcow2',
+				'ImageArchive': disks['image3.qcow2'],
+				'Mountpoint': None,
+				'PendingDeletion': False
+			},
+			{
+				'VirtualMachine': 'vm-backend-0-3',
+				'Name': 'sde', 'Type': 'image',
+				'Location': '/export/pools/stacki',
+				'Size': None,
+				'ImageName': disks['image4.raw'],
+				'ImageArchive': None,
+				'Mountpoint': None,
+				'PendingDeletion': False
+			},
+			{
+				'VirtualMachine': 'vm-backend-0-3',
+				'Name': 'sdf',
+				'Type': 'image',
+				'Location': '/export/pools/stacki',
+				'Size': None,
+				'ImageName': disks['image5.qcow2'],
+				'ImageArchive': None,
+				'Mountpoint': None,
+				'PendingDeletion': False
+			},
+			{
+				'VirtualMachine': 'vm-backend-0-3',
+				'Name': 'sdd',
+				'Type': 'mountpoint',
+				'Location': '/export/pools/stacki',
+				'Size': None,
+				'ImageName': '',
+				'ImageArchive': None,
+				'Mountpoint': '/dev/sdb',
+				'PendingDeletion': False
+			}
+		]
+
 	def test_disk_swap(self, add_hypervisor, add_vm_multiple, host):
 
 		# Set the first disk to blank to allow the disks to be swapped
