@@ -12,6 +12,8 @@
 
 
 import os
+from operator import attrgetter
+
 import stack.commands
 from stack.exception import ArgRequired, CommandError
 
@@ -91,6 +93,8 @@ class Command(stack.commands.PalletArgumentProcessor,
 		# Remember the box info to simplify queries down below
 		box_id, box_os = rows[0]
 
+		enable_repo_params = ('pallet', 'version', 'release', 'arch', 'os')
+		pal_val_getter = attrgetter('name', 'version', 'rel', 'arch', 'os')
 		for pallet in self.getPallets(args, params):
 			# Make sure this pallet's OS is valid for the box
 			if box_os != pallet.os:
@@ -107,6 +111,10 @@ class Command(stack.commands.PalletArgumentProcessor,
 					'insert into stacks(box, roll) values (%s, %s)',
 					(box_id, pallet.id)
 				)
+
+			params = [f'{tup[0]}={tup[1]}' for tup in zip(enable_repo_params, pal_val_getter(pallet))]
+
+			self.call('enable.repo', params + [f'box={box}'])
 
 		# Regenerate stacki.repo
 		self._exec("""

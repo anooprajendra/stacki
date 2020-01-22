@@ -24,7 +24,8 @@ from stack import probepal
 from stack.util import flatten
 from stack.exception import CommandError, UsageError
 
-info_getter = attrgetter('name', 'version', 'release', 'distro_family', 'arch')
+pallet_fields = ('name', 'version', 'release', 'distro_family', 'arch')
+info_getter = attrgetter(*pallet_fields)
 
 
 class command(stack.commands.add.command):
@@ -331,6 +332,11 @@ class Command(command):
 			self.write_pallet_xml(stacki_pallet_dir, pallet)
 			if updatedb:
 				self.update_db(pallet, paths_to_args[pallet.pallet_root])
+				# convert pallet info to dict and parameterize for 'add.repo'
+				add_repo_params = {k: attrgetter(k)(pallet) for k in pallet_fields}
+				add_repo_params['os'] = add_repo_params.pop('distro_family')
+				add_repo_params['pallet'] = add_repo_params.pop('name')
+				self.call('add.repo', [f'{k}={v}' for k, v in add_repo_params.items()])
 			if stacki_pallet_dir == '/export/stack/pallets':
 				self.patch_pallet(pallet)
 
