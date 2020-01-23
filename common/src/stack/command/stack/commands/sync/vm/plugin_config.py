@@ -64,7 +64,7 @@ class Plugin(stack.commands.Plugin):
 				try:
 					conn = Hypervisor(hypervisor_host)
 					if autostart:
-						self.owner.notify(f'Starting {hostname} on {hypervisor}')
+						self.owner.notify(f'Starting {hostname} on {hypervisor_host}')
 						conn.start_domain(hostname)
 
 					# Always set the vm to start on boot
