@@ -5,11 +5,13 @@
 # @copyright@
 
 import stack.commands
+import shlex
 from stack.kvm import Hypervisor
 from stack.kvm import VmException
 from stack.argument_processors.vm import VmArgumentProcessor
 from stack.util import _exec, copy_remote_file, remove_remote_file
 from pathlib import Path
+from contextlib import ExitStack
 
 class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 
@@ -22,25 +24,58 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 	def precedes(self):
 		return ['config']
 
-	def pack_ssh_key(self, hypervisor, disk, location, image):
+	def pack_ssh_key(self, host, hypervisor, disk):
 		"""
 		Returns a list with an error messages encountered
 		when packing the frontend's ssh key into a VM image
 		"""
 
-		copy_key = _exec(f'scp /root/.ssh/id_rsa.pub {hypervisor}:/tmp/authorized_keys', shlexsplit=True)
-		if copy_key.returncode != 0:
-			return [copy_key.stderr]
-		pack_image = _exec(
-			f'ssh {hypervisor} "/usr/bin/virt-copy-in -d {host} /tmp/authorized_keys /root/.ssh/"',
-			shlexsplit=True
-		)
-		if pack_image.returncode != 0:
-			return [pack_image.stderr]
-		remove_key = _exec(f'ssh {hypervisor} "rm /tmp/authorized_keys"', shlexsplit=True)
-		if remove_key.returncode != 0:
-			return [pack_image.stderr]
-		return []
+		key_dir = Path(f'/tmp/{host}_keys')
+
+		with ExitStack() as cleanup:
+
+			# Create the temp key directory
+			# on the remote host
+			create_key_dir = _exec('ssh {hypervisor} "mkdir -p {key_dir}"')
+			disk_loc = disk['Location']
+
+			# Ensure the temp key directory is
+			# removed on the remote host
+			remove_key_dir = shlex.split(f'ssh {hypervisor} "rm -r {key_dir}"')
+			cleanup.callback(subprocess.run, umnt_cmd)
+
+			if create_key_dirreturncode != 0:
+				return [create_key_dir.stderr]
+			copy_key = _exec(f'scp /root/.ssh/id_rsa.pub {hypervisor}:{key_dir}/frontend_key', shlexsplit=True)
+			if copy_key.returncode != 0:
+				return [copy_key.stderr]
+
+			# Get the existing authorized keys file
+			# if it doesn't exist that's fine
+			existing_keys = _exec(
+				f'ssh {hypervisor} "/usr/bin/virt-copy-out -a {disk_loc} ~/.ssh/authorized_keys {key_dir}/authorized_keys"',
+				shlexsplit=True
+			)
+
+			# Add the frontend's public key
+			# to the authorized_keys file
+			add_key = _exec(
+				f'ssh {hypervisor} "cat {key_dir}/frontend_key >> {key_dir}/authorized_keys"',
+				shlexsplit=True
+			)
+			if add_key.returncode != 0:
+				return [copy_key.stderr]
+
+			# Put the key back into
+			# the vm's disk image
+			pack_image = _exec(
+				f'ssh {hypervisor} "/usr/bin/virt-copy-in -a {disk_loc} /tmp/frontend_key >> /root/.ssh/authorized_keys"',
+				shlexsplit=True
+			)
+			if pack_image.returncode != 0:
+				return [pack_image.stderr]
+
+			return []
 
 	def add_disk(self, host, hypervisor, disk, sync_ssh, debug):
 		"""
@@ -56,7 +91,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		if disk_type == 'disk':
 			pool = image_loc.name
 			try:
-				conn = stack.kvm.Hypervisor(hypervisor)
+				conn = Hypervisor(hypervisor)
 				add_pool = conn.add_pool(image_loc.name, image_loc)
 				if not add_pool and debug:
 					self.owner.notify(f'Pool {pool} already created, skipping')
@@ -83,20 +118,19 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 			else:
 				copy_file = disk['Image Name']
 			try:
-				conn = stack.kvm.Hypervisor(hypervisor)
 				if debug:
 					self.owner.notify(f'Transferring file {copy_file}')
 
 				# Copy the image
 				copy_remote_file(copy_file, image_loc, image_name, hypervisor)
-			except VmException as error:
+			except OSError as error:
 				add_errors.append(str(error))
 
 			# Add the frontend's ssh key, assume the image contains an OS
 			if sync_ssh:
 				if debug:
 					self.owner.notify(f'Adding frontend ssh key to {image_name}')
-				pack_ssh_errors = self.pack_ssh_key(host, hypervisor, disk, image_loc, image_name)
+				pack_ssh_errors = self.pack_ssh_key(host, hypervisor, disk)
 				if pack_ssh_errors and debug:
 					add_errors.append(f'Failed to pack frontend ssh key: {pack_ssh_errors}')
 		return add_errors
@@ -114,7 +148,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		if disk_type == 'disk':
 			vol_name = disk['Image Name']
 			try:
-				conn = stack.kvm.Hypervisor(hypervisor)
+				conn = Hypervisor(hypervisor)
 				if debug:
 					self.owner.notify(f'Removing disk {vol_name}')
 
@@ -129,11 +163,10 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 		elif disk_type == 'image':
 			image_name = Path(disk['Image Name']).name
 			try:
-				conn = stack.kvm.Hypervisor(hypervisor)
 				if debug:
 					self.owner.notify(f'Removing image {image_name}')
 				remove_remote_file(f'{image_loc}/{image_name}', hypervisor)
-			except VmException as error:
+			except OSError as error:
 				remove_errors.append(str(error))
 		return remove_errors
 
