@@ -7,10 +7,10 @@ from stack.bool import str2bool
 from pathlib import Path
 
 class TestSyncVmStorage:
-	def mock_vm_exception(self, *args):
+	def mock_vm_exception(self, *args, **kwargs):
 		raise VmException('Oh no something went wrong!')
 
-	def mock_os_error(self, *args):
+	def mock_os_error(self, *args, **kwargs):
 		raise OSError('Oh no something went wrong!')
 
 	@pytest.fixture
@@ -120,8 +120,8 @@ class TestSyncVmStorage:
 			mock_copy_file.assert_called_once_with(
 				copy_file,
 				disk_location,
-				image_name,
-				hypervisor_name
+				hypervisor_name,
+				uncompress_file_name=disk['Image Name']
 			)
 			if sync_ssh:
 				mock_pack_ssh.assert_called_once_with(ANY, host, hypervisor_name, disk)
@@ -145,7 +145,13 @@ class TestSyncVmStorage:
 				'Pending Deletion': 'False',
 				'Size': 100
 		}
-		output = mock_sync_storage_plugin.add_disk('foo', 'hypervisor-foo', disk, True, True)
+		output = mock_sync_storage_plugin.add_disk(
+			'foo',
+			'hypervisor-foo',
+			disk,
+			True,
+			True
+		)
 		assert output == ['Oh no something went wrong!']
 
 	@patch.object(Plugin, 'pack_ssh_key', autospec=True)
@@ -167,7 +173,13 @@ class TestSyncVmStorage:
 				'Pending Deletion': 'False',
 				'Size': ''
 		}
-		output = mock_sync_storage_plugin.add_disk('foo', 'hypervisor-foo', disk, True, True)
+		output = mock_sync_storage_plugin.add_disk(
+			'foo',
+			'hypervisor-foo',
+			disk,
+			True,
+			True
+		)
 		assert output == [
 				'Oh no something went wrong!',
 				'Failed to pack frontend ssh key: Key could not be copied'

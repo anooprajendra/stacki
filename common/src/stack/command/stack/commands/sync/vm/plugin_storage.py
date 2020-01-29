@@ -36,15 +36,15 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 
 			# Create the temp key directory
 			# on the remote host
-			create_key_dir = _exec('ssh {hypervisor} "mkdir -p {key_dir}"')
-			disk_loc = disk['Location']
+			create_key_dir = _exec(f'ssh {hypervisor} "mkdir -p {key_dir}"', shlexsplit=True)
+			disk_loc = Path(f'{disk["Location"]}/{disk["Image Name"]}')
 
 			# Ensure the temp key directory is
 			# removed on the remote host
 			remove_key_dir = shlex.split(f'ssh {hypervisor} "rm -r {key_dir}"')
-			cleanup.callback(subprocess.run, umnt_cmd)
+			cleanup.callback(_exec, remove_key_dir)
 
-			if create_key_dirreturncode != 0:
+			if create_key_dir.returncode != 0:
 				return create_key_dir.stderr
 			copy_key = _exec(f'scp /root/.ssh/id_rsa.pub {hypervisor}:{key_dir}/frontend_key', shlexsplit=True)
 			if copy_key.returncode != 0:
@@ -53,7 +53,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 			# Get the existing authorized keys file
 			# if it doesn't exist that's fine
 			existing_keys = _exec(
-				f'ssh {hypervisor} "/usr/bin/virt-copy-out -a {disk_loc} ~/.ssh/authorized_keys {key_dir}/authorized_keys"',
+				f'ssh {hypervisor} "/usr/bin/virt-copy-out -a {disk_loc.name} ~/.ssh/authorized_keys {key_dir}/authorized_keys"',
 				shlexsplit=True
 			)
 
@@ -69,7 +69,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 			# Put the key back into
 			# the vm's disk image
 			pack_image = _exec(
-				f'ssh {hypervisor} "/usr/bin/virt-copy-in -a {disk_loc} /tmp/frontend_key >> /root/.ssh/authorized_keys"',
+				f'ssh {hypervisor} "/usr/bin/virt-copy-in -a {disk_loc} {key_dir}/authorized_keys /root/.ssh/"',
 				shlexsplit=True
 			)
 			if pack_image.returncode != 0:
@@ -120,7 +120,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 					self.owner.notify(f'Transferring file {copy_file}')
 
 				# Copy the image
-				copy_remote_file(copy_file, image_loc, image_name, hypervisor)
+				copy_remote_file(copy_file, image_loc, hypervisor, uncompress_file_name=image_name)
 			except OSError as error:
 				add_errors.append(str(error))
 
