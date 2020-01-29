@@ -45,10 +45,10 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 			cleanup.callback(subprocess.run, umnt_cmd)
 
 			if create_key_dirreturncode != 0:
-				return [create_key_dir.stderr]
+				return create_key_dir.stderr
 			copy_key = _exec(f'scp /root/.ssh/id_rsa.pub {hypervisor}:{key_dir}/frontend_key', shlexsplit=True)
 			if copy_key.returncode != 0:
-				return [copy_key.stderr]
+				return copy_key.stderr
 
 			# Get the existing authorized keys file
 			# if it doesn't exist that's fine
@@ -64,7 +64,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 				shlexsplit=True
 			)
 			if add_key.returncode != 0:
-				return [copy_key.stderr]
+				return copy_key.stderr
 
 			# Put the key back into
 			# the vm's disk image
@@ -73,9 +73,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 				shlexsplit=True
 			)
 			if pack_image.returncode != 0:
-				return [pack_image.stderr]
-
-			return []
+				return pack_image.stderr
 
 	def add_disk(self, host, hypervisor, disk, sync_ssh, debug):
 		"""
