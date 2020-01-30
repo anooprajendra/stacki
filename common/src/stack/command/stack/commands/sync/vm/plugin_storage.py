@@ -64,7 +64,7 @@ class Plugin(stack.commands.Plugin, VmArgumentProcessor):
 				shlexsplit=True
 			)
 			if add_key.returncode != 0:
-				return copy_key.stderr
+				return add_key.stderr
 
 			# Put the key back into
 			# the vm's disk image
