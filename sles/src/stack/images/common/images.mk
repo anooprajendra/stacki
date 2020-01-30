@@ -11,6 +11,14 @@ PALLET_PATCH_DIR = /opt/stack/pallet-patches/$(SUSE_PRODUCT)-$(IMAGE_VERSION)-$(
 
 -include ../../../common/images-$(OS).mk
 
+# In sles < 15 the checksum file is called `content`, but in sles >= 15 (at this time)
+# the file is called `CHECKSUMS`.
+ifeq ($(shell $(STACKBUILD.ABSOLUTE)/bin/os-release),SLES15)
+CHECKSUMS_FILE = CHECKSUMS
+else
+CHECKSUMS_FILE = content
+endif
+
 dirs:
 	@mkdir -p $(CURDIR)/sles-stacki
 
@@ -35,7 +43,7 @@ sles-stacki.img: dirs rpminst
 stacki-initrd.img:
 	@echo "Building $(SUSE_PRODUCT) initrd"
 	mkdir -p stacki-initrd
-	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm ) 
+	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm )
 	gpg --no-default-keyring --keyring stacki-initrd/installkey.gpg \
 		--import ../../../common/gnupg-keys/stacki.pub
 	rm -rf stacki-initrd/installkey.gpg~
@@ -67,12 +75,12 @@ install:: keyring
 	cd SLES-pallet-patches && (find . -type f | cpio -pudv $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs)
 	$(INSTALL) -m0644 sles-stacki.img $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/boot/x86_64/sles-stacki.img
 	$(INSTALL) -m0755 010-add-stacki-squashfs.sh $(ROOT)/$(PALLET_PATCH_DIR)/010-add-stacki-squashfs.sh
-	# Add the SHA1 of the stacki image to content file
-	echo "HASH $(SHA)  boot/x86_64/sles-stacki.img" >> $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/content
+	# Add the SHA1 of the stacki image to the CHECKSUMS_FILE
+	echo "HASH $(SHA)  boot/x86_64/sles-stacki.img" >> $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE)
 	# Sign the content file
 	gpg --armor \
-		--output $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/content.asc \
-		--detach-sig $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/content
+		--output $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE).asc \
+		--detach-sig $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE)
 
 clean::
 	rm -rf $(CURDIR)/localrepo
