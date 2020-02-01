@@ -31,7 +31,7 @@ class Plugin(stack.commands.Plugin):
 			# the bare parameter gets removes the SUX tags
 		vm_config = self.owner.call('report.vm', [host, 'bare=y'])
 		try:
-			conn = stack.kvm.Hypervisor(hypervisor)
+			conn = Hypervisor(hypervisor)
 			conn.add_domain(vm_config[0]['col-1'])
 		except VmException as error:
 			add_errors.append(str(error))
@@ -45,7 +45,7 @@ class Plugin(stack.commands.Plugin):
 
 		remove_errors = []
 		try:
-			conn = stack.kvm.Hypervisor(hypervisor)
+			conn = Hypervisor(hypervisor)
 			conn.remove_domain(host)
 		except VmException as error:
 			remove_errors.append(str(error))
@@ -65,14 +65,18 @@ class Plugin(stack.commands.Plugin):
 				# with a new config file as libvirt lacks
 				# the ability to do this otherwise
 				if status != 'undefined':
-					hypervisor_errors.append('\n'.join(self.remove_vm(host, debug, kvm_name)))
+					remove_output = self.remove_vm(host, debug, kvm_name)
+					if remove_output:
+						hypervisor_errors.append('\n'.join(remove_output))
 
 				# If a virtual machine is pending for deletion
 				# don't add it again
 				if not delete_vm:
 					if status == 'undefined':
 						self.owner.notify(f'Adding VM {host} to {kvm_name}')
-					hypervisor_errors.append('\n'.join(self.add_vm(host, debug, kvm_name)))
+					add_output = self.add_vm(host, debug, kvm_name)
+					if add_output:
+						hypervisor_errors.append('\n'.join(add_output))
 			else:
 				self.owner.notify(f'Skipping VM {host} on hypervisor {kvm_name}, vm is on')
 		return hypervisor_errors

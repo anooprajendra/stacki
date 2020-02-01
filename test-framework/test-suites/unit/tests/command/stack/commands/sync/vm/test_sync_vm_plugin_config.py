@@ -5,7 +5,7 @@ from stack.commands.sync.vm.plugin_config import Plugin, VmException
 from stack.commands.sync.vm import Command
 from stack.bool import str2bool
 
-class TestListVmStatus:
+class TestSyncVmConfig:
 	def mock_vm_exception(self, *args):
 		raise VmException('Oh no something went wrong!')
 
