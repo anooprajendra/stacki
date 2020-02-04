@@ -36,6 +36,9 @@ if File.file?('.vagrant/cluster-up.json')
       if OS == 'sles12'
         config.vm.box = "stacki/sles-12.3"
         config.vm.box_url = "http://stacki-builds.labs.teradata.com/vagrant-boxes/sles-12.3.json"
+      elsif OS == 'sles15'
+        # TODO: need a real box
+        config.vm.box = "sles-15-sp1"
       elsif OS == 'redhat7'
         config.vm.box = "stacki/centos-7.6"
         if INTERNAL == "true"
