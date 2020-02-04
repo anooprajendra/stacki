@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+# TODO: wtf to do about this ^
 
 from __future__ import print_function
 import os
