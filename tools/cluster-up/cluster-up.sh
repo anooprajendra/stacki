@@ -199,6 +199,9 @@ fi
 if [[ $ISO =~  "-sles12." ]]
 then
     OS="sles12"
+elif [[ $ISO =~  "-sles15." ]]
+then
+    OS="sles15"
 elif [[ $ISO =~ "-redhat7." ]]
 then
     OS="redhat7"
@@ -241,6 +244,20 @@ then
         echo
         echo -e "\033[34mDownloading SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso ...\033[0m"
         curl -f --progress-bar  --retry 3 -o $DOWNLOAD_DIR/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso http://stacki-builds.labs.teradata.com/installer-isos/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso
+    fi
+elif [[ $OS == "sles15" ]]
+then
+    if [[ ! -f "$DOWNLOAD_DIR/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso" ]]
+    then
+        echo
+        echo -e "\033[34mDownloading SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso ...\033[0m"
+        curl -f --progress-bar  --retry 3 -o $DOWNLOAD_DIR/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso http://stacki-builds.labs.teradata.com/installer-isos/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso
+    fi
+    if [[ ! -f "$DOWNLOAD_DIR/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso" ]]
+    then
+        echo
+        echo -e "\033[34mDownloading SLE-15-SP1-Packages-x86_64-GM-DVD1.iso ...\033[0m"
+        curl -f --progress-bar  --retry 3 -o $DOWNLOAD_DIR/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso http://stacki-builds.labs.teradata.com/installer-isos/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso
     fi
 elif [[ $OS == "redhat7" ]]
 then

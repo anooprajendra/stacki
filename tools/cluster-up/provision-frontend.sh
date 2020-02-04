@@ -11,6 +11,13 @@ if [[ $OS == "sles12" ]]
 then
     zypper addrepo iso:/?iso=/export/installer-iso/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso os
     zypper update
+elif [[ $OS == "sles15" ]]
+then
+    zypper addrepo iso:/?iso=/export/installer-iso/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso sles-installer-pkgs
+    zypper addrepo iso:/?iso=/export/installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso sles-extra-pkgs-dev-tools
+    zypper addrepo iso:/?iso=/export/installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso sles-extra-pkgs-basesystem
+    zypper addrepo iso:/?iso=/export/installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso sles-extra-pkgs-servers
+    zypper addrepo iso:/?iso=/export/installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso sles-extra-pkgs-desktop
 fi
 
 # Vagrant monkeys with the hosts file, set it back to something known
