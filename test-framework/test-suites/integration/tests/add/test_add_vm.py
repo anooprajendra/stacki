@@ -18,7 +18,7 @@ class TestAddVM:
 		# The host must be added to the database before adding as a VM
 		add_host = host.run(f'stack add host vm-backend-0-3 appliance=backend rank=0 rack=1')
 		assert add_host.rc == 0
-		params = f'hypervisor=hypervisor-0-1 storage_directory={self.STOR_POOL} memory=4096 cpu=4 disks=100'
+		params = f'hypervisor=hypervisor-0-1 storage_pool={self.STOR_POOL} memory=4096 cpu=4 disks=100'
 		add_result = host.run(f'stack add vm vm-backend-0-3 {params}')
 		assert add_result.rc == 0
 
@@ -44,7 +44,7 @@ class TestAddVM:
 		# The host must be added to the database before adding as a VM
 		add_host = host.run(f'stack add host vm-backend-0-3 appliance=backend rank=0 rack=1')
 		assert add_host.rc == 0
-		cmd = f'stack add vm vm-backend-0-3 hypervisor=hypervisor-0-1 storage_directory={self.STOR_POOL}'
+		cmd = f'stack add vm vm-backend-0-3 hypervisor=hypervisor-0-1 storage_pool={self.STOR_POOL}'
 		add_result = host.run(cmd)
 		assert add_result.rc == 0
 
@@ -63,17 +63,17 @@ class TestAddVM:
 	ADD_VM_BAD_DATA = [
 	('', '', 'argument is required'),
 	('virtual-backend-0-3', '', 'parameter is required'),
-	('virtual-backend-0-3', f'hypervisor=backend-0-0 storage_directory={STOR_POOL}', 'non valid hypervisor'),
-	('virtual-backend-0-3', f'hypervisor=fake-host-0-0 storage_directory={STOR_POOL}', 'cannot resolve host'),
-	('virtual-backend-0-3', f'storage_directory={STOR_POOL}', 'parameter is required'),
+	('virtual-backend-0-3', f'hypervisor=backend-0-0 storage_pool={STOR_POOL}', 'non valid hypervisor'),
+	('virtual-backend-0-3', f'hypervisor=fake-host-0-0 storage_pool={STOR_POOL}', 'cannot resolve host'),
+	('virtual-backend-0-3', f'storage_pool={STOR_POOL}', 'parameter is required'),
 	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=2 memory=3072 disks=', 'parameter needed for'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=2 memory=3072 storage_directory=', 'parameter needed for' ),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=a storage_directory={STOR_POOL}', 'greater than 0'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory=a storage_directory={STOR_POOL}', 'greater than 0'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory= storage_directory={STOR_POOL}', 'greater than 0'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu= storage_directory={STOR_POOL}', 'greater than 0'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=-1 storage_directory={STOR_POOL}', 'greater than 0'),
-	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory=-1 storage_directory={STOR_POOL}', 'greater than 0')
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=2 memory=3072 storage_pool=', 'parameter needed for' ),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=a storage_pool={STOR_POOL}', 'greater than 0'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory=a storage_pool={STOR_POOL}', 'greater than 0'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory= storage_pool={STOR_POOL}', 'greater than 0'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu= storage_pool={STOR_POOL}', 'greater than 0'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 cpu=-1 storage_pool={STOR_POOL}', 'greater than 0'),
+	('virtual-backend-0-3', f'hypervisor=hypervisor-0-1 memory=-1 storage_pool={STOR_POOL}', 'greater than 0')
 	]
 
 	@pytest.mark.parametrize('host_name, params, msg', ADD_VM_BAD_DATA)

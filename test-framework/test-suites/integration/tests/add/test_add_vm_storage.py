@@ -22,7 +22,7 @@ class TestAddVMStorage:
 		image_name = images["image4.raw"]
 
 		# Adds an uncompressed qcow2 image to the host
-		add_storage = f'stack add vm storage vm-backend-0-3 storage_directory={self.STOR_POOL} disks={images["image4.raw"]}'
+		add_storage = f'stack add vm storage vm-backend-0-3 storage_pool={self.STOR_POOL} disks={images["image4.raw"]}'
 		storage_result = host.run(add_storage)
 		assert storage_result.rc == 0
 
@@ -91,7 +91,7 @@ class TestAddVMStorage:
 				else:
 					disk['Image Name'] = str(images[disk_name])
 
-		add_storage = f'stack add vm storage vm-backend-0-3 storage_directory={self.STOR_POOL} disks=200,{",".join(disks)},/dev/sdb'
+		add_storage = f'stack add vm storage vm-backend-0-3 storage_pool={self.STOR_POOL} disks=200,{",".join(disks)},/dev/sdb'
 		storage_result = host.run(add_storage)
 		assert storage_result.rc == 0
 

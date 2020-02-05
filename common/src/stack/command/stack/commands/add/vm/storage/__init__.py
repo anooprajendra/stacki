@@ -18,9 +18,9 @@ class Command(stack.commands.add.vm.Command):
 	storage to
 	</arg>
 
-	<param type='string' name='storage_directory' optional='1'>
-	The number of cpu cores to give to the virtual host.
-	Required for all disk types besides mountpoints.
+	<param type='string' name='storage_pool' optional='1'>
+	The location of the storage pool where storage will be created
+	or transfered
 	</param>
 
 	<param type='string' name='disks' optional='1'>
@@ -30,12 +30,12 @@ class Command(stack.commands.add.vm.Command):
 	mount to a virtual machine.
 	</param>
 
-	<example cmd='add vm storage virtual-backend-0-1 storage_directory=/export/pool/stacki disks=200'>
+	<example cmd='add vm storage virtual-backend-0-1 storage_pool=/export/pool/stacki disks=200'>
 	Add a new disk to virtual-backend-0-1 at the location of /export/pool/stacki
 	(for created disks this will create a new pool with the name stacki if it doesn't exist)
 	</example>
 
-	<example cmd='add vm storage virtual-backend-0-1 storage_directory=/export/pool/stacki disks=/export/stacki.qcow2,/dev/sdb'>
+	<example cmd='add vm storage virtual-backend-0-1 storage_pool=/export/pool/stacki disks=/export/stacki.qcow2,/dev/sdb'>
 	Add two new disks to virtual-backend-0-1: the first is a premade qcow2 image which will be the boot disk
 	(order is from list of being added), the second is a disk that will be mounted to the VM as a mountpoint
 	</example>
@@ -53,7 +53,7 @@ class Command(stack.commands.add.vm.Command):
 		dev_id = 0
 		vol_id = 0
 		disk_loc, disks = self.fillParams([
-			('storage_directory', ''),
+			('storage_pool', ''),
 			('disks', '', True)
 		])
 		vm_disks = self.call('list.vm.storage', vm_host)
@@ -89,7 +89,7 @@ class Command(stack.commands.add.vm.Command):
 			# during vm definition
 			if disk.isdigit():
 				if not disk_loc:
-					raise ParamError(self, 'storage_directory', 'needed for defined disks or images')
+					raise ParamError(self, 'storage_pool', 'needed for defined disks or images')
 				disk_type = 'disk'
 				disk_size = disk
 				if vol_names:
@@ -110,7 +110,7 @@ class Command(stack.commands.add.vm.Command):
 			# First check if it's a valid tar file
 			elif disk_path.exists() and not disk_path.is_dir() and tarfile.is_tarfile(disk_path):
 				if not disk_loc:
-					raise ParamError(self, 'storage_directory', 'needed for defined disks or images')
+					raise ParamError(self, 'storage_pool', 'needed for defined disks or images')
 				disk_type = 'image'
 				image_archive = disk
 				tar_disks = tarfile.open(disk_path)
@@ -125,7 +125,7 @@ class Command(stack.commands.add.vm.Command):
 			elif disk_path.exists():
 				disk_type = 'image'
 				if not disk_loc:
-					raise ParamError(self, 'storage_directory', 'needed for defined disks or images')
+					raise ParamError(self, 'storage_pool', 'needed for defined disks or images')
 
 				# First test for a gzip archive and replace the suffix for
 				# the uncompressed disk image name
@@ -157,6 +157,7 @@ class Command(stack.commands.add.vm.Command):
 			# Create a new entry in the table for each one
 			# Insert disks into the database
 			for image in images:
+
 				# Calculate the next device name (sda, sdb, sdc...etc)
 				if disk_names:
 					disk_name = f'sd{chr(ord(disk_names[-1][-1]) + 1 + dev_id)}'

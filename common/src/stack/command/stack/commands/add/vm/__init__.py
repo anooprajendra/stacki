@@ -32,7 +32,7 @@ class Command(command, VmArgumentProcessor):
 	The amount of memory in MB to give to the virtual host.
 	</param>
 
-	<param type='string' name='storage_directory' optional='1'>
+	<param type='string' name='storage_pool' optional='1'>
 	The location on the hypervisor to store and create disk images.
 	Must be the full path. Required if disks are not just mountpoints.
 	</param>
@@ -53,7 +53,7 @@ class Command(command, VmArgumentProcessor):
 			('hypervisor', None, True),
 			('cpu', '1'),
 			('memory', '3072'),
-			('storage_directory', ''),
+			('storage_pool', ''),
 			('disks', 100)
 		])
 
@@ -83,4 +83,4 @@ class Command(command, VmArgumentProcessor):
 		""", (hypervisor, vm_host, int(memory), int(cpu)))
 
 		# Call add vm storage for any disks given
-		self.call('add.vm.storage', [vm_host, f'disks={disks}', f'storage_directory={disk_loc}'])
+		self.call('add.vm.storage', [vm_host, f'disks={disks}', f'storage_pool={disk_loc}'])
