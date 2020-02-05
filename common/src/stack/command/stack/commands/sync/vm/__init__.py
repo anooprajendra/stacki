@@ -66,7 +66,7 @@ class Command(command, VmArgumentProcessor):
 			('debug', False),
 			('hypervisor', ''),
 			('force', False),
-			('autostart', True),
+			('autostart', False),
 			('sync_ssh', True)
 		])
 
@@ -86,7 +86,7 @@ class Command(command, VmArgumentProcessor):
 				vm_hosts[vm_name] = vm
 			elif force:
 				self.notify(f'Force turning off {vm_name}')
-				self.call(f'set.host.power', args = [vm_name, 'command=off', 'method=kvm'])
+				self.call('set.host.power', args = [vm_name, 'command=off', 'method=kvm'])
 				vm['status'] = 'off'
 				vm_hosts[vm_name] = vm
 			else:
@@ -99,7 +99,8 @@ class Command(command, VmArgumentProcessor):
 		# Raise an error if there are no hosts
 		# to sync
 		if not vm_hosts:
-			raise CommandError(self, 'No virtual machines found to sync')
+			self.notify('No virtual machines found to sync')
+			return
 		self.notify('Sync Virtual Machines')
 		self.beginOutput()
 		plugin_args = (vm_hosts, vm_disks, debug, sync_ssh, force, autostart)

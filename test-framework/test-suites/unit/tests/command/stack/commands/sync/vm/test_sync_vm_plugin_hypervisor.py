@@ -260,8 +260,8 @@ class TestSyncVmHypervisor:
 	):
 		# Simulate not errors returned from
 		# add_vm or remove_vm
-		mock_remove_vm.return_value = []
-		mock_add_vm.return_value = []
+		mock_remove_vm.return_value = ['remove error']
+		mock_add_vm.return_value = ['add error']
 		mock_sync_hypervisor_plugin.owner.str2bool.side_effect = str2bool
 
 		# Run the plugin
@@ -272,7 +272,7 @@ class TestSyncVmHypervisor:
 		for host, values in args.hosts.items():
 			delete_vm = str2bool(values['pending deletion'])
 
-			# Used to check if the current args are called or not 
+			# Used to check if the current args are called or not
 			func_call = call(ANY, host, args.debug, values['hypervisor'])
 			if values['status'] != 'on' or args.force:
 				if values['status'] != 'undefined':
@@ -284,4 +284,4 @@ class TestSyncVmHypervisor:
 			else:
 				assert func_call not in mock_remove_vm.call_args_list
 				assert func_call not in mock_add_vm.call_args_list
-		assert output == []
+		assert output == ['remove error', 'add error']
