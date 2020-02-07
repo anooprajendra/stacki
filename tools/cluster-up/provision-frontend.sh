@@ -14,10 +14,11 @@ then
 elif [[ $OS == "sles15" ]]
 then
     zypper addrepo iso:/?iso=/export/installer-iso/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso sles-installer-pkgs
-    zypper addrepo iso:/?iso=/export/installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso sles-extra-pkgs-dev-tools
-    zypper addrepo iso:/?iso=/export/installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso sles-extra-pkgs-basesystem
-    zypper addrepo iso:/?iso=/export/installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso sles-extra-pkgs-servers
-    zypper addrepo iso:/?iso=/export/installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso sles-extra-pkgs-desktop
+    # The packages iso is massive, move it somewhere it doesn't have to go over the host-vm shared file system
+    mkdir -p /export/local-installer-iso
+    cp /export/installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso /export/local-installer-iso/
+    zypper addrepo iso:/?iso=/export/local-installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso sles-extra-pkgs
+    zypper update
 fi
 
 # Vagrant monkeys with the hosts file, set it back to something known
