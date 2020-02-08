@@ -18,7 +18,7 @@ def add_vm():
 	add_vm = (
 		f'stack add vm vm-backend-0-3 '
 		f'hypervisor=hypervisor-0-1 cpu=1 memory=2048 '
-		f'storage_directory=/export/pools/stacki disks=100'
+		f'storage_pool=/export/pools/stacki disks=100'
 	)
 	vm_result = _exec(add_vm, shlexsplit = True)
 	if vm_result.returncode != 0:
@@ -47,7 +47,7 @@ def add_vm_multiple():
 		add_vm = (
 			f'stack add vm {hostname} '
 			f'hypervisor={hypervisor} cpu={cpu} memory={memory} '
-			f'storage_directory={storloc} disks={disks}'
+			f'storage_pool={storloc} disks={disks}'
 		)
 		vm_result = _exec(add_vm, shlexsplit = True)
 		if vm_result.returncode != 0:
@@ -203,7 +203,7 @@ def add_vm_storage():
 		# Add the new disks
 		cmd =(
 			f'stack add vm storage {host} '
-			f'storage_directory=/export/pools/stacki disks={",".join(disks)},/dev/sdb'
+			f'storage_pool=/export/pools/stacki disks={",".join(disks)},/dev/sdb'
 		)
 		add_stor = _exec(cmd, shlexsplit = True)
 		assert add_stor.returncode == 0
