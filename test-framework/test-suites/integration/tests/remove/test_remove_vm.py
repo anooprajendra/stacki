@@ -17,7 +17,7 @@ class TestRemoveVM:
 	def test_dont_remove_frontend_vm(self, host, add_hypervisor):
 
 		# Add the frontend as a virtual machine
-		add_cmd = 'stack add vm frontend-0-0 hypervisor=hypervisor-0-1 storage_directory=/export/pools/stacki'
+		add_cmd = 'stack add vm frontend-0-0 hypervisor=hypervisor-0-1 storage_pool=/export/pools/stacki'
 		add_frontend_vm = host.run(add_cmd)
 		assert add_frontend_vm.rc == 0
 
