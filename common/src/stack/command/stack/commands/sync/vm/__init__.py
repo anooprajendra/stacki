@@ -96,10 +96,9 @@ class Command(command, VmArgumentProcessor):
 		for disk in self.call('list.vm.storage', [*vm_hosts]):
 			vm_disks.setdefault(disk['Virtual Machine'], []).append(disk)
 
-		# Raise an error if there are no hosts
-		# to sync
+		# If there is no VM's to sync
+		# we are done
 		if not vm_hosts:
-			self.notify('No virtual machines found to sync')
 			return
 		self.notify('Sync Virtual Machines')
 		self.beginOutput()

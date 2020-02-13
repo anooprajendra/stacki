@@ -117,7 +117,7 @@ class TestReportVM:
 		# Add the new disks
 		add_stor = host.run(
 			f'stack add vm storage vm-backend-0-3 '
-			f'storage_directory=/export/pools/stacki disks={",".join(disks)},/dev/sdb'
+			f'storage_pool=/export/pools/stacki disks={",".join(disks)},/dev/sdb'
 		)
 		assert add_stor.rc == 0
 

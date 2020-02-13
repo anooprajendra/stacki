@@ -18,7 +18,7 @@ class TestSyncVM:
 
 	def test_no_vm(self, add_host, host):
 		result = host.run(f'stack sync vm')
-		assert result.rc != 0 and 'No virtual machines' in result.stderr
+		assert result.rc == 0
 
 	# Test VM's marked for deletion
 	# aren't removed without using force
