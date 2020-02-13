@@ -9,7 +9,7 @@ import stack.commands
 from stack.kvm import Hypervisor, VmException
 from stack.exception import ArgError
 
-class Command(stack.commands.list.vm.Command):
+class Command(stack.commands.list.vm.storage.Command):
 	"""
 	List the storage pool information on a hypervisor
 
@@ -44,7 +44,7 @@ class Command(stack.commands.list.vm.Command):
 			return
 		for arg in args:
 			if not self.is_hypervisor(arg):
-				raise ArgError(self, 'list.vm.pool', f'{arg} is not a valid hypervisor')
+				raise ArgError(self, 'hypervisor', f'{arg} is not a valid hypervisor')
 
 		self.beginOutput()
 		header = [
