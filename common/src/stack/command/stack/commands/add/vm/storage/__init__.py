@@ -60,6 +60,9 @@ class Command(stack.commands.add.vm.Command):
 		disk_names = [ disk['Name'] for disk in vm_disks ]
 		disk_names.sort()
 
+		if disk_loc:
+			disk_loc = f'{disk_loc}/{vm_host[0]}'
+
 		# Get the name of all disks for the VM
 		image_formats = ['.qcow2', '.raw']
 
