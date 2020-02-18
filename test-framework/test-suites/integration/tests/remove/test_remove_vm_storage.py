@@ -26,7 +26,7 @@ class TestRemoveVmStorage:
 			'Virtual Machine': 'vm-backend-0-3',
 			'Name': 'sda',
 			'Type': 'disk',
-			'Location': '/export/pools/stacki',
+			'Location': '/export/pools/stacki/vm-backend-0-3',
 			'Size': 100,
 			'Image Name': 'vm-backend-0-3_disk1.qcow2',
 			'Image Archive': None,
