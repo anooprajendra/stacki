@@ -42,9 +42,10 @@ stacki-initrd.img:
 	@echo "Building $(SUSE_PRODUCT) initrd"
 	mkdir -p stacki-initrd
 	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm )
-	gpg --homedir $(TEMPHOMEDIR) --no-default-keyring --keyring stacki-initrd/installkey.gpg \
+	gpg --no-default-keyring --keyring $(TEMPHOMEDIR)/installkey.gpg \
 		--import ../../../common/gnupg-keys/stacki.pub
-	rm -rf stacki-initrd/installkey.gpg~
+	rm -rf $(TEMPHOMEDIR)/installkey.gpg~
+	cp -r $(TEMPHOMEDIR)/* stacki-initrd/
 	# Add common patches to initrd
 	-(cd ../../../common/initrd-patches && \
 		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_RELEASE)/$(IMAGE_VERSION)/stacki-initrd/) )
