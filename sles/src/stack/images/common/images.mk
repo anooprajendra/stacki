@@ -41,8 +41,10 @@ stacki-initrd.img:
 	@echo "Building $(SUSE_PRODUCT) initrd"
 	mkdir -p stacki-initrd
 	# Need to configure socket location so we don't hit the unix domain socket name length limit.
-	mkdir -p stacki-initrd/.gnupg
-	echo -e "%Assuan%\n$(STACKBUILD.ABSOLUTE)/gpgsocket/S.gpg-agent" > stacki-initrd/.gnupg/S.gpg-agent
+	mkdir -p .gnupg
+	echo -e "%Assuan%\n$(STACKBUILD.ABSOLUTE)/gpgsocket/S.gpg-agent" > .gnupg/S.gpg-agent
+	echo -e "%Assuan%\n$(STACKBUILD.ABSOLUTE)/gpgsocket/S.gpg-agent.ssh" > .gnupg/S.gpg-agent.ssh
+	echo -e "extra-socket $(STACKBUILD.ABSOLUTE)/gpgsocket/S.gpg-agent.extra\nbrowser-socket $(STACKBUILD.ABSOLUTE)/gpgsocket/S.gpg-agent.browser" > .gnupg/gpg-agent.conf
 	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm )
 	gpg --no-default-keyring --keyring stacki-initrd/installkey.gpg \
 		--import ../../../common/gnupg-keys/stacki.pub
