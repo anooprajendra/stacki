@@ -33,37 +33,37 @@
 		</interface>
 		<disk device="disk" type="file">
 			<driver cache="none" type="qcow2" name="qemu" io="native"/>
-			<source file="/export/pools/stacki/vm-backend-0-3_disk1.qcow2"/>
+			<source file="/export/pools/stacki/vm-backend-0-3/vm-backend-0-3_disk1.qcow2"/>
 			<target dev="sda" bus="sata"/>
 			<boot order="2"/>
 		</disk>
 		<disk device="disk" type="file">
 			<driver cache="none" type="qcow2" name="qemu" io="native"/>
-			<source file="/export/pools/stacki/image.qcow2"/>
+			<source file="/export/pools/stacki/vm-backend-0-3/image.qcow2"/>
 			<target dev="sdb" bus="virtio"/>
 			<boot order="3"/>
 		</disk>
 		<disk device="disk" type="file">
 			<driver cache="none" type="raw" name="qemu" io="native"/>
-			<source file="/export/pools/stacki/image2.raw"/>
+			<source file="/export/pools/stacki/vm-backend-0-3/image2.raw"/>
 			<target dev="sdc" bus="virtio"/>
 			<boot order="4"/>
 		</disk>
 		<disk device="disk" type="file">
 			<driver cache="none" type="qcow2" name="qemu" io="native"/>
-			<source file="/export/pools/stacki/image3.qcow2"/>
+			<source file="/export/pools/stacki/vm-backend-0-3/image3.qcow2"/>
 			<target dev="sdd" bus="virtio"/>
 			<boot order="5"/>
 		</disk>
 		<disk device="disk" type="file">
 			<driver cache="none" type="raw" name="qemu" io="native"/>
-			<source file="/export/pools/stacki/image4.raw"/>
+			<source file="/export/pools/stacki/vm-backend-0-3/image4.raw"/>
 			<target dev="sde" bus="virtio"/>
 			<boot order="6"/>
 		</disk>
 		<disk device="disk" type="file">
 			<driver cache="none" type="qcow2" name="qemu" io="native"/>
-			<source file="/export/pools/stacki/image5.qcow2"/>
+			<source file="/export/pools/stacki/vm-backend-0-3/image5.qcow2"/>
 			<target dev="sdf" bus="virtio"/>
 			<boot order="7"/>
 		</disk>
