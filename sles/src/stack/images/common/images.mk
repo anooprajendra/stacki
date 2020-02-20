@@ -5,7 +5,6 @@
 # @copyright@
 
 TEMPDIR := $(shell mktemp -d)
-TEMPHOMEDIR := $(shell mktemp --directory)
 
 PALLET_PATCH_DIR = /opt/stack/pallet-patches/$(SUSE_PRODUCT)-$(IMAGE_VERSION)-$(IMAGE_RELEASE)-$(DISTRO_FAMILY)-$(ARCH)
 #PALLET_PATCH_DIR = /opt/stack/$(SUSE_PRODUCT)-pallet-patches/$(IMAGE_VERSION)/$(IMAGE_RELEASE)
@@ -41,11 +40,13 @@ sles-stacki.img: dirs rpminst
 stacki-initrd.img:
 	@echo "Building $(SUSE_PRODUCT) initrd"
 	mkdir -p stacki-initrd
+	# Need to configure socket location so we don't hit the unix domain socket name length limit.
+	mkdir -p stacki-initrd/.gnupg
+	echo -e "%Assuan%\n$(STACKBUILD.ABSOLUTE)/gpgsocket/S.gpg-agent" > stacki-initrd/.gnupg/S.gpg-agent
 	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm )
-	gpg --no-default-keyring --keyring $(TEMPHOMEDIR)/installkey.gpg \
+	gpg --no-default-keyring --keyring stacki-initrd/installkey.gpg \
 		--import ../../../common/gnupg-keys/stacki.pub
-	rm -rf $(TEMPHOMEDIR)/installkey.gpg~
-	cp -r $(TEMPHOMEDIR)/* stacki-initrd/
+	rm -rf stacki-initrd/installkey.gpg~
 	# Add common patches to initrd
 	-(cd ../../../common/initrd-patches && \
 		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_RELEASE)/$(IMAGE_VERSION)/stacki-initrd/) )
@@ -57,11 +58,10 @@ stacki-initrd.img:
 		cd stacki-initrd;	\
 		find . | cpio -oc | gzip -c - > ../stacki-initrd.img; \
 	)
-	rm -rf $(TEMPHOMEDIR)
 
 keyring:
-	gpg --homedir $(TEMPHOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.pub
-	gpg --homedir $(TEMPHOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.priv
+	gpg --batch --import ../../../common/gnupg-keys/stacki.pub
+	gpg --batch --import ../../../common/gnupg-keys/stacki.priv
 
 build: sles-stacki.img stacki-initrd.img
 
@@ -77,10 +77,9 @@ install:: keyring
 	# Add the SHA1 of the stacki image to the CHECKSUMS_FILE
 	echo "HASH $(SHA)  boot/x86_64/sles-stacki.img" >> $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE)
 	# Sign the content file
-	gpg --homedir $(TEMPHOMEDIR) --armor \
+	gpg --armor \
 		--output $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE).asc \
 		--detach-sig $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE)
-	rm -rf $(TEMPHOMEDIR)
 
 clean::
 	rm -rf $(CURDIR)/localrepo
