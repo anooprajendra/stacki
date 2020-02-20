@@ -40,14 +40,9 @@ sles-stacki.img: dirs rpminst
 stacki-initrd.img:
 	@echo "Building $(SUSE_PRODUCT) initrd"
 	mkdir -p stacki-initrd
-	# Need to configure socket location so we don't hit the unix domain socket name length limit.
-	mkdir -p .gnupg
-	echo -e "%Assuan%\n$(STACKBUILD.ABSOLUTE)/gpgsocket/S.gpg-agent" > .gnupg/S.gpg-agent
-	echo -e "%Assuan%\n$(STACKBUILD.ABSOLUTE)/gpgsocket/S.gpg-agent.ssh" > .gnupg/S.gpg-agent.ssh
-	echo -e "extra-socket $(STACKBUILD.ABSOLUTE)/gpgsocket/S.gpg-agent.extra\nbrowser-socket $(STACKBUILD.ABSOLUTE)/gpgsocket/S.gpg-agent.browser" > .gnupg/gpg-agent.conf
 	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm )
-	gpg --no-default-keyring --keyring stacki-initrd/installkey.gpg \
-		--import ../../../common/gnupg-keys/stacki.pub
+	-(gpg --no-default-keyring --keyring stacki-initrd/installkey.gpg \
+		--import ../../../common/gnupg-keys/stacki.pub)
 	rm -rf stacki-initrd/installkey.gpg~
 	# Add common patches to initrd
 	-(cd ../../../common/initrd-patches && \
@@ -62,8 +57,8 @@ stacki-initrd.img:
 	)
 
 keyring:
-	gpg --batch --import ../../../common/gnupg-keys/stacki.pub
-	gpg --batch --import ../../../common/gnupg-keys/stacki.priv
+	-(gpg --batch --import ../../../common/gnupg-keys/stacki.pub)
+	-(gpg --batch --import ../../../common/gnupg-keys/stacki.priv)
 
 build: sles-stacki.img stacki-initrd.img
 
@@ -79,9 +74,9 @@ install:: keyring
 	# Add the SHA1 of the stacki image to the CHECKSUMS_FILE
 	echo "HASH $(SHA)  boot/x86_64/sles-stacki.img" >> $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE)
 	# Sign the content file
-	gpg --armor \
+	-(gpg --armor \
 		--output $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE).asc \
-		--detach-sig $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE)
+		--detach-sig $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE))
 
 clean::
 	rm -rf $(CURDIR)/localrepo
