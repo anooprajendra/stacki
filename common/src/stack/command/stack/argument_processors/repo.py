@@ -55,7 +55,7 @@ class RepoArgumentProcessor:
 	def enable_repo(self, repo, box):
 		''' add a row to the repo_stacks table, tying a repo to a box '''
 
-		repo_id = self.db.select('id FROM repos WHERE alias=%s', (repo,))[0][0]
+		repo_id = self.db.select('id FROM repos WHERE name=%s', (repo,))[0][0]
 		box_id = self.db.select('id FROM boxes WHERE name=%s', (box,))[0][0]
 		sql = '''INSERT INTO repo_stacks
 			(box, repo)
@@ -66,7 +66,7 @@ class RepoArgumentProcessor:
 
 	def disable_repo(self, repo, box):
 		''' disable the repo for a given box '''
-		repo_id = self.db.select('id FROM repos WHERE alias=%s', (repo,))[0][0]
+		repo_id = self.db.select('id FROM repos WHERE name=%s', (repo,))[0][0]
 		box_id = self.db.select('id FROM boxes WHERE name=%s', (box,))[0][0]
 		sql = '''DELETE FROM repo_stacks WHERE box=%s AND repo=%s '''
 		self.db.execute(sql, (box_id, repo_id))
