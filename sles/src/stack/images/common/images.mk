@@ -19,6 +19,10 @@ else
 CHECKSUMS_FILE = content
 endif
 
+# Move homedir to a controlled location so gpg-agent doesn't barf trying to set up
+# a unix domain socket with too long a name.
+GPG_HOMEDIR = /gpg/stacki-initrd/
+
 dirs:
 	@mkdir -p $(CURDIR)/sles-stacki
 
@@ -41,9 +45,13 @@ stacki-initrd.img:
 	@echo "Building $(SUSE_PRODUCT) initrd"
 	mkdir -p stacki-initrd
 	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm )
-	gpg --homedir ~/.gnupg --no-default-keyring --keyring stacki-initrd/installkey.gpg \
+	mkdir -p /gpg/stacki-initrd/
+	# Create the gpg keyring to stuff into the initrd
+	gpg --homedir $(GPG_HOMEDIR) --no-default-keyring --keyring $(GPG_HOMEDIR)/installkey.gpg \
 		--import ../../../common/gnupg-keys/stacki.pub
-	rm -rf stacki-initrd/installkey.gpg~
+	rm -rf $(GPG_HOMEDIR)/installkey.gpg~
+	# Copy it over into the correct place so we can pack it up.
+	cp $(GPG_HOMEDIR)/installkey.gpg stacki-initrd/
 	# Add common patches to initrd
 	-(cd ../../../common/initrd-patches && \
 		(find . -type f  | cpio -pudv ../../$(SUSE_PRODUCT)/$(IMAGE_RELEASE)/$(IMAGE_VERSION)/stacki-initrd/) )
@@ -57,8 +65,8 @@ stacki-initrd.img:
 	)
 
 keyring:
-	gpg --homedir ~/.gnupg --batch --import ../../../common/gnupg-keys/stacki.pub
-	gpg --homedir ~/.gnupg --batch --import ../../../common/gnupg-keys/stacki.priv
+	gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.pub
+	gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.priv
 
 build: sles-stacki.img stacki-initrd.img
 
@@ -74,7 +82,7 @@ install:: keyring
 	# Add the SHA1 of the stacki image to the CHECKSUMS_FILE
 	echo "HASH $(SHA)  boot/x86_64/sles-stacki.img" >> $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE)
 	# Sign the content file
-	gpg --homedir ~/.gnupg --armor \
+	gpg --homedir $(GPG_HOMEDIR) --armor \
 		--output $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE).asc \
 		--detach-sig $(ROOT)/$(PALLET_PATCH_DIR)/add-stacki-squashfs/$(CHECKSUMS_FILE)
 
@@ -86,3 +94,4 @@ clean::
 	rm -rf $(CURDIR)/stacki-initrd
 	rm -rf $(CURDIR)/stacki-initrd.img
 	rm -rf $(CURDIR)/sles-stacki
+	rm -rf $(GPG_HOMEDIR)
