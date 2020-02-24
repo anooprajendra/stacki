@@ -65,8 +65,10 @@ stacki-initrd.img:
 	)
 
 keyring:
-	gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.pub
-	gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.priv
+	# Since we set homedir now, these can return bad exit codes on older versions of GPG since
+	# the keys already exist.
+	-(gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.pub)
+	-(gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.priv)
 
 build: sles-stacki.img stacki-initrd.img
 
