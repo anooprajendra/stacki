@@ -13,7 +13,7 @@ PALLET_PATCH_DIR = /opt/stack/pallet-patches/$(SUSE_PRODUCT)-$(IMAGE_VERSION)-$(
 
 # In sles < 15 the checksum file is called `content`, but in sles >= 15 (at this time)
 # the file is called `CHECKSUMS`.
-ifeq ($(shell $(STACKBUILD.ABSOLUTE)/bin/os-release),SLES15)
+ifeq ($(IMAGE_RELEASE),sles15)
 CHECKSUMS_FILE = CHECKSUMS
 else
 CHECKSUMS_FILE = content
