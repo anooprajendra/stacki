@@ -21,7 +21,7 @@ endif
 
 # Move homedir to a controlled location so gpg-agent doesn't barf trying to set up
 # a unix domain socket with too long a name.
-GPG_HOMEDIR = /gpg/stacki-initrd/
+GPG_HOMEDIR = /gpg/$(SUSE_PRODUCT)/$(IMAGE_RELEASE)/$(IMAGE_VERSION)/stacki-initrd
 
 dirs:
 	@mkdir -p $(CURDIR)/sles-stacki
@@ -45,8 +45,8 @@ stacki-initrd.img:
 	@echo "Building $(SUSE_PRODUCT) initrd"
 	mkdir -p stacki-initrd
 	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm )
-	mkdir -p /gpg/stacki-initrd/
 	# Create the gpg keyring to stuff into the initrd
+	mkdir -p $(GPG_HOMEDIR)
 	gpg --homedir $(GPG_HOMEDIR) --no-default-keyring --keyring $(GPG_HOMEDIR)/installkey.gpg \
 		--import ../../../common/gnupg-keys/stacki.pub
 	rm -rf $(GPG_HOMEDIR)/installkey.gpg~
@@ -65,8 +65,9 @@ stacki-initrd.img:
 	)
 
 keyring:
+	mkdir -p $(GPG_HOMEDIR)
 	# Since we set homedir now, these can return bad exit codes on older versions of GPG since
-	# the keys already exist.
+	# the keys might already exist.
 	-(gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.pub)
 	-(gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.priv)
 
