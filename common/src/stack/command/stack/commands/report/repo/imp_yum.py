@@ -25,7 +25,7 @@ class Implementation(stack.commands.Implementation):
 
 		# make a second jinja pass at the repo data, in case it has variables with stacki attributes
 		repo_str = jinja2.Template(self.owner.box_repo_data[box]).render(**self.owner.host_attrs[host])
-		repo = repo_str.splitlines()
+		repo.extend(repo_str.splitlines())
 
 		# TODO carts should call add repo, then this goes away
 		for o in self.owner.call('list.cart'):
