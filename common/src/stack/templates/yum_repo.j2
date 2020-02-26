@@ -14,7 +14,7 @@ autorefresh={{ autorefresh }}
 {% if assumeyes != 0 %}
 assumeyes={{ assumeyes }}
 {% endif %}
-{% if gpgkey != "" %}
+{% if gpgkey is not none %}
 gpgkey={{ gpgkey }}
 {% endif %}
 

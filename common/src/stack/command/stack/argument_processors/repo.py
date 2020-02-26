@@ -125,10 +125,11 @@ class RepoArgumentProcessor:
 
 	def build_repo_files(self, box_data, repo_template):
 		# TODO does this belong here?
-		templ = jinja2.Template(repo_template, lstrip_blocks=True, trim_blocks=True)
-		repo_stanzas = []
-		for repo_data in box_data.values():
-			lines = [s for s in templ.render(repo_data).splitlines() if s]
-			repo_stanzas.append('\n'.join(lines))
-		return repo_stanzas
-
+                import pathlib
+                templ = jinja2.Template(pathlib.Path(repo_template).read_text(), lstrip_blocks=True, trim_blocks=True)
+                repo_stanzas = []
+                for repo_data in box_data.values():
+                        for repo in repo_data.values():
+                                lines = [s for s in templ.render(**repo).splitlines() if s]
+                                repo_stanzas.append('\n'.join(lines))
+                return repo_stanzas

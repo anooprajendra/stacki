@@ -107,7 +107,7 @@ class Command(stack.commands.PalletArgumentProcessor, RepoArgumentProcessor,
 			pallet_ids = [pal.id for pal in pallets]
 			# TODO, probe pallets on disk for repositories
 
-			pallet_web_path = 'http://{{ fe_ip }}/install/pallets/'
+			pallet_web_path = 'http://{{ Kickstart_PrivateAddress }}/install/pallets/'
 			for pal in pallets:
 				name = f'{pal.name} {pal.version} {pal.rel}'
 				path = '/'.join([pal.name, pal.version, pal.rel, pal.os, pal.arch])
