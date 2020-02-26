@@ -45,8 +45,9 @@ stacki-initrd.img:
 	@echo "Building $(SUSE_PRODUCT) initrd"
 	mkdir -p stacki-initrd
 	$(EXTRACT) initrd | ( cd stacki-initrd ; cpio -iudcm )
-	# Create the gpg keyring to stuff into the initrd
+	# Set up the GPG homedir.
 	mkdir -p $(GPG_HOMEDIR)
+	# Create the gpg keyring to stuff into the initrd
 	gpg --homedir $(GPG_HOMEDIR) --no-default-keyring --keyring $(GPG_HOMEDIR)/installkey.gpg \
 		--import ../../../common/gnupg-keys/stacki.pub
 	rm -rf $(GPG_HOMEDIR)/installkey.gpg~
@@ -66,10 +67,8 @@ stacki-initrd.img:
 
 keyring:
 	mkdir -p $(GPG_HOMEDIR)
-	# Since we set homedir now, these can return bad exit codes on older versions of GPG since
-	# the keys might already exist.
-	-(gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.pub)
-	-(gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.priv)
+	gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.pub
+	gpg --homedir $(GPG_HOMEDIR) --batch --import ../../../common/gnupg-keys/stacki.priv
 
 build: sles-stacki.img stacki-initrd.img
 
