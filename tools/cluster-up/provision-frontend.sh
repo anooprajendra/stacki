@@ -6,17 +6,19 @@ set -e
 # Output the commands as they are run
 set -x
 
+# Copy all installer isos to a local VM folder. There seems to be intermittent issues
+# with using ISO files out of the shared folder.
+mkdir -p /export/local-installer-iso
+cp -r /export/installer-iso/*.iso /export/local-installer-iso
+
 # Add the installer ISO for SLES
 if [[ $OS == "sles12" ]]
 then
-    zypper addrepo iso:/?iso=/export/installer-iso/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso os
+    zypper addrepo iso:/?iso=/export/local-installer-iso/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso os
     zypper update
 elif [[ $OS == "sles15" ]]
 then
-    zypper addrepo iso:/?iso=/export/installer-iso/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso sles-installer-pkgs
-    # The packages iso is massive, move it somewhere it doesn't have to go over the host-vm shared file system
-    mkdir -p /export/local-installer-iso
-    cp /export/installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso /export/local-installer-iso/
+    zypper addrepo iso:/?iso=/export/local-installer-iso/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso os
     zypper addrepo iso:/?iso=/export/local-installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso sles-extra-pkgs
     zypper update
 fi
