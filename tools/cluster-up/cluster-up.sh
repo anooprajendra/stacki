@@ -316,14 +316,22 @@ run_hooks "post-frontend"
 # Add the OS pallet
 echo
 echo -e "\033[34mAdding the OS pallet to the frontend ...\033[0m"
-if [[ $OS == "sles12" ]]
+if [[ $OS == "sles15" ]]
 then
-    vagrant ssh frontend -c "sudo -i stack add pallet /export/installer-iso/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso"
+    vagrant ssh frontend -c "sudo -i stack add pallet /export/local-installer-iso/SLE-15-SP1-Installer-DVD-x86_64-GM-DVD1.iso"
+    vagrant ssh frontend -c "sudo -i stack add pallet /export/local-installer-iso/SLE-15-SP1-Packages-x86_64-GM-DVD1.iso"
+    vagrant ssh frontend -c "sudo -i stack enable pallet SLES"
+    vagrant ssh frontend -c "sudo -i stack enable pallet SLES box=frontend"
+    vagrant ssh frontend -c "sudo -i stack enable pallet Packages-1"
+    vagrant ssh frontend -c "sudo -i stack enable pallet Packages-1 box=frontend"
+elif [[ $OS == "sles12" ]]
+then
+    vagrant ssh frontend -c "sudo -i stack add pallet /export/local-installer-iso/SLE-12-SP3-Server-DVD-x86_64-GM-DVD1.iso"
     vagrant ssh frontend -c "sudo -i stack enable pallet SLES"
     vagrant ssh frontend -c "sudo -i stack enable pallet SLES box=frontend"
 elif [[ $OS == "redhat7" ]]
 then
-    vagrant ssh frontend -c "sudo -i stack add pallet /export/installer-iso/CentOS-7-x86_64-Everything-1810.iso"
+    vagrant ssh frontend -c "sudo -i stack add pallet /export/local-installer-iso/CentOS-7-x86_64-Everything-1810.iso"
     vagrant ssh frontend -c "sudo -i stack enable pallet CentOS"
     vagrant ssh frontend -c "sudo -i stack enable pallet CentOS box=frontend"
 fi
