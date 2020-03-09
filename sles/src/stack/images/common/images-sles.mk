@@ -1,7 +1,7 @@
 RPMLOC = $(shell find cache -type f -name *.rpm)
 $(info RPMLOC is $(RPMLOC))
 $(info PATH is $(shell pwd))
-$(info contents is $(shell find))
+$(info contents is $(shell find -type d))
 localrepo:
 	$(info making localrepo in $(CURDIR))
 	mkdir -p $(CURDIR)/localrepo
