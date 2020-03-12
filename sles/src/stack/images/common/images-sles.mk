@@ -20,6 +20,7 @@ getpackages:
 	rm -rf cache
 	mkdir -p cache
 	zypper --pkg-cache-dir cache --reposd-dir $(CURDIR) clean --all
-	$(info PATH is $(shell pwd))
+	$(info PATH_IN_getpackages is $(shell pwd))
+	$(info YUMLIST is $(YUMLIST))
 	zypper --pkg-cache-dir cache --reposd-dir $(CURDIR) download $(YUMLIST)
 
