@@ -339,5 +339,3 @@ class Command(command):
 
 		# Clear the old packages
 		self._exec('systemctl start ludicrous-cleaner'.split())
-
-
