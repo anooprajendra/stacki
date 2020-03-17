@@ -334,10 +334,7 @@ class Command(command):
 				self.update_db(pallet, paths_to_args[pallet.pallet_root])
 			if stacki_pallet_dir == '/export/stack/pallets':
 				self.patch_pallet(pallet)
-			output = info_getter(pallet)
-			self.addOutput(output[0], (output[1],output[2],output[4],output[3]))	
-
-
+			self.addOutput(pallet.name, (pallet.version, pallet.release, pallet.arch, pallet.distro_family))
 		self.endOutput(header=['pallet', 'version', 'release', 'arch', 'os'])
 
 		# Clear the old packages
