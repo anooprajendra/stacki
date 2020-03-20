@@ -4,15 +4,18 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import stack.commands
-import stack.switch
 import os
 
+import stack.commands
+import stack.switch
+
+
 class command(stack.commands.list.command):
-	pass
+    pass
+
 
 class Command(command):
-	"""
+    """
 	List all supported switches
 
 	<example cmd='list switch support'>
@@ -20,25 +23,25 @@ class Command(command):
 	</example>
 
 	"""
-	def run(self, params, args):
 
-		# collect all of the modules (read: files) in the stack.switch path and import them
-		for fi in os.listdir(stack.switch.__path__[0]):
-			if fi[0] != '_' and fi.split('.')[-1] in ('py', 'pyw'):
-				modulename = fi.split('.')[0]
-				pkg = '.'.join([stack.switch.__name__, modulename])
-				module = __import__(pkg)
+    def run(self, params, args):
 
-		allmodels = []
-		# importing modules with subclasses automatically adds them to the base class' __sublcasses__()
-		for sub_cls in stack.switch.Switch.__subclasses__():
-			# for each sublcass, ask it what its supported models are
-			allmodels.extend(sub_cls.supported())
+        # collect all of the modules (read: files) in the stack.switch path and import them
+        for fi in os.listdir(stack.switch.__path__[0]):
+            if fi[0] != "_" and fi.split(".")[-1] in ("py", "pyw"):
+                modulename = fi.split(".")[0]
+                pkg = ".".join([stack.switch.__name__, modulename])
+                module = __import__(pkg)
 
-		self.beginOutput()
-		for make, model in allmodels:
-			self.addOutput(make, model)
+        allmodels = []
+        # importing modules with subclasses automatically adds them to the base class' __sublcasses__()
+        for sub_cls in stack.switch.Switch.__subclasses__():
+            # for each sublcass, ask it what its supported models are
+            allmodels.extend(sub_cls.supported())
 
-		header = ['make', 'model']
-		self.endOutput(header=header, trimOwner=True)
+        self.beginOutput()
+        for make, model in allmodels:
+            self.addOutput(make, model)
 
+        header = ["make", "model"]
+        self.endOutput(header=header, trimOwner=True)

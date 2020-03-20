@@ -9,7 +9,7 @@ from stack.exception import ArgUnique
 
 
 class Command(stack.commands.HostArgumentProcessor, stack.commands.report.command):
-	"""
+    """
 	Output the storage partition configuration for a specific host
 
 	<arg type='string' name='host'>
@@ -21,18 +21,18 @@ class Command(stack.commands.HostArgumentProcessor, stack.commands.report.comman
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHostnames(args)
+    def run(self, params, args):
+        hosts = self.getHostnames(args)
 
-		if len(hosts) != 1:
-			raise ArgUnique(self, 'host')
+        if len(hosts) != 1:
+            raise ArgUnique(self, "host")
 
-		self.beginOutput()
+        self.beginOutput()
 
-		# Get the partitions, removing 'source' to keep the existing output structure
-		partitions = self.call('list.host.storage.partition', [hosts[0]])
-		for partition in partitions:
-			partition.pop('source', None)
+        # Get the partitions, removing 'source' to keep the existing output structure
+        partitions = self.call("list.host.storage.partition", [hosts[0]])
+        for partition in partitions:
+            partition.pop("source", None)
 
-		self.addOutput('', str(partitions))
-		self.endOutput(padChar='')
+        self.addOutput("", str(partitions))
+        self.endOutput(padChar="")

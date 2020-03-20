@@ -2,12 +2,13 @@ import re
 
 
 class TestListHostGraph:
-	def test_no_hosts(self, host, add_host):
-		"Test when no hosts are specified"
+    def test_no_hosts(self, host, add_host):
+        "Test when no hosts are specified"
 
-		result = host.run('stack list host graph')
-		assert result.rc == 0
-		assert re.match(r"""
+        result = host.run("stack list host graph")
+        assert result.rc == 0
+        assert re.match(
+            r"""
 			frontend-0-0\s+ digraph\ rocks\ {\s+
 			frontend-0-0\s+	size="100,100";\s+
 			frontend-0-0\s+ 	rankdir=LR;\s+
@@ -50,14 +51,18 @@ class TestListHostGraph:
 			backend-0-0\s+ 		(?:[^;}]+;\s+)+
 			backend-0-0\s+ 	}\s+
 			backend-0-0\s+ }
-		""", result.stdout, re.VERBOSE)
+		""",
+            result.stdout,
+            re.VERBOSE,
+        )
 
-	def test_with_specific_host(self, host, add_host):
-		"Test when a host is specified"
-		
-		result = host.run('stack list host graph backend-0-0')
-		assert result.rc == 0
-		assert re.match(r"""
+    def test_with_specific_host(self, host, add_host):
+        "Test when a host is specified"
+
+        result = host.run("stack list host graph backend-0-0")
+        assert result.rc == 0
+        assert re.match(
+            r"""
 			digraph\ rocks\ {\s+
 				size="100,100";\s+
 			 	rankdir=LR;\s+
@@ -79,4 +84,7 @@ class TestListHostGraph:
 			 		(?:[^;}]+;\s+)+
 			 	}\s+
 			}
-		""", result.stdout, re.VERBOSE)
+		""",
+            result.stdout,
+            re.VERBOSE,
+        )

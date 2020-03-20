@@ -9,7 +9,7 @@ from stack.exception import CommandError, ParamRequired, ParamType, ParamValue
 
 
 class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command):
-	"""
+    """
 	Add a global storage partition configuration for the all hosts in the cluster.
 
 	<param type='string' name='device' optional='0'>
@@ -51,60 +51,64 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command)
 	</example>
 	"""
 
-	def run(self, params, args):
-		# Get the scope and make sure the args are valid
-		scope, = self.fillParams([('scope', 'global')])
-		scope_mappings = self.getScopeMappings(args, scope)
+    def run(self, params, args):
+        # Get the scope and make sure the args are valid
+        (scope,) = self.fillParams([("scope", "global")])
+        scope_mappings = self.getScopeMappings(args, scope)
 
-		# Now validate the params
-		device, size, fstype, mountpoint, options, partid = self.fillParams([
-			('device', None, True),
-			('size', None, True),
-			('type', None),
-			('mountpoint', None),
-			('options', None),
-			('partid', None),
-		])
+        # Now validate the params
+        device, size, fstype, mountpoint, options, partid = self.fillParams(
+            [
+                ("device", None, True),
+                ("size", None, True),
+                ("type", None),
+                ("mountpoint", None),
+                ("options", None),
+                ("partid", None),
+            ]
+        )
 
-		if not device:
-			raise ParamRequired(self, 'device')
+        if not device:
+            raise ParamRequired(self, "device")
 
-		if not size:
-			raise ParamRequired(self, 'size')
+        if not size:
+            raise ParamRequired(self, "size")
 
-		# Validate size
-		if mountpoint == 'swap' and size in ['recommended', 'hibernation']:
-			if size == 'recommended':
-				size = -1
-			else:
-				size = -2
-		else:
-			try:
-				size = int(size)
-			except:
-				raise ParamType(self, 'size', 'integer')
+        # Validate size
+        if mountpoint == "swap" and size in ["recommended", "hibernation"]:
+            if size == "recommended":
+                size = -1
+            else:
+                size = -2
+        else:
+            try:
+                size = int(size)
+            except:
+                raise ParamType(self, "size", "integer")
 
-			if size < 0:
-				raise ParamValue(self, 'size', '>= 0')
+            if size < 0:
+                raise ParamValue(self, "size", ">= 0")
 
-		# Validate partid
-		if partid:
-			try:
-				partid = int(partid)
-			except ValueError:
-				raise ParamType(self, 'partid', 'integer')
+        # Validate partid
+        if partid:
+            try:
+                partid = int(partid)
+            except ValueError:
+                raise ParamType(self, "partid", "integer")
 
-			if partid < 1:
-				raise ParamValue(self, 'partid', '>= 0')
-		else:
-			partid = 0
+            if partid < 1:
+                raise ParamValue(self, "partid", ">= 0")
+        else:
+            partid = 0
 
-		# Make sure the specification for mountpoint doesn't already exist
-		if mountpoint:
-			# Needs to be unique in the scope
-			for scope_mapping in scope_mappings:
-				# Check that the route is unique for the scope
-				if self.db.count("""
+        # Make sure the specification for mountpoint doesn't already exist
+        if mountpoint:
+            # Needs to be unique in the scope
+            for scope_mapping in scope_mappings:
+                # Check that the route is unique for the scope
+                if (
+                    self.db.count(
+                        """
 					(storage_partition.id)
 					FROM storage_partition,scope_map
 					WHERE storage_partition.scope_map_id = scope_map.id
@@ -115,36 +119,46 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command)
 					AND scope_map.os_id <=> %s
 					AND scope_map.environment_id <=> %s
 					AND scope_map.node_id <=> %s
-				""", (device, mountpoint, *scope_mapping)) != 0:
-					raise CommandError(
-						self,
-						f'partition specification for device "{device}" '
-						f'and mount point "{mountpoint}" already exists'
-					)
-		else:
-			mountpoint = None
+				""",
+                        (device, mountpoint, *scope_mapping),
+                    )
+                    != 0
+                ):
+                    raise CommandError(
+                        self,
+                        f'partition specification for device "{device}" '
+                        f'and mount point "{mountpoint}" already exists',
+                    )
+        else:
+            mountpoint = None
 
-		if not fstype:
-			fstype = None
+        if not fstype:
+            fstype = None
 
-		if not options:
-			options = ""
+        if not options:
+            options = ""
 
-		# Everything is valid, add the data for each scope_mapping
-		for scope_mapping in scope_mappings:
-			# First add the scope mapping
-			self.db.execute("""
+        # Everything is valid, add the data for each scope_mapping
+        for scope_mapping in scope_mappings:
+            # First add the scope mapping
+            self.db.execute(
+                """
 				INSERT INTO scope_map(
 					scope, appliance_id, os_id, environment_id, node_id
 				)
 				VALUES (%s, %s, %s, %s, %s)
-			""", scope_mapping)
+			""",
+                scope_mapping,
+            )
 
-			# Then add the storage partition entry
-			self.db.execute("""
+            # Then add the storage partition entry
+            self.db.execute(
+                """
 				INSERT INTO storage_partition(
 					scope_map_id, device, mountpoint,
 					size, fstype, options, partid
 				)
 				VALUES (LAST_INSERT_ID(), %s, %s, %s, %s, %s, %s)
-			""", (device, mountpoint, size, fstype, options, partid))
+			""",
+                (device, mountpoint, size, fstype, options, partid),
+            )

@@ -10,15 +10,16 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-import sys
-import shutil
 import os.path
+import shutil
+import sys
+
 import stack.commands
-from stack.exception import ParamRequired, CommandError
+from stack.exception import CommandError, ParamRequired
 
 
 class Command(stack.commands.load.command):
-	"""
+    """
 	Load host info into the database.
 	
 	<param type='string' name='file'>
@@ -37,74 +38,71 @@ class Command(stack.commands.load.command):
 	</example>
 	
 	<related>unload hostfile</related>
-	"""		
+	"""
 
+    def run(self, params, args):
+        filename, processor = self.fillParams(
+            [("file", None), ("processor", "default")]
+        )
 
-	def run(self, params, args):
-		filename, processor = self.fillParams([
-			('file', None),
-			('processor', 'default')
-			])
+        if not filename:
+            raise ParamRequired(self, "file")
 
-		if not filename:
-			raise ParamRequired(self, 'file')
+        if not os.path.exists(filename):
+            raise CommandError(self, 'file "%s" does not exist' % filename)
 
-		if not os.path.exists(filename):
-			raise CommandError(self, 'file "%s" does not exist' % filename)
+        self.hosts = {}
+        self.interfaces = {}
 
-		self.hosts = {}
-		self.interfaces = {}
+        sys.stderr.write("Loading Spreadsheet\n")
+        self.runImplementation("load_%s" % processor, (filename,))
 
-		sys.stderr.write('Loading Spreadsheet\n')
-		self.runImplementation('load_%s' % processor, (filename, ))
+        sys.stderr.write("Configuring Database\n")
+        args = self.hosts, self.interfaces
+        self.runPlugins(args)
 
-		sys.stderr.write('Configuring Database\n')
-		args = self.hosts, self.interfaces
-		self.runPlugins(args)
+        # Set each host's default boot action to os, before we
+        # build out the DHCP file with sync.config
 
-		# Set each host's default boot action to os, before we
-		# build out the DHCP file with sync.config
+        sys.stderr.write("Setting Bootaction to OS\n")
 
-		sys.stderr.write('Setting Bootaction to OS\n')
+        argv = []
+        for a in self.hosts.keys():
+            argv.append(a)
+        argv.append("action=os")
+        argv.append("sync=false")
 
-		argv = []
-		for a in self.hosts.keys():
-			argv.append(a)
-		argv.append('action=os')
-		argv.append('sync=false')
+        self.call("set.host.boot", argv)
 
-		self.call('set.host.boot', argv)
-		
-		self.call('sync.config')
+        self.call("sync.config")
 
-		argv = []
-		for a in self.hosts.keys():
-			argv.append(a)
-		self.call('sync.host.config', argv)
-		
-		#
-		# checkin the hosts spreadsheet
-		#
-		sheetsdir = '/export/stack/spreadsheets'
-		if not os.path.exists(sheetsdir):
-			os.makedirs(sheetsdir)
-			
-		RCSdir = '%s/RCS' % sheetsdir
-		if not os.path.exists(RCSdir):
-			os.makedirs(RCSdir)
+        argv = []
+        for a in self.hosts.keys():
+            argv.append(a)
+        self.call("sync.host.config", argv)
 
-		#
-		# if the 'sheetsfile' doesn't exist or if the 'sheetsfile' and
-		# the 'filename' are not the same file, then copy 'filename'
-		# to 'sheetsfile'.
-		#
-		sheetsfile = '%s/%s' % (sheetsdir, os.path.basename(filename))
-		if not os.path.exists(sheetsfile) or not os.path.samefile(filename, sheetsfile):
-			shutil.copyfile(filename, '%s' % sheetsfile)
+        #
+        # checkin the hosts spreadsheet
+        #
+        sheetsdir = "/export/stack/spreadsheets"
+        if not os.path.exists(sheetsdir):
+            os.makedirs(sheetsdir)
 
-		cmd = 'date | /opt/stack/bin/ci "%s"' % sheetsfile
-		os.system(cmd)
+        RCSdir = "%s/RCS" % sheetsdir
+        if not os.path.exists(RCSdir):
+            os.makedirs(RCSdir)
 
-		cmd = '/opt/stack/bin/co -f -l "%s"' % sheetsfile
-		os.system(cmd)
+        #
+        # if the 'sheetsfile' doesn't exist or if the 'sheetsfile' and
+        # the 'filename' are not the same file, then copy 'filename'
+        # to 'sheetsfile'.
+        #
+        sheetsfile = "%s/%s" % (sheetsdir, os.path.basename(filename))
+        if not os.path.exists(sheetsfile) or not os.path.samefile(filename, sheetsfile):
+            shutil.copyfile(filename, "%s" % sheetsfile)
 
+        cmd = 'date | /opt/stack/bin/ci "%s"' % sheetsfile
+        os.system(cmd)
+
+        cmd = '/opt/stack/bin/co -f -l "%s"' % sheetsfile
+        os.system(cmd)

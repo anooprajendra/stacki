@@ -7,13 +7,13 @@
 #
 
 import os
+
 import stack.commands
 from stack.exception import ArgRequired
 
 
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.remove.command):
-	"""
+class Command(stack.commands.CartArgumentProcessor, stack.commands.remove.command):
+    """
 	Remove a cart from both the database and filesystem.	
 
 	<arg type='string' name='cart' repeat='1'>
@@ -28,20 +28,22 @@ class Command(stack.commands.CartArgumentProcessor,
 	<related>enable cart</related>
 	<related>disable cart</related>
 	<related>list cart</related>
-	"""		
+	"""
 
-	def run(self, params, args):
-		if not len(args):
-			raise ArgRequired(self, 'cart')
+    def run(self, params, args):
+        if not len(args):
+            raise ArgRequired(self, "cart")
 
-		cartpath = '/export/stack/carts'
-		for cart in self.getCartNames(args):
-			os.system('/bin/rm -rf %s' % os.path.join(cartpath, cart))
+        cartpath = "/export/stack/carts"
+        for cart in self.getCartNames(args):
+            os.system("/bin/rm -rf %s" % os.path.join(cartpath, cart))
 
-			self.db.execute('delete from carts where name=%s', (cart,))
+            self.db.execute("delete from carts where name=%s", (cart,))
 
-		os.system("""
+        os.system(
+            """
 			/opt/stack/bin/stack report host repo localhost | 
 			/opt/stack/bin/stack report script | 
 			/bin/sh
-			""")
+			"""
+        )

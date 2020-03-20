@@ -9,7 +9,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.add.environment.command):
-	"""
+    """
 	Add a storage partition configuration for an environment.
 
 	<arg type='string' name='environment' repeat='1' optional='0'>
@@ -46,9 +46,13 @@ class Command(stack.commands.add.environment.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'environment')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "environment")
 
-		self.command('add.storage.partition', self._argv + ['scope=environment'], verbose_errors = False)
-		return self.rc
+        self.command(
+            "add.storage.partition",
+            self._argv + ["scope=environment"],
+            verbose_errors=False,
+        )
+        return self.rc

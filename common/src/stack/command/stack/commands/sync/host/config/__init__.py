@@ -8,9 +8,8 @@ import stack.commands
 import stack.util
 
 
-class Command(stack.commands.sync.host.command,
-	stack.commands.HostArgumentProcessor):
-	"""
+class Command(stack.commands.sync.host.command, stack.commands.HostArgumentProcessor):
+    """
 	!!! Rocks+ Internal Only !!!
 	Generate host specific configuration files
 	on the frontend
@@ -18,17 +17,17 @@ class Command(stack.commands.sync.host.command,
 	Hostname(s)
 	</arg>
 	"""
-	def run(self, params, args):
 
-		self.notify('Sync Host Config')
+    def run(self, params, args):
 
-		hosts = self.getHostnames(args)
-		attrs = {}
+        self.notify("Sync Host Config")
 
-		for host in self.getHostnames(args):
-			attrs[host] = {}
-		for row in self.call('list.host.attr', hosts):
-			attrs[row['host']][row['attr']] = row['value']
+        hosts = self.getHostnames(args)
+        attrs = {}
 
-		self.runPlugins({ 'hosts': hosts,
-				  'attrs': attrs })
+        for host in self.getHostnames(args):
+            attrs[host] = {}
+        for row in self.call("list.host.attr", hosts):
+            attrs[row["host"]][row["attr"]] = row["value"]
+
+        self.runPlugins({"hosts": hosts, "attrs": attrs})

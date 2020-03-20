@@ -9,7 +9,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.set.host.command):
-	"""
+    """
 	Sets an attribute to a host and sets the associated values
 
 	<arg type='string' name='host' optional='0' repeat='1'>
@@ -34,9 +34,9 @@ class Command(stack.commands.set.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'host')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "host")
 
-		self.command('set.attr', self._argv + ['scope=host'], verbose_errors = False)
-		return self.rc
+        self.command("set.attr", self._argv + ["scope=host"], verbose_errors=False)
+        return self.rc

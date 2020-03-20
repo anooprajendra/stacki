@@ -4,28 +4,29 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import stack.commands
 import csv
 from io import StringIO
 
+import stack.commands
+
 
 class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
-	"""
+    """
 	Outputs a switch hostfile in CSV format.
 	<dummy />
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		header = ['NAME', 'SWITCH', 'PORT', 'INTERFACE']
+        header = ["NAME", "SWITCH", "PORT", "INTERFACE"]
 
-		s = StringIO()
-		w = csv.writer(s)
-		w.writerow(header)
+        s = StringIO()
+        w = csv.writer(s)
+        w.writerow(header)
 
-		for row in self.call('list.switch.host'):
-			w.writerow([row['host'], row['switch'], row['port'], row['interface']])
+        for row in self.call("list.switch.host"):
+            w.writerow([row["host"], row["switch"], row["port"], row["interface"]])
 
-		self.beginOutput()
-		self.addOutput('', s.getvalue().strip())
-		self.endOutput()
+        self.beginOutput()
+        self.addOutput("", s.getvalue().strip())
+        self.endOutput()

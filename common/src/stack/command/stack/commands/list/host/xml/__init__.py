@@ -15,7 +15,7 @@ from stack.exception import ArgUnique
 
 
 class Command(stack.commands.list.host.command):
-	"""
+    """
 	Lists the monolithic XML configuration file for a host.
 	Tis is the same XML configuration file that is sent back to a 
 	host when a host begins its installation procedure.
@@ -29,37 +29,33 @@ class Command(stack.commands.list.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(pallet, debug ) = self.fillParams([
-			('pallet', ),
-			('debug', 'false')
-		])
+        (pallet, debug) = self.fillParams([("pallet",), ("debug", "false")])
 
-		debug = self.str2bool(debug)
+        debug = self.str2bool(debug)
 
-		hosts = self.getHostnames(args)
-		if len(hosts) != 1:
-			raise ArgUnique(self, 'host')
-		host = hosts[0]
-		
-		self.beginOutput()
+        hosts = self.getHostnames(args)
+        if len(hosts) != 1:
+            raise ArgUnique(self, "host")
+        host = hosts[0]
 
-		# Call "stack list node xml" with attrs{} dictionary
-		# set from the database.
+        self.beginOutput()
 
+        # Call "stack list node xml" with attrs{} dictionary
+        # set from the database.
 
-		attrs = {}
-		for row in self.call('list.host.attr', [ host ]):
-			attrs[row['attr']] = row['value']
+        attrs = {}
+        for row in self.call("list.host.attr", [host]):
+            attrs[row["attr"]] = row["value"]
 
-		args = [ attrs['node'] ]
-		args.append('attrs=%s' % attrs)
-		if pallet:
-			args.append('pallet=%s' % pallet)
-		xml = self.command('list.node.xml', args)
-		if not debug:
-			for line in xml.split('\n'):
-				self.addOutput(host, line)
+        args = [attrs["node"]]
+        args.append("attrs=%s" % attrs)
+        if pallet:
+            args.append("pallet=%s" % pallet)
+        xml = self.command("list.node.xml", args)
+        if not debug:
+            for line in xml.split("\n"):
+                self.addOutput(host, line)
 
-		self.endOutput(padChar='', trimOwner=True)
+        self.endOutput(padChar="", trimOwner=True)

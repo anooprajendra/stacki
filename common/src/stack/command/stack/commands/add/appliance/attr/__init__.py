@@ -15,7 +15,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.add.appliance.command):
-	"""
+    """
 	Adds an attribute to an appliance and sets the associated values
 
 	<arg type='string' name='appliance' optional='0' repeat='1'>
@@ -40,9 +40,11 @@ class Command(stack.commands.add.appliance.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'appliance')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "appliance")
 
-		self.command('set.appliance.attr', self._argv + [ 'force=no' ], verbose_errors = False)
-		return self.rc
+        self.command(
+            "set.appliance.attr", self._argv + ["force=no"], verbose_errors=False
+        )
+        return self.rc

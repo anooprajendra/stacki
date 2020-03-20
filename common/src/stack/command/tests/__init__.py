@@ -6,4 +6,4 @@
 
 import stack.api
 
-stack.api.__stack__ = './stack.py'
+stack.api.__stack__ = "./stack.py"

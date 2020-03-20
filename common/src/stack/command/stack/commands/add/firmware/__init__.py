@@ -13,11 +13,13 @@
 import stack.commands
 from stack.argument_processors.firmware import FirmwareArgumentProcessor
 
+
 class command(stack.commands.add.command, FirmwareArgumentProcessor):
-	pass
+    pass
+
 
 class Command(command, stack.commands.HostArgumentProcessor):
-	"""
+    """
 	Adds a firmware image to stacki.
 
 	<arg type='string' name='version'>
@@ -77,5 +79,5 @@ class Command(command, stack.commands.HostArgumentProcessor):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.runPlugins(args = (params, args))
+    def run(self, params, args):
+        self.runPlugins(args=(params, args))

@@ -14,10 +14,10 @@ import stack.commands
 
 
 class command(stack.commands.Command):
-	MustBeRoot = 0
+    MustBeRoot = 0
 
-	def getSubnet(self, subnet, netmask):
-		"""
+    def getSubnet(self, subnet, netmask):
+        """
 		This Function returns a subnet with a
 		CIDR netmask that is not a multiple of
 		8. This means subnets smaller than /24 (25-32)
@@ -27,22 +27,22 @@ class command(stack.commands.Command):
 		netmasks that are in the 23..8 range. For
 		more info read RFC2317
 		"""
-		s_list = list(map(int, subnet.split('.')))
-		n_list = list(map(int, netmask.split('.')))
-		
-		net_list = []
-		cidr = 0
-		for i in range(0, 4):
-			if n_list[i] == 0:
-				break
-			elif n_list[i] == 255:
-				net_list.append(str(s_list[i]))
-				cidr = cidr + 8
-			else:
-				b = n_list[i]
-				s = 0
-				while (b > 0):
-					b = (b << 1 ) - 256
-					s = s + 1
-				s = cidr + s
-		return net_list
+        s_list = list(map(int, subnet.split(".")))
+        n_list = list(map(int, netmask.split(".")))
+
+        net_list = []
+        cidr = 0
+        for i in range(0, 4):
+            if n_list[i] == 0:
+                break
+            elif n_list[i] == 255:
+                net_list.append(str(s_list[i]))
+                cidr = cidr + 8
+            else:
+                b = n_list[i]
+                s = 0
+                while b > 0:
+                    b = (b << 1) - 256
+                    s = s + 1
+                s = cidr + s
+        return net_list

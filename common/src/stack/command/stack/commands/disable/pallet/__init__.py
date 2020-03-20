@@ -12,14 +12,14 @@
 
 
 import os
+
 import stack.commands
 from stack.argument_processors.pallet import PalletArgumentProcessor
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(PalletArgumentProcessor,
-	stack.commands.disable.command):
-	"""
+class Command(PalletArgumentProcessor, stack.commands.disable.command):
+    """
 	Disable an available pallet. The pallet must already be copied on the
 	system using the command "stack add pallet".
 
@@ -68,35 +68,34 @@ class Command(PalletArgumentProcessor,
 	<related>create pallet</related>
 	"""
 
-	def run(self, params, args):
-		if len(args) < 1:
-			raise ArgRequired(self, 'pallet')
+    def run(self, params, args):
+        if len(args) < 1:
+            raise ArgRequired(self, "pallet")
 
-		(arch, box) = self.fillParams([
-			('arch', self.arch),
-			('box', 'default')
-		])
+        (arch, box) = self.fillParams([("arch", self.arch), ("box", "default")])
 
-		# We need to write the default arch back to the params list
-		params['arch'] = arch
+        # We need to write the default arch back to the params list
+        params["arch"] = arch
 
-		# Make sure our box exists
-		rows = self.db.select('ID from boxes where name=%s', (box,))
-		if len(rows) == 0:
-			raise CommandError(self, 'unknown box "%s"' % box)
+        # Make sure our box exists
+        rows = self.db.select("ID from boxes where name=%s", (box,))
+        if len(rows) == 0:
+            raise CommandError(self, 'unknown box "%s"' % box)
 
-		# Remember the box ID to simply queries down below
-		box_id = rows[0][0]
+        # Remember the box ID to simply queries down below
+        box_id = rows[0][0]
 
-		for pallet in self.get_pallets(args, params):
-			self.db.execute(
-				'delete from stacks where box=%s and roll=%s',
-				(box_id, pallet.id)
-			)
+        for pallet in self.get_pallets(args, params):
+            self.db.execute(
+                "delete from stacks where box=%s and roll=%s", (box_id, pallet.id)
+            )
 
-		# Regenerate stacki.repo
-		self._exec("""
+        # Regenerate stacki.repo
+        self._exec(
+            """
 			/opt/stack/bin/stack report host repo localhost |
 			/opt/stack/bin/stack report script |
 			/bin/sh
-			""", shell=True)
+			""",
+            shell=True,
+        )

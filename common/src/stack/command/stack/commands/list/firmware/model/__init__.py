@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.list.firmware.command):
-	"""
+    """
 	Lists firmware models tracked by stacki.
 
 	<arg type='string' name='models' repeat='1'>
@@ -46,14 +47,14 @@ class Command(stack.commands.list.firmware.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		header = []
-		values = []
-		for provides, results in self.runPlugins(args = (params, args)):
-			header.extend(results["keys"])
-			values.extend(results["values"])
+    def run(self, params, args):
+        header = []
+        values = []
+        for provides, results in self.runPlugins(args=(params, args)):
+            header.extend(results["keys"])
+            values.extend(results["values"])
 
-		self.beginOutput()
-		for owner, vals in values:
-			self.addOutput(owner = owner, vals = vals)
-		self.endOutput(header = header)
+        self.beginOutput()
+        for owner, vals in values:
+            self.addOutput(owner=owner, vals=vals)
+        self.endOutput(header=header)

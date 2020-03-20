@@ -8,7 +8,7 @@ import stack.commands.set.network
 
 
 class Command(stack.commands.set.network.command):
-	"""
+    """
 	Sets the network mask for one or more networks.
 
 	<arg type='string' name='network' optional='0' repeat='1'>
@@ -24,12 +24,9 @@ class Command(stack.commands.set.network.command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(networks, mask) = self.fillSetNetworkParams(args, 'mask')
+        (networks, mask) = self.fillSetNetworkParams(args, "mask")
 
-		for network in networks:
-			self.db.execute(
-				'update subnets set mask=%s where name=%s',
-				(mask, network)
-			)
+        for network in networks:
+            self.db.execute("update subnets set mask=%s where name=%s", (mask, network))

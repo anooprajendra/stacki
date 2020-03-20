@@ -8,41 +8,42 @@ import stack.commands
 
 
 class Command(stack.commands.list.command):
-	"""
+    """
 	List the current groups and the number of member hosts in each.
 
 	<example cmd='list group'>
 	List the current groups and the number of member hosts in each
 	</example>
-	"""		
+	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		self.beginOutput()
+        self.beginOutput()
 
-		groups = {}
+        groups = {}
 
-		for row in self.db.select(
-			"""
+        for row in self.db.select(
+            """
 			name from groups
-			"""):
-			groups[row[0]] = []
+			"""
+        ):
+            groups[row[0]] = []
 
-		for row in self.db.select(
-			"""g.name, n.name
+        for row in self.db.select(
+            """g.name, n.name
 			from groups g, memberships m, nodes n
 			where n.id = m.nodeid and g.id = m.groupid
-			"""):
-			
-			groupname, hostname = row
-			if groupname in groups:
-				groups[groupname].append(hostname)
-			else:
-				groups[groupname] = hostname
+			"""
+        ):
 
-		for group in sorted(groups):
-			members = ' '.join(groups[group])
-			self.addOutput(group, [members])
+            groupname, hostname = row
+            if groupname in groups:
+                groups[groupname].append(hostname)
+            else:
+                groups[groupname] = hostname
 
-		self.endOutput(header=['group', 'hosts'], trimOwner=False)
+        for group in sorted(groups):
+            members = " ".join(groups[group])
+            self.addOutput(group, [members])
 
+        self.endOutput(header=["group", "hosts"], trimOwner=False)

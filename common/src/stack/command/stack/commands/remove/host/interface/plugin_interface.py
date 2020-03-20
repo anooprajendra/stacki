@@ -14,13 +14,12 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "interface"
 
-	def provides(self):
-		return 'interface'
+    def requires(self):
+        return ["boot", "TAIL"]
 
-	def requires(self):
-		return [ 'boot', 'TAIL']
-
-	def run(self, networks):
-		for network in networks:
-			self.owner.db.execute('delete from networks where id=%s', (network,))
+    def run(self, networks):
+        for network in networks:
+            self.owner.db.execute("delete from networks where id=%s", (network,))

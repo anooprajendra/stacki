@@ -11,16 +11,16 @@
 # @rocks@
 
 import os
+
 import stack.commands
 
 
-class command(stack.commands.HostArgumentProcessor,
-	stack.commands.iterate.command):
-	pass
+class command(stack.commands.HostArgumentProcessor, stack.commands.iterate.command):
+    pass
 
-	
+
 class Command(command):
-	"""
+    """
 	Iterate sequentially over a list of hosts.  This is used to run 
 	a shell command on the frontend with with '%' wildcard expansion for
 	every host specified.
@@ -41,55 +41,55 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(cmd, ) = self.fillParams([ ('command', None, True) ])
+        (cmd,) = self.fillParams([("command", None, True)])
 
-		self.beginOutput()
+        self.beginOutput()
 
-		hosts = []
-		if len(args) == 0:
-			#
-			# no hosts are supplied. we need to exclude the frontend
-			#
-			for host in self.getHostnames(args):
-				if host == self.db.getHostname('localhost'):
-					#
-					# don't include the frontend
-					#
-					continue
+        hosts = []
+        if len(args) == 0:
+            #
+            # no hosts are supplied. we need to exclude the frontend
+            #
+            for host in self.getHostnames(args):
+                if host == self.db.getHostname("localhost"):
+                    #
+                    # don't include the frontend
+                    #
+                    continue
 
-				hosts.append(host)
-		else:
-			hosts = self.getHostnames(args)
-			
-		for host in hosts:
-			# Turn the wildcard '%' into the hostname, and '%%' into
-			# a single '%'.
+                hosts.append(host)
+        else:
+            hosts = self.getHostnames(args)
 
-			s = ''
-			prev = ''
-			for i in range(0, len(cmd)):
-				curr = cmd[i]
-				try:
-					next = cmd[i + 1]
-				except:
-					next = ''
-				if curr == '%':
-					if prev != '%' and next != '%':
-						s   += host
-						prev = host
-						continue # consume '%'
-					elif prev == '%':
-						s   += '%'
-						prev = '*'
-						continue # consume '%'
-				else:
-					s += curr
-				prev = curr
+        for host in hosts:
+            # Turn the wildcard '%' into the hostname, and '%%' into
+            # a single '%'.
 
-			os.system(s)
-#			for line in os.popen(s).readlines():
-#				self.addOutput(host, line[:-1])
+            s = ""
+            prev = ""
+            for i in range(0, len(cmd)):
+                curr = cmd[i]
+                try:
+                    next = cmd[i + 1]
+                except:
+                    next = ""
+                if curr == "%":
+                    if prev != "%" and next != "%":
+                        s += host
+                        prev = host
+                        continue  # consume '%'
+                    elif prev == "%":
+                        s += "%"
+                        prev = "*"
+                        continue  # consume '%'
+                else:
+                    s += curr
+                prev = curr
 
-		self.endOutput(padChar='')
+            os.system(s)
+        # 			for line in os.popen(s).readlines():
+        # 				self.addOutput(host, line[:-1])
+
+        self.endOutput(padChar="")

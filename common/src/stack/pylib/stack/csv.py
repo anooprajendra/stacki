@@ -1,5 +1,5 @@
 #! /opt/stack/bin/python
-# 
+#
 # @copyright@
 # Copyright (c) 2006 - 2019 Teradata
 # All rights reserved. Stacki(r) v5.x stacki.com
@@ -10,53 +10,52 @@ import csv
 
 
 class Iterator(object):
+    def __init__(self, input, lcase=True):
+        self.header = None
+        self.reader = csv.reader(input)
+        self.lcase = lcase
 
-        def __init__(self, input, lcase=True):
-                self.header = None
-                self.reader = csv.reader(input)
-                self.lcase  = lcase
-                
-        def __iter__(self):
-                return self
+    def __iter__(self):
+        return self
 
-        def __next__(self):
+    def __next__(self):
+        row = None
+        while not row:
+            row = self.reader.__next__()
+
+            # skip empty lines
+            # strip all cells of whitespace
+
+            empty = True
+            for cell in row:
+                if cell.strip():
+                    empty = False
+            if empty:
                 row = None
-                while not row:
-                        row = self.reader.__next__()
+                continue
 
-                        # skip empty lines
-                        # strip all cells of whitespace
+            # after stripping col 0 '#' is a comment
 
-                        empty = True
-                        for cell in row:
-                                if cell.strip():
-                                        empty = False
-                        if empty:
-                                row = None
-                                continue
+            if len(row[0]) > 0 and row[0][0] == "#":
+                row = None
+                continue
 
-                        # after stripping col 0 '#' is a comment
+            # found the header line, now lowercase everthing
 
-                        if len(row[0]) > 0 and row[0][0] == '#':
-                                row = None
-                                continue
+            if not self.header:
+                self.header = []
+                for cell in row:
+                    if self.lcase:
+                        self.header.append(cell.lower())
+                    else:
+                        self.header.append(cell)
+                row = self.header
 
-                        # found the header line, now lowercase everthing
-
-                        if not self.header:
-                                self.header = []
-                                for cell in row:
-                                    if self.lcase:
-                                        self.header.append(cell.lower())
-                                    else:
-                                        self.header.append(cell)
-                                row = self.header
-
-                return row
+        return row
 
 
 def reader(fin, lcase=True):
-        """
+    """
         Stacki version of the standard python cvs.reader() function with the
         following additions:
 
@@ -67,6 +66,4 @@ def reader(fin, lcase=True):
 
         All Stacki code should use stack.cvs.reader() instead of cvs.reader()
         """
-        return Iterator(fin, lcase)
-
-
+    return Iterator(fin, lcase)

@@ -6,35 +6,36 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-import sys
 import getopt
-import stack.mq
 import json
+import sys
+
+import stack.mq
 import zmq
 
 try:
-	opt, args = getopt.getopt(sys.argv[1:], 'c:H:',['command','host'])
+    opt, args = getopt.getopt(sys.argv[1:], "c:H:", ["command", "host"])
 except getopt.GetoptError:
-	print('usage: [ -c enable | disable | status ] [ -H host ] {channel}')
-	sys.exit(-1)
+    print("usage: [ -c enable | disable | status ] [ -H host ] {channel}")
+    sys.exit(-1)
 
-control = 'smq'
-command = 'enable'
-host = 'localhost'
+control = "smq"
+command = "enable"
+host = "localhost"
 
 for o, a in opt:
-	if o in ['-h','--help']:
-		usage()
-	elif o in ['-c', '--command']:
-		command = a.strip()
-	elif o in ['-H','--host']:
-		host = a.strip()
+    if o in ["-h", "--help"]:
+        usage()
+    elif o in ["-c", "--command"]:
+        command = a.strip()
+    elif o in ["-H", "--host"]:
+        host = a.strip()
 
 try:
-	channel = args[0].strip()
+    channel = args[0].strip()
 except:
-	channel = control
-message = {'channel': channel, 'type':'','command':command}
+    channel = control
+message = {"channel": channel, "type": "", "command": command}
 
 context = zmq.Context()
 sock = context.socket(zmq.REQ)

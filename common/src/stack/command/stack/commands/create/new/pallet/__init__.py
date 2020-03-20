@@ -12,12 +12,14 @@
 
 import os
 import shutil
-from jinja2 import Template
+
 import stack
 import stack.commands
+from jinja2 import Template
+
 
 class Command(stack.commands.create.new.command):
-	"""	
+    """	
 	Create a skeleton directory structure for a pallet source.
 
 	This command is to be used mainly by pallet developers.
@@ -48,49 +50,43 @@ class Command(stack.commands.create.new.command):
 	</example>
 	"""
 
-	def createPalletSkeleton(self, tmplt_vars):
-		""" Create directory structure for the new pallet"""
-		name = tmplt_vars['pallet_name']
+    def createPalletSkeleton(self, tmplt_vars):
+        """ Create directory structure for the new pallet"""
+        name = tmplt_vars["pallet_name"]
 
-		if os.path.exists('./template'):
-			template_dir = './template'
-		else:
-			template_dir = \
-				'/opt/stack/share/build/src/pallet/template'
+        if os.path.exists("./template"):
+            template_dir = "./template"
+        else:
+            template_dir = "/opt/stack/share/build/src/pallet/template"
 
-		# copy the template structure over
-		shutil.copytree(template_dir, name)
+        # copy the template structure over
+        shutil.copytree(template_dir, name)
 
-		# rename all directories as needed
-		for r, d, f in os.walk(name):
-			for orig_dir in d:
-				newdir = orig_dir.replace('PALLET', name)
-				os.rename(os.path.join(r, orig_dir),
-						os.path.join(r, newdir))
+        # rename all directories as needed
+        for r, d, f in os.walk(name):
+            for orig_dir in d:
+                newdir = orig_dir.replace("PALLET", name)
+                os.rename(os.path.join(r, orig_dir), os.path.join(r, newdir))
 
-		# now re-scan the tree and rename (and perform template rendering on) files
-		for r, d, f in os.walk(name):
-			for orig_file in f:
-				fi_name = os.path.join(r, orig_file.replace('PALLET', name))
-				os.rename(os.path.join(r, orig_file), fi_name)
+        # now re-scan the tree and rename (and perform template rendering on) files
+        for r, d, f in os.walk(name):
+            for orig_file in f:
+                fi_name = os.path.join(r, orig_file.replace("PALLET", name))
+                os.rename(os.path.join(r, orig_file), fi_name)
 
-				# rewrite the file with template substitution
-				with open(fi_name, 'r+') as fi:
-					rendered = Template(fi.read()).render(**tmplt_vars)
-					fi.seek(0)
-					fi.truncate()
-					fi.write(rendered)
+                # rewrite the file with template substitution
+                with open(fi_name, "r+") as fi:
+                    rendered = Template(fi.read()).render(**tmplt_vars)
+                    fi.seek(0)
+                    fi.truncate()
+                    fi.write(rendered)
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		name, version, os = self.fillParams([
-			('name', None, True),
-			('version', '1.0'),
-			('os', self.os),
-		])
+        name, version, os = self.fillParams(
+            [("name", None, True), ("version", "1.0"), ("os", self.os),]
+        )
 
-		self.createPalletSkeleton({
-			'pallet_name': name,
-			'version': version,
-			'os': os,
-		})
+        self.createPalletSkeleton(
+            {"pallet_name": name, "version": version, "os": os,}
+        )

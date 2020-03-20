@@ -8,7 +8,9 @@
 
 import os
 
-os.environ['DJANGO_SETTINGS_MODULE'] = "stack.restapi.settings"
-
 import django
+
+os.environ["DJANGO_SETTINGS_MODULE"] = "stack.restapi.settings"
+
+
 django.setup()

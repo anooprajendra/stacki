@@ -15,7 +15,7 @@ from stack.exception import ParamRequired
 
 
 class Command(stack.commands.set.host.interface.command):
-	"""
+    """
 	Sets the mac address for named interface on host.
 
 	<arg type='string' name='host' optional='0'>
@@ -41,43 +41,41 @@ class Command(stack.commands.set.host.interface.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		host = self.getSingleHost(args)
+    def run(self, params, args):
+        host = self.getSingleHost(args)
 
-		(interface, mac, network) = self.fillParams([
-			('interface', None),
-			('mac', None, True),
-			('network', None)
-		])
+        (interface, mac, network) = self.fillParams(
+            [("interface", None), ("mac", None, True), ("network", None)]
+        )
 
-		# Gotta have one of these
-		if not any([interface, network]):
-			raise ParamRequired(self, ('interface', 'network'))
+        # Gotta have one of these
+        if not any([interface, network]):
+            raise ParamRequired(self, ("interface", "network"))
 
-		# Make sure mac and/or network exist on our hosts
-		self.validate([host], interface, None, network)
+        # Make sure mac and/or network exist on our hosts
+        self.validate([host], interface, None, network)
 
-		# If mac is an empty sting or NULL, we are clearing it
-		if not mac or mac.upper() == 'NULL':
-			mac = None
+        # If mac is an empty sting or NULL, we are clearing it
+        if not mac or mac.upper() == "NULL":
+            mac = None
 
-		# Make the change in the DB
-		if network:
-			sql = """
+        # Make the change in the DB
+        if network:
+            sql = """
 				update networks,nodes,subnets set networks.mac=%s
 				where nodes.name=%s and subnets.name=%s
 				and networks.node=nodes.id and networks.subnet=subnets.id
 			"""
-			values = [mac, host, network]
-		else:
-			sql = """
+            values = [mac, host, network]
+        else:
+            sql = """
 				update networks,nodes set networks.mac=%s
 				where nodes.name=%s and networks.node=nodes.id
 			"""
-			values = [mac, host]
+            values = [mac, host]
 
-		if interface:
-			sql += " and networks.device=%s"
-			values.append(interface)
+        if interface:
+            sql += " and networks.device=%s"
+            values.append(interface)
 
-		self.db.execute(sql, values)
+        self.db.execute(sql, values)

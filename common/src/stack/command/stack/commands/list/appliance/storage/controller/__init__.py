@@ -8,7 +8,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.appliance.command):
-	"""
+    """
 	List the storage controller configuration for a given appliance(s).
 
 	<arg optional='1' type='string' name='appliance' repeat='1'>
@@ -17,6 +17,12 @@ class Command(stack.commands.list.appliance.command):
 	</arg>
 	"""
 
-	def run(self, params, args):
-		self.addText(self.command('list.storage.controller', self._argv + ['scope=appliance'], verbose_errors = False))
-		return self.rc
+    def run(self, params, args):
+        self.addText(
+            self.command(
+                "list.storage.controller",
+                self._argv + ["scope=appliance"],
+                verbose_errors=False,
+            )
+        )
+        return self.rc

@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.set.firmware.command):
-	"""
+    """
 	Associates a firmware version_regex with one or more models
 
 	<arg type='string' name='models'>
@@ -33,5 +34,5 @@ class Command(stack.commands.set.firmware.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.runPlugins(args = (params, args))
+    def run(self, params, args):
+        self.runPlugins(args=(params, args))

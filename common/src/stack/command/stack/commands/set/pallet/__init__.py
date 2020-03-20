@@ -7,6 +7,6 @@
 import stack.commands
 from stack.argument_processors.pallet import PalletArgumentProcessor
 
-class command(stack.commands.set.command,
-	      PalletArgumentProcessor):
-	pass
+
+class command(stack.commands.set.command, PalletArgumentProcessor):
+    pass

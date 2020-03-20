@@ -5,12 +5,13 @@
 # @copyright@
 
 import grp
+
 import stack.commands
 from stack.exception import CommandError
 
 
 class Command(stack.commands.Command):
-	"""
+    """
 	Remove Access control pattern.
 	
 	<param name="command" optional='0'>
@@ -30,26 +31,22 @@ class Command(stack.commands.Command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(cmd, group) = self.fillParams([
-			('command', None, True),
-			('group',   None, True)
-		])
+        (cmd, group) = self.fillParams([("command", None, True), ("group", None, True)])
 
-		groupid = None
-		try:
-			groupid = int(group)
-		except ValueError:
-			pass
+        groupid = None
+        try:
+            groupid = int(group)
+        except ValueError:
+            pass
 
-		if groupid is None:
-			try:
-				groupid = grp.getgrnam(group).gr_gid
-			except KeyError:
-				raise CommandError(self, 'cannot find group %s' % group)
+        if groupid is None:
+            try:
+                groupid = grp.getgrnam(group).gr_gid
+            except KeyError:
+                raise CommandError(self, "cannot find group %s" % group)
 
-		self.db.execute(
-			'delete from access where command=%s and groupid=%s',
-			(cmd, groupid)
-		)
+        self.db.execute(
+            "delete from access where command=%s and groupid=%s", (cmd, groupid)
+        )

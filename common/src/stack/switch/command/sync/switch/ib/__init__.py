@@ -4,26 +4,32 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import subprocess
+
 import stack.commands
 import stack.util
-import subprocess
 from stack.exception import CommandError
 
+
 def enforce_subnet_manager(command_handle, switches):
-	ibswitches = [sw for sw in command_handle.call('list.switch', switches + ['expanded=True'])
-			if sw['model'] == 'm7800' and sw['ib subnet manager']]
+    ibswitches = [
+        sw
+        for sw in command_handle.call("list.switch", switches + ["expanded=True"])
+        if sw["model"] == "m7800" and sw["ib subnet manager"]
+    ]
 
-	bad_switches = set(switches).difference(sw['switch'] for sw in ibswitches)
-	if bad_switches:
-		msg = 'The following switches are either non-infiniband or are not subnet managers: '
-		raise CommandError(command_handle, msg + f'{", ".join(bad_switches)}')
+    bad_switches = set(switches).difference(sw["switch"] for sw in ibswitches)
+    if bad_switches:
+        msg = "The following switches are either non-infiniband or are not subnet managers: "
+        raise CommandError(command_handle, msg + f'{", ".join(bad_switches)}')
 
-class command(stack.commands.SwitchArgumentProcessor,
-	stack.commands.sync.command):
-		pass
+
+class command(stack.commands.SwitchArgumentProcessor, stack.commands.sync.command):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	Reconfigure Infiniband switches.
 
 	<arg optional='1' type='string' name='switch' repeat='1'>
@@ -49,28 +55,28 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		nukeswitch, factory_reset, = self.fillParams([
-			('nukeswitch', False),
-			('factory_reset', False),
-		])
+        nukeswitch, factory_reset, = self.fillParams(
+            [("nukeswitch", False), ("factory_reset", False),]
+        )
 
-		self.nukeswitch = self.str2bool(nukeswitch)
-		self.factory_reset = self.str2bool(factory_reset)
+        self.nukeswitch = self.str2bool(nukeswitch)
+        self.factory_reset = self.str2bool(factory_reset)
 
-		switches = self.getSwitchNames(args)
+        switches = self.getSwitchNames(args)
 
-		switch_attrs = self.getHostAttrDict(switches)
+        switch_attrs = self.getHostAttrDict(switches)
 
-		for switch in switches:
-			if switch_attrs[switch].get('switch_type') != 'infiniband':
-				msg = f'{switch} is not an infiniband switch, please verify "stack list host attr {switch} attr=switch_type"'
-				raise CommandError(self, msg)
+        for switch in switches:
+            if switch_attrs[switch].get("switch_type") != "infiniband":
+                msg = f'{switch} is not an infiniband switch, please verify "stack list host attr {switch} attr=switch_type"'
+                raise CommandError(self, msg)
 
-		for switch in self.call('list.host.interface', switches):
-			switch_name = switch['host']
+        for switch in self.call("list.host.interface", switches):
+            switch_name = switch["host"]
 
-			model = self.getHostAttr(switch_name, 'component.model')
-			self.runImplementation(switch_attrs[switch_name]['component.model'], [switch_name])
-
+            model = self.getHostAttr(switch_name, "component.model")
+            self.runImplementation(
+                switch_attrs[switch_name]["component.model"], [switch_name]
+            )

@@ -9,7 +9,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.add.environment.command):
-	"""
+    """
 	Sets an attribute to an environment and sets the associated values
 
 	<arg type='string' name='environment' optional='0' repeat='1'>
@@ -34,9 +34,11 @@ class Command(stack.commands.add.environment.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'environment')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "environment")
 
-		self.command('set.environment.attr', self._argv + ['force=no'], verbose_errors = False)
-		return self.rc
+        self.command(
+            "set.environment.attr", self._argv + ["force=no"], verbose_errors=False
+        )
+        return self.rc

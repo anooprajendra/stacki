@@ -12,31 +12,35 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
-	"""Returns the names of all makes in the database."""
+    """Returns the names of all makes in the database."""
 
-	def provides(self):
-		return "basic"
+    def provides(self):
+        return "basic"
 
-	def run(self, args):
-		# If expanded is true, also list any user defined implementations and version regexes
-		if args:
-			return {
-				"keys": ["make", "version_regex_name"],
-				"values": [
-					(row[0], row[1:]) for row in self.owner.db.select(
-						"""
+    def run(self, args):
+        # If expanded is true, also list any user defined implementations and version regexes
+        if args:
+            return {
+                "keys": ["make", "version_regex_name"],
+                "values": [
+                    (row[0], row[1:])
+                    for row in self.owner.db.select(
+                        """
 						firmware_make.name, firmware_version_regex.name
 						FROM firmware_make
 							LEFT JOIN firmware_version_regex
 								ON firmware_make.version_regex_id = firmware_version_regex.id
 						"""
-					)
-				]
-			}
+                    )
+                ],
+            }
 
-		# Otherwise just return the names of the makes.
-		return {
-			"keys": ["make"],
-			"values": [(row[0], []) for row in self.owner.db.select("name FROM firmware_make")]
-		}
+        # Otherwise just return the names of the makes.
+        return {
+            "keys": ["make"],
+            "values": [
+                (row[0], []) for row in self.owner.db.select("name FROM firmware_make")
+            ],
+        }

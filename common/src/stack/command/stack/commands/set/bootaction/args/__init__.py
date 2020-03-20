@@ -9,7 +9,7 @@ from stack.exception import CommandError
 
 
 class Command(stack.commands.set.bootaction.command):
-	"""
+    """
 	Updates the args for a bootaction.
 
 	<arg type='string' name='action' repeat='0' optional='0'>
@@ -34,16 +34,17 @@ class Command(stack.commands.set.bootaction.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		(b_action, b_type, b_os) = self.getBootActionTypeOS(params, args)
+    def run(self, params, args):
+        (b_action, b_type, b_os) = self.getBootActionTypeOS(params, args)
 
-		(b_args, ) = self.fillParams([ ('args', '', True) ])
+        (b_args,) = self.fillParams([("args", "", True)])
 
-		if not self.actionExists(b_action, b_type, b_os):
-			raise CommandError(self, 'action "%s" does not exist' % b_action)
+        if not self.actionExists(b_action, b_type, b_os):
+            raise CommandError(self, 'action "%s" does not exist' % b_action)
 
-		if b_os:
-			self.db.execute("""
+        if b_os:
+            self.db.execute(
+                """
 				update bootactions set args=%s
 				where os=(
 					select id from oses where name=%s
@@ -51,11 +52,16 @@ class Command(stack.commands.set.bootaction.command):
 				and bootname=(
 					select id from bootnames where name=%s and type=%s
 				)
-			""", (b_args, b_os, b_action, b_type))
-		else:
-			self.db.execute("""
+			""",
+                (b_args, b_os, b_action, b_type),
+            )
+        else:
+            self.db.execute(
+                """
 				update bootactions set args=%s
 				where os is NULL and bootname=(
 					select id from bootnames where name=%s and type=%s
 				)
-			""", (b_args, b_action, b_type))
+			""",
+                (b_args, b_action, b_type),
+            )

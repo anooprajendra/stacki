@@ -14,16 +14,15 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "host"
 
-	def provides(self):
-		return 'host'
+    def requires(self):
+        #
+        # make sure this plugin runs last
+        #
+        return ["interface", "TAIL"]
 
-	def requires(self):
-		#
-		# make sure this plugin runs last
-		#
-		return [ 'interface', 'TAIL']
-
-	def run(self, hosts):
-		for host in hosts:
-			self.owner.db.execute('delete from nodes where name=%s', (host,))
+    def run(self, hosts):
+        for host in hosts:
+            self.owner.db.execute("delete from nodes where name=%s", (host,))

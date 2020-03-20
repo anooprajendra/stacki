@@ -8,48 +8,58 @@
 #
 
 
-import os, sys
-import string, random
+import grp
+import os
+import pwd
+import random
+import string
 import subprocess
-import pwd, grp
+import sys
 
 import pymysql
 
 # Get root credentials
-conf_file = open('/etc/root.my.cnf')
+conf_file = open("/etc/root.my.cnf")
 for line in conf_file.readlines():
-	if line.startswith('password'):
-		root_pass = line.split('=')[1].strip()
-		break
+    if line.startswith("password"):
+        root_pass = line.split("=")[1].strip()
+        break
 conf_file.close()
 
 # Connect to the database
-d = pymysql.connect(user='root', db='mysql', passwd=root_pass,
-	unix_socket='/var/run/mysql/mysql.sock',
-	autocommit=True)
+d = pymysql.connect(
+    user="root",
+    db="mysql",
+    passwd=root_pass,
+    unix_socket="/var/run/mysql/mysql.sock",
+    autocommit=True,
+)
 
 db = d.cursor()
 
 cmd_set = []
 
 # Generate a random password for django
-p = subprocess.Popen("/opt/stack/sbin/gen_random_pw",
-	stdout = subprocess.PIPE,
-	stderr = subprocess.PIPE)
+p = subprocess.Popen(
+    "/opt/stack/sbin/gen_random_pw", stdout=subprocess.PIPE, stderr=subprocess.PIPE
+)
 o, e = p.communicate()
 django_pass = o.strip()
 
 # Create the Django.my.cnf file
 django_conf_file = "/opt/stack/etc/django.my.cnf"
-f = open(django_conf_file, 'w+')
-f.write("""[client]
+f = open(django_conf_file, "w+")
+f.write(
+    """[client]
 user		= django
 port		= 40000
 socket		= /var/run/mysql/mysql.sock
 password	= %s
-""" % django_pass)
+"""
+    % django_pass
+)
 # Set owner and group to root:apache
-apache_gid = grp.getgrnam('apache')[2]
+apache_gid = grp.getgrnam("apache")[2]
 os.fchown(f.fileno(), 0, apache_gid)
 f.close()
 
@@ -57,18 +67,18 @@ f.close()
 cmd_set.append('create user "django"@"localhost" identified by "%s"' % django_pass)
 
 # Create the Django Database
-cmd_set.append('create database django')
+cmd_set.append("create database django")
 
 # Grant django user access to the Django database
 grant_cmd = 'grant all on django.* to "django"@"localhost";'
 cmd_set.append(grant_cmd)
 
 for cmd in cmd_set:
-	try:
-		db.execute(cmd)
-	except:
-		sys.stderr.write("Could not execute %s\n" % cmd)
+    try:
+        db.execute(cmd)
+    except:
+        sys.stderr.write("Could not execute %s\n" % cmd)
 
 # Create grants file for restore
-with open('/var/db/django-grants.sql', 'w') as fh:
-	fh.write(grant_cmd)
+with open("/var/db/django-grants.sql", "w") as fh:
+    fh.write(grant_cmd)

@@ -12,18 +12,20 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
-	"""Returns the names, regex, and description of all version regexes in the database."""
+    """Returns the names, regex, and description of all version regexes in the database."""
 
-	def provides(self):
-		return "basic"
+    def provides(self):
+        return "basic"
 
-	def run(self, args):
-		return {
-			"keys": ["name", "regex", "description"],
-			"values": [
-				(row[0], row[1:]) for row in self.owner.db.select(
-					"name, regex, description FROM firmware_version_regex"
-				)
-			],
-		}
+    def run(self, args):
+        return {
+            "keys": ["name", "regex", "description"],
+            "values": [
+                (row[0], row[1:])
+                for row in self.owner.db.select(
+                    "name, regex, description FROM firmware_version_regex"
+                )
+            ],
+        }

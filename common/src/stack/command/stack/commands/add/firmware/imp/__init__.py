@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.add.firmware.command):
-	"""
+    """
 	Adds a firmware implementation to the stacki database.
 
 	<arg type='string' name='name'>
@@ -38,5 +39,5 @@ class Command(stack.commands.add.firmware.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.runPlugins(args = (params, args))
+    def run(self, params, args):
+        self.runPlugins(args=(params, args))

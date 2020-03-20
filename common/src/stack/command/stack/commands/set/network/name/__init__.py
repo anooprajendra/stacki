@@ -9,7 +9,7 @@ from stack.exception import ArgUnique, CommandError
 
 
 class Command(stack.commands.set.network.command):
-	"""
+    """
 	Sets the network name of a network.
 
 	<arg type='string' name='network' optional='0' repeat='0'>
@@ -25,18 +25,15 @@ class Command(stack.commands.set.network.command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(networks, name) = self.fillSetNetworkParams(args, 'name')
-		if len(networks) > 1:
-			raise ArgUnique(self, 'network')
+        (networks, name) = self.fillSetNetworkParams(args, "name")
+        if len(networks) > 1:
+            raise ArgUnique(self, "network")
 
-		if ' ' in name:
-			raise CommandError(self, 'network name must not contain a space')
+        if " " in name:
+            raise CommandError(self, "network name must not contain a space")
 
-		network = networks[0]
+        network = networks[0]
 
-		self.db.execute(
-			'update subnets set name=%s where name=%s',
-			(name, network)
-		)
+        self.db.execute("update subnets set name=%s where name=%s", (name, network))

@@ -6,14 +6,13 @@
 
 import stack.commands
 from stack.commands.sync.switch.ib import enforce_subnet_manager
-from stack.exception import ArgRequired, ParamValue, CommandError
+from stack.exception import ArgRequired, CommandError, ParamValue
 
 
 class Command(
-	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
+    stack.commands.Command, stack.commands.SwitchArgumentProcessor,
 ):
-	"""
+    """
 	Lists the infiniband partitions in the Stacki database for one or more
 	switches.
 
@@ -31,50 +30,54 @@ class Command(
 
 	"""
 
-	def run(self, params, args):
-		if not len(args):
-			raise ArgRequired(self, 'switch')
+    def run(self, params, args):
+        if not len(args):
+            raise ArgRequired(self, "switch")
 
-		name, enforce_sm = self.fillParams([
-			('name', None),
-			('enforce_sm', False),
-		])
+        name, enforce_sm = self.fillParams([("name", None), ("enforce_sm", False),])
 
-		if name:
-			name = name.lower()
-		if name == 'default':
-			name = 'Default'
-		elif name != None:
-			try:
-				name = '0x{0:04x}'.format(int(name, 16))
-			except ValueError:
-				raise ParamValue(self, 'name', 'a hex value between 0x0001 and 0x7ffe, or "default"')
+        if name:
+            name = name.lower()
+        if name == "default":
+            name = "Default"
+        elif name != None:
+            try:
+                name = "0x{0:04x}".format(int(name, 16))
+            except ValueError:
+                raise ParamValue(
+                    self, "name", 'a hex value between 0x0001 and 0x7ffe, or "default"'
+                )
 
-		switches = self.getSwitchNames(args)
-		switch_attrs = self.getHostAttrDict(switches)
-		for switch in switches:
-			if switch_attrs[switch].get('switch_type') != 'infiniband':
-				raise CommandError(self, f'{switch} does not have a switch_type of "infiniband"')
+        switches = self.getSwitchNames(args)
+        switch_attrs = self.getHostAttrDict(switches)
+        for switch in switches:
+            if switch_attrs[switch].get("switch_type") != "infiniband":
+                raise CommandError(
+                    self, f'{switch} does not have a switch_type of "infiniband"'
+                )
 
-		if self.str2bool(enforce_sm):
-			enforce_subnet_manager(self, switches)
+        if self.str2bool(enforce_sm):
+            enforce_subnet_manager(self, switches)
 
-		format_str = ','.join(['%s'] * len(switches))
-		sw_select = '''
+        format_str = ",".join(["%s"] * len(switches))
+        sw_select = (
+            """
 			nodes.name, ib.part_name, ib.part_key, ib.options
 			FROM nodes, ib_partitions ib
 			WHERE nodes.name IN (%s)
-			AND nodes.id=ib.switch''' % format_str
+			AND nodes.id=ib.switch"""
+            % format_str
+        )
 
-		vals = list(switches)
+        vals = list(switches)
 
-		if name:
-			sw_select += ' AND ib.part_name=%s'
-			vals.append(name)
+        if name:
+            sw_select += " AND ib.part_name=%s"
+            vals.append(name)
 
-		sw_select += ' ORDER BY nodes.name'
+        sw_select += " ORDER BY nodes.name"
 
-		self.beginOutput()
-		for line in self.db.select(sw_select, vals):
-			self.addOutput(line[0], (line[1], '0x{0:04x}'.format(line[2]), line[3]))
-		self.endOutput(header=['switch', 'partition', 'partition key', 'options'])
+        self.beginOutput()
+        for line in self.db.select(sw_select, vals):
+            self.addOutput(line[0], (line[1], "0x{0:04x}".format(line[2]), line[3]))
+        self.endOutput(header=["switch", "partition", "partition key", "options"])

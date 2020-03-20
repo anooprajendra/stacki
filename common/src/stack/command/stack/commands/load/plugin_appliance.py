@@ -8,26 +8,21 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "appliance"
 
-	def provides(self):
-		return 'appliance'
+    def run(self, section):
 
-	def run(self, section):
+        self.owner.set_scope("appliance")
 
-		self.owner.set_scope('appliance')
+        for a in section:
+            appliance = a.get("name")
+            params = {"public": a.get("public")}
 
-		for a in section:
-			appliance = a.get('name')
-			params    = {'public': a.get('public')}
+            self.owner.stack("add.appliance", appliance, **params)
 
-			self.owner.stack('add.appliance', appliance, **params)
-
-			self.owner.load_attr(a.get('attr'), appliance)
-			self.owner.load_controller(a.get('controller'), appliance)
-			self.owner.load_partition(a.get('partition'), appliance)
-			self.owner.load_firewall(a.get('firewall'), appliance)
-			self.owner.load_route(a.get('route'), appliance)
-
-
-
-
+            self.owner.load_attr(a.get("attr"), appliance)
+            self.owner.load_controller(a.get("controller"), appliance)
+            self.owner.load_partition(a.get("partition"), appliance)
+            self.owner.load_firewall(a.get("firewall"), appliance)
+            self.owner.load_route(a.get("route"), appliance)

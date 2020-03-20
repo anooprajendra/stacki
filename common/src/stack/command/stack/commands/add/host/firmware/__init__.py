@@ -13,5 +13,6 @@
 import stack.commands
 from stack.argument_processors.firmware import FirmwareArgumentProcessor
 
+
 class command(stack.commands.add.host.command, FirmwareArgumentProcessor):
-	pass
+    pass

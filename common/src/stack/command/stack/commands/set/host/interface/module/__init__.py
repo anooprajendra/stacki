@@ -16,7 +16,7 @@ from stack.exception import ParamRequired
 
 
 class Command(stack.commands.set.host.interface.command):
-	"""
+    """
 	Sets the device module for a named interface. On Linux this will get
 	translated to an entry in /etc/modprobe.conf.
 
@@ -45,48 +45,50 @@ class Command(stack.commands.set.host.interface.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(module, interface, mac, network) = self.fillParams([
-			('module', None, True),
-			('interface', None),
-			('mac', None),
-			('network', None)
-		])
+        (module, interface, mac, network) = self.fillParams(
+            [
+                ("module", None, True),
+                ("interface", None),
+                ("mac", None),
+                ("network", None),
+            ]
+        )
 
-		# Gotta have one of these
-		if not any([interface, mac, network]):
-			raise ParamRequired(self, ('interface', 'mac', 'network'))
+        # Gotta have one of these
+        if not any([interface, mac, network]):
+            raise ParamRequired(self, ("interface", "mac", "network"))
 
-		# Make sure interface, mac, and/or network exist on our hosts
-		self.validate(hosts, interface, mac, network)
+        # Make sure interface, mac, and/or network exist on our hosts
+        self.validate(hosts, interface, mac, network)
 
-		# Module set to the string "NULL" is a null in the DB
-		if module.upper() == 'NULL':
-			module = None
+        # Module set to the string "NULL" is a null in the DB
+        if module.upper() == "NULL":
+            module = None
 
-		for host in hosts:
-			if network:
-				sql = """
+        for host in hosts:
+            if network:
+                sql = """
 					update networks,nodes,subnets set networks.module=%s
 					where nodes.name=%s and subnets.name=%s
 					and networks.node=nodes.id and networks.subnet=subnets.id
 				"""
-				values = [module, host, network]
-			else:
-				sql = """
+                values = [module, host, network]
+            else:
+                sql = """
 					update networks,nodes set networks.module=%s
 					where nodes.name=%s and networks.node=nodes.id
 				"""
-				values = [module, host]
+                values = [module, host]
 
-			if interface:
-				sql += " and networks.device=%s"
-				values.append(interface)
+            if interface:
+                sql += " and networks.device=%s"
+                values.append(interface)
 
-			if mac:
-				sql += " and networks.mac=%s"
-				values.append(mac)
+            if mac:
+                sql += " and networks.mac=%s"
+                values.append(mac)
 
-			self.db.execute(sql, values)
+            self.db.execute(sql, values)

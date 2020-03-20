@@ -6,14 +6,13 @@
 
 import stack.commands
 from stack.commands.sync.switch.ib import enforce_subnet_manager
-from stack.exception import ArgRequired, ParamValue, CommandError
+from stack.exception import ArgRequired, CommandError, ParamValue
 
 
 class Command(
-	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
+    stack.commands.Command, stack.commands.SwitchArgumentProcessor,
 ):
-	"""
+    """
 	Set membership state on an infiniband partition in the Stacki database for
 	a switch.
 
@@ -49,77 +48,95 @@ class Command(
 	</param>
 	"""
 
-	def run(self, params, args):
-		if len(args) != 1:
-			raise ArgUnique(self, 'switch')
+    def run(self, params, args):
+        if len(args) != 1:
+            raise ArgUnique(self, "switch")
 
-		name, guid, hostname, interface, membership, enforce_sm = self.fillParams([
-			('name', None, True),
-			('guid', None),
-			('member', None),
-			('interface', None),
-			('membership', 'limited'),
-			('enforce_sm', False),
-		])
+        name, guid, hostname, interface, membership, enforce_sm = self.fillParams(
+            [
+                ("name", None, True),
+                ("guid", None),
+                ("member", None),
+                ("interface", None),
+                ("membership", "limited"),
+                ("enforce_sm", False),
+            ]
+        )
 
-		if not guid and not hostname:
-			raise CommandError(self, 'either guid or member and interface must be specified')
+        if not guid and not hostname:
+            raise CommandError(
+                self, "either guid or member and interface must be specified"
+            )
 
-		if guid:
-			guid = guid.lower()
-		if hostname and not interface or interface and not hostname:
-			raise CommandError(self, 'member and interface must both be specified')
-		elif hostname and interface:
-			ifaces = self.call('list.host.interface', [hostname])
-			for row in ifaces:
-				if row['interface'] == interface:
-					guid = row['mac']
-					break
-			else: #nobreak
-				raise CommandError(self, f'member has no interface named "{interface}"')
+        if guid:
+            guid = guid.lower()
+        if hostname and not interface or interface and not hostname:
+            raise CommandError(self, "member and interface must both be specified")
+        elif hostname and interface:
+            ifaces = self.call("list.host.interface", [hostname])
+            for row in ifaces:
+                if row["interface"] == interface:
+                    guid = row["mac"]
+                    break
+            else:  # nobreak
+                raise CommandError(self, f'member has no interface named "{interface}"')
 
-		name = name.lower()
-		if name == 'default':
-			name = 'Default'
-		elif name != None:
-			try:
-				name = '0x{0:04x}'.format(int(name, 16))
-			except ValueError:
-				raise ParamValue(self, 'name', 'a hex value between 0x0001 and 0x7ffe, or "default"')
+        name = name.lower()
+        if name == "default":
+            name = "Default"
+        elif name != None:
+            try:
+                name = "0x{0:04x}".format(int(name, 16))
+            except ValueError:
+                raise ParamValue(
+                    self, "name", 'a hex value between 0x0001 and 0x7ffe, or "default"'
+                )
 
-		membership = membership.lower()
-		if membership not in ['limited', 'full']:
-			raise ParamValue(self, 'membership', 'either "limited" or "full"')
+        membership = membership.lower()
+        if membership not in ["limited", "full"]:
+            raise ParamValue(self, "membership", 'either "limited" or "full"')
 
-		switches = self.getSwitchNames(args)
-		switch_attrs = self.getHostAttrDict(switches)
-		for switch in switches:
-			if switch_attrs[switch].get('switch_type') != 'infiniband':
-				raise CommandError(self, f'{switch} does not have a switch_type of "infiniband"')
+        switches = self.getSwitchNames(args)
+        switch_attrs = self.getHostAttrDict(switches)
+        for switch in switches:
+            if switch_attrs[switch].get("switch_type") != "infiniband":
+                raise CommandError(
+                    self, f'{switch} does not have a switch_type of "infiniband"'
+                )
 
-		if self.str2bool(enforce_sm):
-			enforce_subnet_manager(self, switches)
+        if self.str2bool(enforce_sm):
+            enforce_subnet_manager(self, switches)
 
-		switch, = switches
-		switch_id = self.db.select('id FROM nodes WHERE name=%s', switch)[0][0]
+        (switch,) = switches
+        switch_id = self.db.select("id FROM nodes WHERE name=%s", switch)[0][0]
 
-		# ensure the guid actually exists - guid should be unique across table
-		guid_id = self.db.select('id FROM networks WHERE mac=%s', guid)
-		try:
-			guid_id = guid_id[0][0]
-		except IndexError:
-			raise CommandError(self, f'guid "{guid}" was not found in the interfaces table')
+        # ensure the guid actually exists - guid should be unique across table
+        guid_id = self.db.select("id FROM networks WHERE mac=%s", guid)
+        try:
+            guid_id = guid_id[0][0]
+        except IndexError:
+            raise CommandError(
+                self, f'guid "{guid}" was not found in the interfaces table'
+            )
 
-		# lookups using sql instead of api calls because all 'list switch partition' calls are expensive.
-		# Ensure this partition exists on the switch
-		if self.db.count(
-				'(id) FROM ib_partitions WHERE part_name=%s AND switch=%s',
-				(name, switch_id)) == 0:
-			raise CommandError(self, f'partition {name} does not exist on switch {switch}')
+        # lookups using sql instead of api calls because all 'list switch partition' calls are expensive.
+        # Ensure this partition exists on the switch
+        if (
+            self.db.count(
+                "(id) FROM ib_partitions WHERE part_name=%s AND switch=%s",
+                (name, switch_id),
+            )
+            == 0
+        ):
+            raise CommandError(
+                self, f"partition {name} does not exist on switch {switch}"
+            )
 
-		# Determine if this member already exists on the partition and switch
-		existing = False
-		if self.db.count('''
+        # Determine if this member already exists on the partition and switch
+        existing = False
+        if (
+            self.db.count(
+                """
 			(ib_m.id)
 			FROM ib_memberships ib_m, ib_partitions ib_p, nodes, networks
 			WHERE ib_m.switch=nodes.id AND
@@ -127,19 +144,22 @@ class Command(
 				networks.id=ib_m.interface AND
 				ib_m.part_name=ib_p.id AND
 				ib_p.part_name=%s AND
-				networks.id=%s ''',
-				(switch, name, guid_id)) > 0:
-			existing = True
+				networks.id=%s """,
+                (switch, name, guid_id),
+            )
+            > 0
+        ):
+            existing = True
 
-		insert_sql = '''
+        insert_sql = """
 				INSERT INTO ib_memberships (switch, interface, part_name, member_type)
 				VALUES (%s,
 						%s,
 						(SELECT id FROM ib_partitions WHERE part_name=%s AND switch=%s),
 						%s)
-				'''
+				"""
 
-		update_sql = '''
+        update_sql = """
 				UPDATE ib_memberships
 				SET switch=%s,
 					interface=%s,
@@ -148,9 +168,24 @@ class Command(
 				WHERE switch=%s AND
 					part_name=(SELECT id FROM ib_partitions WHERE part_name=%s AND switch=%s) AND
 					interface=%s
-				'''
+				"""
 
-		if existing:
-			self.db.execute(update_sql, (switch_id, guid_id, name, switch_id, membership, switch_id, name, switch_id, guid_id))
-		else:
-			self.db.execute(insert_sql, (switch_id, guid_id, name, switch_id, membership))
+        if existing:
+            self.db.execute(
+                update_sql,
+                (
+                    switch_id,
+                    guid_id,
+                    name,
+                    switch_id,
+                    membership,
+                    switch_id,
+                    name,
+                    switch_id,
+                    guid_id,
+                ),
+            )
+        else:
+            self.db.execute(
+                insert_sql, (switch_id, guid_id, name, switch_id, membership)
+            )

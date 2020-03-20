@@ -10,17 +10,16 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-from collections import defaultdict
 import importlib
 import pathlib
+from collections import defaultdict
 
 import stack.commands
 from stack.argument_processors.pallet import PalletArgumentProcessor
 
 
-class Command(PalletArgumentProcessor,
-	stack.commands.list.command):
-	"""
+class Command(PalletArgumentProcessor, stack.commands.list.command):
+    """
 	List the commands provided by a pallet.
 
 	<arg optional='1' type='string' name='pallet' repeat='1'>
@@ -54,49 +53,50 @@ class Command(PalletArgumentProcessor,
 	</example>
 	"""
 
-	def run(self, params, args):
-		# Get a listing of all the subdirectories in the stack.commands package
-		# Filter it to remove any blanks and __pycache__
-		command_lib_dir = pathlib.Path(stack.commands.__path__[0])
-		directories = [
-			str(path.relative_to(command_lib_dir)) for path in command_lib_dir.rglob('**')
-			if '__pycache__' not in path.parts and path.is_dir()
-		]
+    def run(self, params, args):
+        # Get a listing of all the subdirectories in the stack.commands package
+        # Filter it to remove any blanks and __pycache__
+        command_lib_dir = pathlib.Path(stack.commands.__path__[0])
+        directories = [
+            str(path.relative_to(command_lib_dir))
+            for path in command_lib_dir.rglob("**")
+            if "__pycache__" not in path.parts and path.is_dir()
+        ]
 
-		# Create a mapping of pallet names to Commands
-		mapping = defaultdict(list)
-		for directory in sorted(directories):
-			if '/.' in directory or directory == '.':
-				continue
+        # Create a mapping of pallet names to Commands
+        mapping = defaultdict(list)
+        for directory in sorted(directories):
+            if "/." in directory or directory == ".":
+                continue
 
-			# Load our module
-			modpath = f'stack.commands.{directory.replace("/", ".")}'
+            # Load our module
+            modpath = f'stack.commands.{directory.replace("/", ".")}'
 
-			try:
-				module = importlib.import_module(modpath)
-			except SyntaxError:
-				continue
+            try:
+                module = importlib.import_module(modpath)
+            except SyntaxError:
+                continue
 
-			# Make sure it is a Command
-			if not hasattr(module, 'Command'):
-				continue
+            # Make sure it is a Command
+            if not hasattr(module, "Command"):
+                continue
 
-			# Load the RollName if possible
-			try:
-				pallet_name = getattr(module, 'RollName')
-			except AttributeError:
-				continue
+            # Load the RollName if possible
+            try:
+                pallet_name = getattr(module, "RollName")
+            except AttributeError:
+                continue
 
-			mapping[pallet_name].append(directory.replace('/', ' '))
+            mapping[pallet_name].append(directory.replace("/", " "))
 
-		# Output a list of commands for the pallets requested
-		self.beginOutput()
+        # Output a list of commands for the pallets requested
+        self.beginOutput()
 
-		for pallet in self.get_pallets(args, params):
-			if pallet.name in mapping:
-				for command in mapping[pallet.name]:
-					self.addOutput(pallet.name, command)
-			else:
-				self.addOutput(pallet.name, '')
+        for pallet in self.get_pallets(args, params):
+            if pallet.name in mapping:
+                for command in mapping[pallet.name]:
+                    self.addOutput(pallet.name, command)
+            else:
+                self.addOutput(pallet.name, "")
 
-		self.endOutput(header=['pallet', 'command'])
+        self.endOutput(header=["pallet", "command"])

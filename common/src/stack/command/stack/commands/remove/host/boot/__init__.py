@@ -15,7 +15,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.host.command):
-	"""
+    """
 	Removes the boot configuration for a host
 
 	<arg type='string' name='host' repeat='1'>
@@ -31,34 +31,34 @@ class Command(stack.commands.remove.host.command):
 	backend-0-1.
 	</example>
 	"""
-	
-	def getHostHexIP(self, host):
-		#
-		# Get the IP and NETMASK of the host
-		#
-	
-		appliance = self.getHostAttr(host, 'appliance')
-		if appliance == 'frontend':
-			return []
 
-		hex_ip_list = []
-		for row in self.call('list.host.interface', [host, 'expanded=True']):
-			ip = row['ip']
-			pxe = row['pxe']
-			if ip and pxe:
-				#
-				# Compute the HEX IP filename for the host
-				#
-				hexstr = ''
-				for i in ip.split('.'):
-					hexstr += '%02x' % (int(i))
+    def getHostHexIP(self, host):
+        #
+        # Get the IP and NETMASK of the host
+        #
 
-				hex_ip_list.append(hexstr.upper())
-		return hex_ip_list
+        appliance = self.getHostAttr(host, "appliance")
+        if appliance == "frontend":
+            return []
 
-	def run(self, params, args):
-		if not len(args):
-			raise ArgRequired(self, 'host')
+        hex_ip_list = []
+        for row in self.call("list.host.interface", [host, "expanded=True"]):
+            ip = row["ip"]
+            pxe = row["pxe"]
+            if ip and pxe:
+                #
+                # Compute the HEX IP filename for the host
+                #
+                hexstr = ""
+                for i in ip.split("."):
+                    hexstr += "%02x" % (int(i))
 
-		hosts = self.getHostnames(args)
-		self.runPlugins(hosts)
+                hex_ip_list.append(hexstr.upper())
+        return hex_ip_list
+
+    def run(self, params, args):
+        if not len(args):
+            raise ArgRequired(self, "host")
+
+        hosts = self.getHostnames(args)
+        self.runPlugins(hosts)

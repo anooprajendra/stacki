@@ -9,7 +9,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.environment.command):
-	"""
+    """
 	Remove a storage controller configuration for an environment.
 
 	<arg type='string' name='environment' repeat='1' optional='0'>
@@ -32,9 +32,13 @@ class Command(stack.commands.remove.environment.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'environment')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "environment")
 
-		self.command('remove.storage.controller', self._argv + ['scope=environment'], verbose_errors = False)
-		return self.rc
+        self.command(
+            "remove.storage.controller",
+            self._argv + ["scope=environment"],
+            verbose_errors=False,
+        )
+        return self.rc

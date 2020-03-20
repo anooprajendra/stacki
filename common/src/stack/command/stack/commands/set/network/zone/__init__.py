@@ -9,7 +9,7 @@ from stack.exception import ArgUnique
 
 
 class Command(stack.commands.set.network.command):
-	"""
+    """
 	Sets the DNS zone (domain name) for a network.
 
 	<arg type='string' name='network' optional='0' repeat='0'>
@@ -25,15 +25,12 @@ class Command(stack.commands.set.network.command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(networks, zone) = self.fillSetNetworkParams(args, 'zone')
-		if len(networks) > 1:
-			raise ArgUnique(self, 'network')
+        (networks, zone) = self.fillSetNetworkParams(args, "zone")
+        if len(networks) > 1:
+            raise ArgUnique(self, "network")
 
-		network = networks[0]
+        network = networks[0]
 
-		self.db.execute(
-			'update subnets set zone=%s where name=%s',
-			(zone, network)
-		)
+        self.db.execute("update subnets set zone=%s where name=%s", (zone, network))

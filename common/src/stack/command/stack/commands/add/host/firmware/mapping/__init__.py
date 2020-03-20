@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.add.host.firmware.command):
-	"""
+    """
 	Maps firmware files to hosts so 'stack sync host firmware' can find them.
 
 	<arg type='string' name='host' repeat='1'>
@@ -45,5 +46,5 @@ class Command(stack.commands.add.host.firmware.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.runPlugins(args = (params, args))
+    def run(self, params, args):
+        self.runPlugins(args=(params, args))

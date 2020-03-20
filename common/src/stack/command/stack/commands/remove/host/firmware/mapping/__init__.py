@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.remove.host.firmware.command):
-	"""
+    """
 	Removes firmware mappings.
 
 	<arg type='string' name='host' repeat='1'>
@@ -59,5 +60,5 @@ class Command(stack.commands.remove.host.firmware.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.runPlugins(args = (params, args))
+    def run(self, params, args):
+        self.runPlugins(args=(params, args))

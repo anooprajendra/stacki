@@ -6,14 +6,13 @@
 
 import stack.commands
 from stack.commands.sync.switch.ib import enforce_subnet_manager
-from stack.exception import ArgUnique, ParamValue, CommandError
+from stack.exception import ArgUnique, CommandError, ParamValue
 
 
 class Command(
-	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
+    stack.commands.Command, stack.commands.SwitchArgumentProcessor,
 ):
-	"""
+    """
 	Remove memberships from infiniband partitions from the Stacki database.
 
 	<arg type='string' name='switch'>
@@ -44,65 +43,76 @@ class Command(
 
 	"""
 
-	def run(self, params, args):
-		if len(args) != 1:
-			raise ArgUnique(self, 'switch')
+    def run(self, params, args):
+        if len(args) != 1:
+            raise ArgUnique(self, "switch")
 
-		name, guid, hostname, interface, enforce_sm = self.fillParams([
-			('name', None),
-			('guid', None),
-			('member', None),
-			('interface', None),
-			('enforce_sm', False),
-		])
+        name, guid, hostname, interface, enforce_sm = self.fillParams(
+            [
+                ("name", None),
+                ("guid", None),
+                ("member", None),
+                ("interface", None),
+                ("enforce_sm", False),
+            ]
+        )
 
-		if guid:
-			guid = guid.lower()
-		if hostname and not interface or interface and not hostname:
-			raise CommandError(self, 'member and interface must both be specified')
-		elif hostname and interface:
-			ifaces = self.call('list.host.interface', [hostname])
-			for row in ifaces:
-				if row['interface'] == interface:
-					guid = row['mac']
-					break
-			else: #nobreak
-				raise CommandError(self, f'member has no interface named "{interface}"')
+        if guid:
+            guid = guid.lower()
+        if hostname and not interface or interface and not hostname:
+            raise CommandError(self, "member and interface must both be specified")
+        elif hostname and interface:
+            ifaces = self.call("list.host.interface", [hostname])
+            for row in ifaces:
+                if row["interface"] == interface:
+                    guid = row["mac"]
+                    break
+            else:  # nobreak
+                raise CommandError(self, f'member has no interface named "{interface}"')
 
-		if name:
-			name = name.lower()
-		if name == 'default':
-			name = 'Default'
-		elif name != None:
-			try:
-				name = '0x{0:04x}'.format(int(name, 16))
-			except ValueError:
-				raise ParamValue(self, 'name', 'a hex value between 0x0001 and 0x7ffe, or "default"')
+        if name:
+            name = name.lower()
+        if name == "default":
+            name = "Default"
+        elif name != None:
+            try:
+                name = "0x{0:04x}".format(int(name, 16))
+            except ValueError:
+                raise ParamValue(
+                    self, "name", 'a hex value between 0x0001 and 0x7ffe, or "default"'
+                )
 
-		switches = self.getSwitchNames(args)
-		switch_attrs = self.getHostAttrDict(switches)
-		for switch in switches:
-			if switch_attrs[switch].get('switch_type') != 'infiniband':
-				raise CommandError(self, f'{switch} does not have a switch_type of "infiniband"')
+        switches = self.getSwitchNames(args)
+        switch_attrs = self.getHostAttrDict(switches)
+        for switch in switches:
+            if switch_attrs[switch].get("switch_type") != "infiniband":
+                raise CommandError(
+                    self, f'{switch} does not have a switch_type of "infiniband"'
+                )
 
-		if self.str2bool(enforce_sm):
-			enforce_subnet_manager(self, switches)
+        if self.str2bool(enforce_sm):
+            enforce_subnet_manager(self, switches)
 
-		switch, = switches
-		switch_id, = self.db.select('id FROM nodes WHERE name=%s', switch)
+        (switch,) = switches
+        (switch_id,) = self.db.select("id FROM nodes WHERE name=%s", switch)
 
-		vals = [switch_id[0]]
-		delete_stmt = '''DELETE FROM ib_memberships'''
-		where_clause = 'WHERE ib_memberships.switch=%s'
-		if name:
-			part_id = self.db.select('id FROM ib_partitions WHERE part_name=%s AND switch=%s', (name, switch_id))
-			if not part_id:
-				raise CommandError(self, f'{name} is not a partition on {switches[0]}')
-			where_clause += ' AND ib_memberships.part_name=%s'
-			vals.append(part_id[0][0])
+        vals = [switch_id[0]]
+        delete_stmt = """DELETE FROM ib_memberships"""
+        where_clause = "WHERE ib_memberships.switch=%s"
+        if name:
+            part_id = self.db.select(
+                "id FROM ib_partitions WHERE part_name=%s AND switch=%s",
+                (name, switch_id),
+            )
+            if not part_id:
+                raise CommandError(self, f"{name} is not a partition on {switches[0]}")
+            where_clause += " AND ib_memberships.part_name=%s"
+            vals.append(part_id[0][0])
 
-		if guid:
-			where_clause += ' AND ib_memberships.interface=(SELECT id FROM networks WHERE mac=%s)'
-			vals.append(guid)
+        if guid:
+            where_clause += (
+                " AND ib_memberships.interface=(SELECT id FROM networks WHERE mac=%s)"
+            )
+            vals.append(guid)
 
-		self.db.execute(f'{delete_stmt} {where_clause}', vals)
+        self.db.execute(f"{delete_stmt} {where_clause}", vals)

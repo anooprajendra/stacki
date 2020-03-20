@@ -3,8 +3,9 @@ import xml.etree.ElementTree as ET
 
 from stack.probepal.common import PalletInfo, Probe
 
+
 class NativePalletProbe(Probe):
-	'''
+    """
 	This prober is intended to look for and parse one or more roll-*.xml files which indicates a stacki native pallet.
 
 	Note that a native pallet may actually contain multiple pallets (this is referred to as a Jumbo Pallet), with a roll-*.xml file for each.
@@ -25,44 +26,51 @@ class NativePalletProbe(Probe):
 	b3d353f21f0f29e212138bc02b5154388f0d1d26
 	</gitlog>
 	</roll>
-	'''
+	"""
 
+    def __init__(self, weight=10, desc="roll.xml files - native stacki"):
+        super().__init__(weight=weight, desc=desc)
 
-	def __init__(self, weight=10, desc='roll.xml files - native stacki'):
-		super().__init__(weight=weight, desc=desc)
+    def probe(self, pallet_root):
+        roll_files = list(pathlib.Path(pallet_root).glob("**/roll-*.xml"))
 
-	def probe(self, pallet_root):
-		roll_files = list(pathlib.Path(pallet_root).glob('**/roll-*.xml'))
+        if not roll_files:
+            return []
 
-		if not roll_files:
-			return []
+        # to support jumbo pallets, this probe must return a list of palletinfo objects
+        # if even one roll-*.xml file fails to parse, we fail the whole pallet
+        pal_infos = []
 
-		# to support jumbo pallets, this probe must return a list of palletinfo objects
-		# if even one roll-*.xml file fails to parse, we fail the whole pallet
-		pal_infos = []
+        for fi in roll_files:
+            if not fi.is_file():
+                return []
 
-		for fi in roll_files:
-			if not fi.is_file():
-				return []
+            real_root = str(fi.parent)
 
-			real_root = str(fi.parent)
+            name, version, release, arch, distro_family = [None] * 5
+            try:
+                docroot = ET.parse(fi).getroot()
+                name = docroot.attrib["name"]
+                info = docroot.find("info")
+                version = info.attrib["version"]
+                release = info.attrib["release"]
+                arch = info.attrib["arch"]
+                distro_family = info.attrib["os"]
+            except Exception:
+                # any errors, just fail and move to the next probe
+                return []
 
-			name, version, release, arch, distro_family = [None] * 5
-			try:
-				docroot = ET.parse(fi).getroot()
-				name = docroot.attrib['name']
-				info = docroot.find('info')
-				version = info.attrib['version']
-				release = info.attrib['release']
-				arch = info.attrib['arch']
-				distro_family = info.attrib['os']
-			except Exception:
-				# any errors, just fail and move to the next probe
-				return []
+            p = PalletInfo(
+                name,
+                version,
+                release,
+                arch,
+                distro_family,
+                real_root,
+                self.__class__.__name__,
+            )
+            if not p.is_complete():
+                return []
+            pal_infos.append(p)
 
-			p = PalletInfo(name, version, release, arch, distro_family, real_root, self.__class__.__name__)
-			if not p.is_complete():
-				return []
-			pal_infos.append(p)
-
-		return pal_infos
+        return pal_infos

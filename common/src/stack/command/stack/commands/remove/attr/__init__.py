@@ -15,7 +15,7 @@ import stack.commands
 
 
 class Command(stack.commands.remove.command):
-	"""
+    """
 	Remove a global attribute.
 
 	<param type='string' name='attr' optional='0'>
@@ -27,8 +27,6 @@ class Command(stack.commands.remove.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.command('set.attr', self._argv + [ 'value=' ])
-		return self.rc
-
-
+    def run(self, params, args):
+        self.command("set.attr", self._argv + ["value="])
+        return self.rc

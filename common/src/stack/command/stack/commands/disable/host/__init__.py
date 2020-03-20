@@ -7,6 +7,5 @@
 import stack.commands.disable
 
 
-class command(stack.commands.HostArgumentProcessor,
-	stack.commands.disable.command):
-	pass
+class command(stack.commands.HostArgumentProcessor, stack.commands.disable.command):
+    pass

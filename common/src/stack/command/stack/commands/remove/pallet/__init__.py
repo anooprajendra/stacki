@@ -22,12 +22,13 @@ import stack.commands
 from stack.argument_processors.pallet import PalletArgumentProcessor
 from stack.exception import ArgRequired
 
-class command(PalletArgumentProcessor,
-	      stack.commands.remove.command):
-	pass
+
+class command(PalletArgumentProcessor, stack.commands.remove.command):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	Remove a pallet from both the database and filesystem.
 
 	<arg type='string' name='pallet' repeat='1'>
@@ -70,64 +71,72 @@ class Command(command):
 	<related>create pallet</related>
 	"""
 
-	def run(self, params, args):
-		if len(args) < 1:
-			raise ArgRequired(self, 'pallet')
+    def run(self, params, args):
+        if len(args) < 1:
+            raise ArgRequired(self, "pallet")
 
-		self.beginOutput()
+        self.beginOutput()
 
-		regenerate = False
-		for pallet in self.get_pallets(args, params):
-			self.clean_pallet(pallet)
-			regenerate = True
+        regenerate = False
+        for pallet in self.get_pallets(args, params):
+            self.clean_pallet(pallet)
+            regenerate = True
 
-		# Regenerate the stacki.repo if needed
-		if regenerate:
-			self._exec("""
+        # Regenerate the stacki.repo if needed
+        if regenerate:
+            self._exec(
+                """
 				/opt/stack/bin/stack report host repo localhost |
 				/opt/stack/bin/stack report script |
 				/bin/sh
-			""", shell=True)
+			""",
+                shell=True,
+            )
 
-		self.endOutput(padChar='')
+        self.endOutput(padChar="")
 
-	def clean_pallet(self, pallet):
-		"""
+    def clean_pallet(self, pallet):
+        """
 		Remove pallet files and database entry for this arch and OS.
 		"""
 
-		self.addOutput('',
-			f'Removing {pallet.name} {pallet.version}-{pallet.rel}-'
-			f'{pallet.os}-{pallet.arch} pallet ...'
-		)
+        self.addOutput(
+            "",
+            f"Removing {pallet.name} {pallet.version}-{pallet.rel}-"
+            f"{pallet.os}-{pallet.arch} pallet ...",
+        )
 
-		# Remove the pallet files and as much as the tree as possible
-		tree = [
-			'/export/stack/pallets', pallet.name, pallet.version,
-			pallet.rel, pallet.os, pallet.arch
-		]
+        # Remove the pallet files and as much as the tree as possible
+        tree = [
+            "/export/stack/pallets",
+            pallet.name,
+            pallet.version,
+            pallet.rel,
+            pallet.os,
+            pallet.arch,
+        ]
 
-		# Walk up the tree to clean it up, but stop at the top directory
-		while len(tree) > 1:
-			path = pathlib.Path().joinpath(*tree)
+        # Walk up the tree to clean it up, but stop at the top directory
+        while len(tree) > 1:
+            path = pathlib.Path().joinpath(*tree)
 
-			# if for some reason the directory is already partially deleted
-			if not path.exists():
-				tree.pop()
-				continue
-			# The arch is the bottom of the tree, we remove everything
-			if tree[-1] == pallet.arch:
-				shutil.rmtree(path)
-			else:
-				# Just remove the directory if possible
-				try:
-					path.rmdir()
-				except OSError:
-					# Directory wasn't empty, we are done
-					break
+            # if for some reason the directory is already partially deleted
+            if not path.exists():
+                tree.pop()
+                continue
+            # The arch is the bottom of the tree, we remove everything
+            if tree[-1] == pallet.arch:
+                shutil.rmtree(path)
+            else:
+                # Just remove the directory if possible
+                try:
+                    path.rmdir()
+                except OSError:
+                    # Directory wasn't empty, we are done
+                    break
 
-			# Move up a level in the tree
-			tree.pop()
+            # Move up a level in the tree
+            tree.pop()
 
-		# Remove the pallet from the database
-		self.db.execute('delete from rolls where id=%s', (pallet.id,))
+        # Remove the pallet from the database
+        self.db.execute("delete from rolls where id=%s", (pallet.id,))

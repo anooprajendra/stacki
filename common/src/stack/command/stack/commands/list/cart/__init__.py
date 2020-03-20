@@ -7,9 +7,8 @@
 import stack.commands
 
 
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.list.command):
-	"""
+class Command(stack.commands.CartArgumentProcessor, stack.commands.list.command):
+    """
 	List the status of available carts.
 	
 	<arg optional='1' type='string' name='cart' repeat='1'>
@@ -33,40 +32,39 @@ class Command(stack.commands.CartArgumentProcessor,
 	<example cmd='list cart expanded=True'>
 	List the status of all the available carts and their source urls.
 	</example>
-	"""		
+	"""
 
+    def run(self, params, args):
+        (expanded,) = self.fillParams([("expanded", False)])
+        expanded = self.str2bool(expanded)
 
-	def run(self, params, args):
-		expanded, = self.fillParams([ ('expanded', False) ])
-		expanded = self.str2bool(expanded)
+        # queury all the carts (fill the cache) and hit the db once
 
-		# queury all the carts (fill the cache) and hit the db once
+        carts = {}
+        for name, url in self.db.select("name, url from carts"):
+            carts[name] = {"url": url, "boxes": []}
 
-		carts = {}
-		for name, url in self.db.select('name, url from carts'):
-			carts[name] = { 'url': url, 'boxes': [] }
-
-		for name, box in self.db.select("""
+        for name, box in self.db.select(
+            """
 			c.name, b.name from
 			cart_stacks s, carts c, boxes b where
 			s.cart=c.id and s.box=b.id
-			"""):
-			carts[name]['boxes'].append(box)
+			"""
+        ):
+            carts[name]["boxes"].append(box)
 
+        self.beginOutput()
 
-		self.beginOutput()
+        for cart in self.getCartNames(args):
 
-		for cart in self.getCartNames(args):
+            output = [" ".join(carts[cart]["boxes"])]
 
-			output = [ ' '.join(carts[cart]['boxes']) ]
+            if expanded is True:
+                output.append(carts[cart]["url"])
 
-			if expanded is True:
-				output.append(carts[cart]['url'])
+            self.addOutput(cart, output)
 
-			self.addOutput(cart, output)
-
-		header = ['name', 'boxes']
-		if expanded is True:
-			header.append('url')
-		self.endOutput(header=header, trimOwner=False)
-
+        header = ["name", "boxes"]
+        if expanded is True:
+            header.append("url")
+        self.endOutput(header=header, trimOwner=False)

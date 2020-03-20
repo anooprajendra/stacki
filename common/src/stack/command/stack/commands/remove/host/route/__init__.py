@@ -15,7 +15,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.host.command):
-	"""
+    """
 	Remove a static route for a host.
 
 	<arg type='string' name='host' repeat='1' optional='0'>
@@ -41,9 +41,9 @@ class Command(stack.commands.remove.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'host')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "host")
 
-		self.command('remove.route', self._argv + ['scope=host'], verbose_errors = False)
-		return self.rc
+        self.command("remove.route", self._argv + ["scope=host"], verbose_errors=False)
+        return self.rc

@@ -8,7 +8,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.host.command):
-	"""
+    """
 	List the storage partition configuration for a given host(s).
 
 	<arg optional='1' type='string' name='host' repeat='1'>
@@ -17,6 +17,12 @@ class Command(stack.commands.list.host.command):
 	</arg>
 	"""
 
-	def run(self, params, args):
-		self.addText(self.command('list.storage.partition', self._argv + ['scope=host'], verbose_errors = False))
-		return self.rc
+    def run(self, params, args):
+        self.addText(
+            self.command(
+                "list.storage.partition",
+                self._argv + ["scope=host"],
+                verbose_errors=False,
+            )
+        )
+        return self.rc

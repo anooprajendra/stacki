@@ -9,9 +9,8 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
-	"""
+class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
+    """
 	Output the PXE file for a host
 	<arg name="host" type="string" repeat="1">
 	One or more hostnames
@@ -21,100 +20,91 @@ class Command(stack.commands.Command,
 	</param>
 	"""
 
+    def run(self, params, args):
 
-	def run(self, params, args):
+        hosts = self.getHostnames(args, managed_only=True)
 
-		hosts = self.getHostnames(args, managed_only=True)
+        (action,) = self.fillParams([("action", None)])
 
-		(action,) = self.fillParams([
-			('action', None)
-		])
+        # If there are no host appliances there is no need to proceed
+        if len(hosts) == 0:
+            return
 
-		# If there are no host appliances there is no need to proceed
-		if len(hosts) == 0:
-			return
+        ha = {}
+        for host in hosts:
+            ha[host] = {"host": host, "action": None, "type": action, "attrs": {}}
 
-		ha = {}
-		for host in hosts:
-			ha[host] = {
-				'host'       : host,
-				'action'     : None,
-				'type'       : action,
-				'attrs'      : {}
-			}
+        for row in self.call("list.host.attr", hosts):
+            ha[row["host"]]["attrs"][row["attr"]] = row["value"]
 
+        if not action:  # param can override the db
+            for row in self.call("list.host.boot", hosts):
+                ha[row["host"]]["type"] = row["action"]
 
-		for row in self.call('list.host.attr', hosts):
-			ha[row['host']]['attrs'][row['attr']] = row['value']
+        hosts_with_no_action = []
+        for row in self.call("list.host", hosts):
+            h = ha[row["host"]]
+            if h["type"] == "install":
+                h["action"] = row["installaction"]
+            elif h["type"] == "os":
+                h["action"] = row["osaction"]
+            # If there is no bootaction set for this host it is added to the list of hosts to be skipped
+            if h["action"] == None:
+                hosts_with_no_action.append(row["host"])
+            h["os"] = row["os"]
+            h["appliance"] = row["appliance"]
 
-		if not action: # param can override the db
-			for row in self.call('list.host.boot', hosts):
-				ha[row['host']]['type'] = row['action']
+        # Removing all the hosts which do not have any bootaction
+        for blacklist_host in hosts_with_no_action:
+            ha.pop(blacklist_host)
+            hosts.remove(blacklist_host)
 
-		hosts_with_no_action = []
-		for row in self.call('list.host', hosts):
-			h = ha[row['host']]
-			if h['type'] == 'install':
-				h['action'] = row['installaction']
-			elif h['type'] == 'os':
-				h['action'] = row['osaction']
-			# If there is no bootaction set for this host it is added to the list of hosts to be skipped
-			if h['action'] == None:
-				hosts_with_no_action.append(row['host'])
-			h['os']        = row['os']
-			h['appliance'] = row['appliance']
+        # This condition is checked again because the previous block updates the list of hosts
+        if len(hosts) == 0:
+            return
 
-		# Removing all the hosts which do not have any bootaction
-		for blacklist_host in hosts_with_no_action:
-			ha.pop(blacklist_host)
-			hosts.remove(blacklist_host)
+        ba = {}
+        for row in self.call("list.bootaction"):
+            ba[(row["bootaction"], row["type"], row["os"])] = row
 
-		# This condition is checked again because the previous block updates the list of hosts
-		if len(hosts) == 0:
-			return
+        for host in hosts:
+            h = ha[host]
+            key = (h["action"], h["type"], None)
+            if key in ba:
+                b = ba[key]
+                h["kernel"] = b["kernel"]
+                h["ramdisk"] = b["ramdisk"]
+                h["args"] = b["args"]
+            key = (h["action"], h["type"], h["os"])
+            if key in ba:
+                b = ba[key]
+                h["kernel"] = b["kernel"]
+                h["ramdisk"] = b["ramdisk"]
+                h["args"] = b["args"]
 
-		ba = {}
-		for row in self.call('list.bootaction'):
-			ba[(row['bootaction'], row['type'], row['os'])] = row
+        argv = []
+        for host in hosts:
+            argv.append(host)
+        argv.append("expanded=true")
+        for row in self.call("list.host.interface", argv):
+            h = ha[row["host"]]
+            if "interfaces" not in h:
+                h["interfaces"] = []
+            if h["appliance"] == "frontend":
+                continue
+            ip = row["ip"]
+            pxe = row["pxe"]
+            interface = row["interface"]
+            if ip and pxe:
+                h["interfaces"].append(
+                    {
+                        "interface": interface,
+                        "ip": ip,
+                        "mask": row["mask"],
+                        "gateway": row["gateway"],
+                    }
+                )
 
-		for host in hosts:
-			h   = ha[host]
-			key = (h['action'], h['type'], None)
-			if key in ba:
-				b = ba[key]
-				h['kernel']  = b['kernel']
-				h['ramdisk'] = b['ramdisk']
-				h['args']    = b['args']
-			key = (h['action'], h['type'], h['os'])
-			if key in ba:
-				b = ba[key]
-				h['kernel']  = b['kernel']
-				h['ramdisk'] = b['ramdisk']
-				h['args']    = b['args']
-
-		argv = []
-		for host in hosts:
-			argv.append(host)
-		argv.append('expanded=true')
-		for row in self.call('list.host.interface', argv):
-			h   = ha[row['host']]
-			if 'interfaces' not in h:
-				h['interfaces'] = []
-			if h['appliance'] == 'frontend':
-				continue
-			ip  = row['ip']
-			pxe = row['pxe']
-			interface = row['interface']
-			if ip and pxe:
-				h['interfaces'].append({
-					'interface': interface,
-					'ip'	   : ip,
-					'mask'	   : row['mask'],
-					'gateway'  : row['gateway']
-				})
-
-
-		self.beginOutput()
-		self.runPlugins(ha)
-		self.endOutput(padChar='', trimOwner=True)
-
+        self.beginOutput()
+        self.runPlugins(ha)
+        self.endOutput(padChar="", trimOwner=True)

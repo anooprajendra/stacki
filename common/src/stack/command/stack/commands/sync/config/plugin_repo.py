@@ -8,10 +8,8 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "repo"
 
-	def provides(self):
-		return 'repo'
-		
-	def run(self, args):
-		self.owner.command('sync.host.repo', [ 'localhost' ])
-
+    def run(self, args):
+        self.owner.command("sync.host.repo", ["localhost"])

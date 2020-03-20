@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.add.firmware.command):
-	"""
+    """
 	Adds a firmware version regex to the stacki database for use in parsing and validating firmware version numbers.
 
 	<arg type='string' name='regex'>
@@ -42,5 +43,5 @@ class Command(stack.commands.add.firmware.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.runPlugins(args = (params, args))
+    def run(self, params, args):
+        self.runPlugins(args=(params, args))

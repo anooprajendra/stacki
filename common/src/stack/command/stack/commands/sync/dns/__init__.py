@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.sync.command):
-	"""
+    """
 	Rebuild the DNS configuration files, then restart named.
 
 	<example cmd='sync dns'>
@@ -21,18 +22,18 @@ class Command(stack.commands.sync.command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		self.notify('Sync DNS')
-		# named's files are re-written as a side-effect of runPlugins()
-		self.runPlugins()
+        self.notify("Sync DNS")
+        # named's files are re-written as a side-effect of runPlugins()
+        self.runPlugins()
 
-		# only start named if we have networks with dns=True and those nets have zones defined.
-		nets = [net for net in self.call('list.network', ['dns=true']) if net['zone']]
+        # only start named if we have networks with dns=True and those nets have zones defined.
+        nets = [net for net in self.call("list.network", ["dns=true"]) if net["zone"]]
 
-		if nets:
-			self._exec('systemctl enable named'.split())
-			self._exec('systemctl restart named'.split())
-		else:
-			self._exec('systemctl disable named'.split())
-			self._exec('systemctl stop named'.split())
+        if nets:
+            self._exec("systemctl enable named".split())
+            self._exec("systemctl restart named".split())
+        else:
+            self._exec("systemctl disable named".split())
+            self._exec("systemctl stop named".split())

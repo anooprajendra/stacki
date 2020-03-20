@@ -6,11 +6,10 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "bootaction"
 
-	def provides(self):
-		return 'bootaction'
-
-
-	def run(self, args):
-		return self.owner.command('dump.bootaction')
+    def run(self, args):
+        return self.owner.command("dump.bootaction")

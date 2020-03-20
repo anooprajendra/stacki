@@ -8,17 +8,15 @@
 
 import os
 import sys
-import stack.django_env
 
 import stack.commands
-
+import stack.django_env
+from django.contrib.auth.models import Group, User
 from stack.exception import *
 
-from django.contrib.auth.models import User, Group
 
-class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
-	"""
+class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
+    """
 	Set or unset admin privileges of a user.
 	<arg name="Username" type="string">
 	Username of user for which to set / unset
@@ -28,19 +26,18 @@ class Command(stack.commands.Command,
 	Set or unset admin privileges.
 	</param>
 	"""
-	def run(self, params, args):
-		# Get Username
-		if len(args) != 1:
-			raise ArgRequired(self, "username")
-		username = args[0]
-		(admin, ) = self.fillParams([
-				("admin", "True"),
-				])
-		try:
-			u = User.objects.get(username = username)
-		except User.DoesNotExist:
-			raise CommandError(self, "User %s does not exist" % username)
 
-		admin = self.str2bool(admin)
-		u.is_superuser = admin
-		u.save()
+    def run(self, params, args):
+        # Get Username
+        if len(args) != 1:
+            raise ArgRequired(self, "username")
+        username = args[0]
+        (admin,) = self.fillParams([("admin", "True"),])
+        try:
+            u = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise CommandError(self, "User %s does not exist" % username)
+
+        admin = self.str2bool(admin)
+        u.is_superuser = admin
+        u.save()

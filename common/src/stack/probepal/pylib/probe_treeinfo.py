@@ -2,8 +2,9 @@ import pathlib
 
 from stack.probepal.common import PalletInfo, Probe
 
+
 class TreeinfoProbe(Probe):
-	'''
+    """
 	This prober is intended to look for and parse a .treeinfo file which indicates a centos 7+ or opensuse iso
 
 	The contents of this file look like:
@@ -28,67 +29,74 @@ class TreeinfoProbe(Probe):
 	[images-xen]
 	kernel = images/pxeboot/vmlinuz
 	initrd = images/pxeboot/initrd.img
-	'''
+	"""
 
+    def __init__(self, weight=20, desc="treeinfo files - centos7 or opensuse-based"):
+        super().__init__(weight=weight, desc=desc)
 
-	def __init__(self, weight=20, desc='treeinfo files - centos7 or opensuse-based'):
-		super().__init__(weight=weight, desc=desc)
+    def probe(self, pallet_root):
+        path = pathlib.Path(f"{pallet_root}/.treeinfo")
+        if not path.is_file():
+            return []
 
-	def probe(self, pallet_root):
-		path = pathlib.Path(f'{pallet_root}/.treeinfo')
-		if not path.is_file():
-			return []
+        lines = path.read_text().splitlines()
 
-		lines = path.read_text().splitlines()
+        name, major_version, full_version, release, arch, distro_family = [None] * 6
 
-		name, major_version, full_version, release, arch, distro_family = [None] * 6
+        for line in lines:
+            kv = line.split("=")
+            if len(kv) != 2:
+                continue
 
-		for line in lines:
-			kv = line.split('=')
-			if len(kv) != 2:
-				continue
+            key, value = kv[0].strip(), kv[1].strip()
 
-			key, value = kv[0].strip(), kv[1].strip()
+            if key == "family":
+                if value.startswith("CentOS"):
+                    name = "CentOS"
+                    distro_family = "redhat"
+                elif value.startswith("Oracle"):
+                    name = "OLE"
+                    distro_family = "redhat"
+                elif value.startswith("openSUSE"):
+                    name = "openSUSE"
+                    distro_family = "sles"
 
-			if key == 'family':
-				if value.startswith('CentOS'):
-					name = 'CentOS'
-					distro_family = 'redhat'
-				elif value.startswith('Oracle'):
-					name = 'OLE'
-					distro_family = 'redhat'
-				elif value.startswith('openSUSE'):
-					name = 'openSUSE'
-					distro_family = 'sles'
+            elif key == "version":
+                full_version = value
+                major_version = value.split(".")[0]
+            elif key == "arch":
+                arch = value
 
-			elif key == 'version':
-				full_version = value
-				major_version = value.split('.')[0]
-			elif key == 'arch':
-				arch = value
+        if not name:
+            return []
 
-		if not name:
-			return []
+        release = distro_family + major_version
 
-		release = distro_family + major_version
+        discinfo_path = pathlib.Path(f"{pallet_root}/.discinfo")
+        if discinfo_path.is_file():
+            # .discinfo is rhel-family specific, but has minor version numbering
+            lines = discinfo_path.read_text().splitlines()
+            try:
+                version_str = lines[1].strip().split()
+                v = [i for i in version_str if i.replace(".", "1").isdigit()]
+                if len(v) == 1:
+                    version = v[0]
+            except IndexError:
+                pass
+        else:
+            # opensuse
+            try:
+                version = str(float(full_version))
+            except ValueError:
+                version = major_version
 
-		discinfo_path = pathlib.Path(f'{pallet_root}/.discinfo')
-		if discinfo_path.is_file():
-			# .discinfo is rhel-family specific, but has minor version numbering
-			lines = discinfo_path.read_text().splitlines()
-			try:
-				version_str = lines[1].strip().split()
-				v = [i for i in version_str if i.replace('.', '1').isdigit()]
-				if len(v) == 1:
-					version = v[0]
-			except IndexError:
-				pass
-		else:
-			# opensuse
-			try:
-				version = str(float(full_version))
-			except ValueError:
-				version = major_version
-
-		p = PalletInfo(name, version, release, arch, distro_family, pallet_root, self.__class__.__name__)
-		return [p] if p.is_complete() else []
+        p = PalletInfo(
+            name,
+            version,
+            release,
+            arch,
+            distro_family,
+            pallet_root,
+            self.__class__.__name__,
+        )
+        return [p] if p.is_complete() else []

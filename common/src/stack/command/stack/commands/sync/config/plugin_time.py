@@ -10,13 +10,13 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
-	"re-write and sync ntp config on the frontend"
+    "re-write and sync ntp config on the frontend"
 
-	def provides(self):
-		return 'time'
+    def provides(self):
+        return "time"
 
-	def requires(self):
-		return ['dhcpd']
+    def requires(self):
+        return ["dhcpd"]
 
-	def run(self, args):
-		self.owner.command('sync.host.time', ['localhost'])
+    def run(self, args):
+        self.owner.command("sync.host.time", ["localhost"])

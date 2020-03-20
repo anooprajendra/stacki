@@ -8,13 +8,17 @@ import stack.commands
 import stack.util
 from stack.exception import CommandError
 
-class command(stack.commands.SwitchArgumentProcessor,
-	      stack.commands.list.command,
-	      stack.commands.HostArgumentProcessor):
-	pass
+
+class command(
+    stack.commands.SwitchArgumentProcessor,
+    stack.commands.list.command,
+    stack.commands.HostArgumentProcessor,
+):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	List mac address table on switch.
 
 	<arg optional='1' type='string' name='switch' repeat='1'>
@@ -35,20 +39,19 @@ class Command(command):
 	List mac table for all known switches/
 	</example>
 	"""
-	def run(self, params, args):
 
-		(pinghosts,) = self.fillParams([
-		('pinghosts', False),
-		])
+    def run(self, params, args):
 
-		self.pinghosts = self.str2bool(pinghosts)
+        (pinghosts,) = self.fillParams([("pinghosts", False),])
 
-		_switches = self.getSwitchNames(args)
-		self.beginOutput()
-		for switch in self.call('list.host.interface', _switches):
+        self.pinghosts = self.str2bool(pinghosts)
 
-			switch_name = switch['host']
-			model = self.getHostAttr(switch_name, 'component.model')
-			self.runImplementation(model, [switch])
+        _switches = self.getSwitchNames(args)
+        self.beginOutput()
+        for switch in self.call("list.host.interface", _switches):
 
-		self.endOutput(header=['switch', 'port',  'mac', 'host', 'interface', 'vlan'])
+            switch_name = switch["host"]
+            model = self.getHostAttr(switch_name, "component.model")
+            self.runImplementation(model, [switch])
+
+        self.endOutput(header=["switch", "port", "mac", "host", "interface", "vlan"])

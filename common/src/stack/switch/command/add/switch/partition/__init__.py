@@ -5,14 +5,13 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ArgRequired, ParamValue, CommandError
+from stack.exception import ArgRequired, CommandError, ParamValue
 
 
 class Command(
-	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
+    stack.commands.Command, stack.commands.SwitchArgumentProcessor,
 ):
-	"""
+    """
 	Adds a partition for an Infiniband switch to the Stacki database.
 	Note that a sync is still required to enact this change on the switch.
 
@@ -39,6 +38,6 @@ class Command(
 
 	"""
 
-	def run(self, params, args):
-		self.command('set.switch.partition.options', self._argv + ['force_add=false'])
-		return self.rc
+    def run(self, params, args):
+        self.command("set.switch.partition.options", self._argv + ["force_add=false"])
+        return self.rc

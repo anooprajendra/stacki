@@ -9,7 +9,7 @@ from stack.exception import ArgRequired, CommandError
 
 
 class Command(stack.commands.set.host.command):
-	"""
+    """
 	Set the metadata for a list of hosts. The metadata is
 	reserved for the user and is not used internally by Stacki. The
 	intention is to provide a mechanism similar to the AWS
@@ -30,15 +30,12 @@ class Command(stack.commands.set.host.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(metadata, ) = self.fillParams([
-			('metadata', None, True)
-		])
+        (metadata,) = self.fillParams([("metadata", None, True)])
 
-		for host in hosts:
-			self.db.execute(
-				'update nodes set metadata=%s where name=%s',
-				(metadata, host)
-			)
+        for host in hosts:
+            self.db.execute(
+                "update nodes set metadata=%s where name=%s", (metadata, host)
+            )

@@ -8,30 +8,29 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "basic"
 
-	def provides(self):
-		return 'basic'
+    def run(self, args):
+        (hosts, expanded, hashit) = args
 
-	def run(self, args):
-		(hosts, expanded, hashit) = args
+        keys = []
+        host_info = dict.fromkeys(hosts)
+        for host in hosts:
+            host_info[host] = []
 
-		keys      = [ ] 
-		host_info = dict.fromkeys(hosts)
-		for host in hosts:
-			host_info[host] = []
+        if expanded:
+            # This is used by the MessageQ as a permanent handle on
+            # Redis keys. This allows both the networking and names
+            # of hosts to change and keeps the mq happy -- doesn't
+            # break the status in 'list host'.
+            keys.append("id")
+            for name, id in self.db.select("name, id from nodes"):
+                if name in host_info:
+                    host_info[name] = [id]
 
-		if expanded:
-			# This is used by the MessageQ as a permanent handle on
-			# Redis keys. This allows both the networking and names
-			# of hosts to change and keeps the mq happy -- doesn't
-			# break the status in 'list host'.
-			keys.append('id')
-			for name, id in self.db.select('name, id from nodes'):
-				if name in host_info:
-					host_info[name] = [ id ]
-
-		for row in self.db.select(
-			"""
+        for row in self.db.select(
+            """
 			n.name, n.rack, n.rank, 
 			a.name,
 			o.name, b.name, 
@@ -44,16 +43,23 @@ class Plugin(stack.commands.Plugin):
 			left join bootnames bno  on n.osaction      = bno.id 
 			left join bootnames bni  on n.installaction = bni.id
 			left join oses o	 on b.os            = o.id
-			"""):
+			"""
+        ):
 
-			if row[0] in host_info:
-				host_info[row[0]].extend(row[1:])
+            if row[0] in host_info:
+                host_info[row[0]].extend(row[1:])
 
-		keys.extend(['rack', 'rank',
-			     'appliance',
-			     'os', 'box',
-			     'environment',
-			     'osaction', 'installaction'])
+        keys.extend(
+            [
+                "rack",
+                "rank",
+                "appliance",
+                "os",
+                "box",
+                "environment",
+                "osaction",
+                "installaction",
+            ]
+        )
 
-		return { 'keys' : keys, 'values': host_info }
-
+        return {"keys": keys, "values": host_info}

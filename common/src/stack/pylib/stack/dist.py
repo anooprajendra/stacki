@@ -14,52 +14,53 @@
 
 import os
 import types
+
 import stack.file
 
 
 class Arch:
-	"""
+    """
 	Base class that understands Linux architecture strings and nothing
 	else.  All distributions needs this information as do other code
 	that handles rpms
 	"""
 
-	def __init__(self):
-		self.arch	= ''
-		self.distArch	= ''
-		self.cpus	= []
-		self.i86cpus	= [ 'athlon', 'i686', 'i586', 'i486', 'i386' ]
+    def __init__(self):
+        self.arch = ""
+        self.distArch = ""
+        self.cpus = []
+        self.i86cpus = ["athlon", "i686", "i586", "i486", "i386"]
 
-	def getCPUs(self):
-		return self.cpus
+    def getCPUs(self):
+        return self.cpus
 
-	def getArch(self):
-		return self.arch
+    def getArch(self):
+        return self.arch
 
-	def getDistArch(self):
-		return self.distArch
+    def getDistArch(self):
+        return self.distArch
 
-	def setArch(self, arch, distArch=None):
-		"""
+    def setArch(self, arch, distArch=None):
+        """
 		The two architectures are to handle trends like
 		the AMD64 dist arch, where the true arch is x86_64.
 		NOTE: This trend does not exist with RHEL.
 		"""
 
-		self.arch = arch
-		if arch in self.i86cpus:
-			self.cpus = self.i86cpus
-			self.arch = 'i386'
-		elif arch == 'x86_64':
-			self.cpus = [ arch ]
-			self.cpus.extend([ 'ia32e' ])
-			self.cpus.extend(self.i86cpus)
-		else:
-			self.cpus = [ arch ]
+        self.arch = arch
+        if arch in self.i86cpus:
+            self.cpus = self.i86cpus
+            self.arch = "i386"
+        elif arch == "x86_64":
+            self.cpus = [arch]
+            self.cpus.extend(["ia32e"])
+            self.cpus.extend(self.i86cpus)
+        else:
+            self.cpus = [arch]
 
-		self.cpus.extend([ 'src', 'noarch' ])
+        self.cpus.extend(["src", "noarch"])
 
-		if distArch:
-			self.distArch = distArch
-		else:
-			self.distArch = arch
+        if distArch:
+            self.distArch = distArch
+        else:
+            self.distArch = arch

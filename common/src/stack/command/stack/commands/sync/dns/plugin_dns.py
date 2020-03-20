@@ -15,9 +15,8 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "dns"
 
-	def provides(self):
-		return 'dns'
-
-	def run(self, args):
-		self.owner.report('report.zones')
+    def run(self, args):
+        self.owner.report("report.zones")

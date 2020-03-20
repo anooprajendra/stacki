@@ -14,16 +14,18 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "interface"
 
-	def provides(self):
-		return 'interface'
+    def requires(self):
+        return ["boot", "TAIL"]
 
-	def requires(self):
-		return [ 'boot', 'TAIL']
-
-	def run(self, hosts):
-		for host in hosts:
-			self.owner.db.execute("""
+    def run(self, hosts):
+        for host in hosts:
+            self.owner.db.execute(
+                """
 				delete from networks
 				where node=(select id from nodes where name=%s)
-			""", (host,))
+			""",
+                (host,),
+            )

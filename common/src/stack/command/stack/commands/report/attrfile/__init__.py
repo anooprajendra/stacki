@@ -8,12 +8,12 @@
 import csv
 import re
 from io import StringIO
+
 import stack.commands
 
 
-class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
-	"""
+class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
+    """
 	This command outputs all the attributes
 	of a system in a CSV format.
 
@@ -22,52 +22,54 @@ class Command(stack.commands.Command,
 	</param>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(attr_filter, ) = self.fillParams([ ("filter", None), ])
+        (attr_filter,) = self.fillParams([("filter", None),])
 
-		header		= []
-		csv_attrs	= []
-		regex		= None
+        header = []
+        csv_attrs = []
+        regex = None
 
-		scope_data = {}
+        scope_data = {}
 
-		if attr_filter:
-			regex = re.compile(attr_filter)
+        if attr_filter:
+            regex = re.compile(attr_filter)
 
-		#iterate through each scope and get the respective data
-		for scope in [ 'global', 'os', 'appliance', 'environment', 'host' ]:
-			for row in self.call('list.attr', [ 'scope=%s' % scope, 'resolve=false', 'const=false', 'shadow=false' ]):
-				if scope == 'global':
-					target = 'global'
-				else:
-					target = row[scope]
-				attr   = row['attr']
-				value  = row['value']
+        # iterate through each scope and get the respective data
+        for scope in ["global", "os", "appliance", "environment", "host"]:
+            for row in self.call(
+                "list.attr",
+                ["scope=%s" % scope, "resolve=false", "const=false", "shadow=false"],
+            ):
+                if scope == "global":
+                    target = "global"
+                else:
+                    target = row[scope]
+                attr = row["attr"]
+                value = row["value"]
 
-				if regex and not regex.match(attr):
-					continue
+                if regex and not regex.match(attr):
+                    continue
 
-				if target not in scope_data:
-					scope_data[target] = {}
-				scope_data[target][attr] = value
+                if target not in scope_data:
+                    scope_data[target] = {}
+                scope_data[target][attr] = value
 
-				if attr not in header:
-					header.append(attr)
+                if attr not in header:
+                    header.append(attr)
 
-		for scope in scope_data:
-			scope_data[scope]['target'] = scope
-			csv_attrs.append(scope_data[scope])
+        for scope in scope_data:
+            scope_data[scope]["target"] = scope
+            csv_attrs.append(scope_data[scope])
 
-		header.sort()
-		header.insert(0, 'target')
+        header.sort()
+        header.insert(0, "target")
 
-		s = StringIO()
-		w = csv.DictWriter(s, header)
-		w.writeheader()
-		w.writerows(csv_attrs)
+        s = StringIO()
+        w = csv.DictWriter(s, header)
+        w.writeheader()
+        w.writerows(csv_attrs)
 
-		self.beginOutput()
-		self.addOutput(None, s.getvalue().strip())
-		self.endOutput(trimOwner = True)
-
+        self.beginOutput()
+        self.addOutput(None, s.getvalue().strip())
+        self.endOutput(trimOwner=True)

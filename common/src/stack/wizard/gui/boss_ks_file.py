@@ -3,14 +3,15 @@
 import os
 import shutil
 
+import stack.roll
+
 # Create a pallets directory in RAMDISK
 os.makedirs("/export/stack/pallets")
-import stack.roll
 
 # Read the rolls.xml file and get
 # information about the pallets to install
 g = stack.roll.Generator()
-f = open('/tmp/rolls.xml','r')
+f = open("/tmp/rolls.xml", "r")
 g.parse(f)
 
 # Download the graph and node XML files
@@ -19,47 +20,69 @@ wget_cmd = "/usr/bin/wget -r -nH -A xml,pro --cut-dirs=2"
 cwd = os.getcwd()
 os.chdir("/export/stack/pallets")
 for pallet in g.rolls:
-	nodes_url = "%s/%s/%s/%s/redhat/%s/nodes" % (pallet[4],pallet[0],pallet[1],pallet[2],pallet[3])
-	os.system("%s %s" % (wget_cmd, nodes_url))
-	graph_url = "%s/%s/%s/%s/redhat/%s/graph" % (pallet[4],pallet[0],pallet[1],pallet[2],pallet[3])
-	os.system("%s %s" % (wget_cmd, graph_url))
+    nodes_url = "%s/%s/%s/%s/redhat/%s/nodes" % (
+        pallet[4],
+        pallet[0],
+        pallet[1],
+        pallet[2],
+        pallet[3],
+    )
+    os.system("%s %s" % (wget_cmd, nodes_url))
+    graph_url = "%s/%s/%s/%s/redhat/%s/graph" % (
+        pallet[4],
+        pallet[0],
+        pallet[1],
+        pallet[2],
+        pallet[3],
+    )
+    os.system("%s %s" % (wget_cmd, graph_url))
 
-	#
-	# convert any .pro files to .xml
-	#
-	graphdir = '/export/stack/pallets/%s/%s/%s/redhat/%s/graph' \
-		% (pallet[0], pallet[1], pallet[2], pallet[3])
-	#
-	# If graph directory does not exist, this could
-	# indicate a foreign pallet. Ignore, and move on
-	#
-	if not os.path.exists(graphdir):
-		continue
-	for file in os.listdir(graphdir):
-		base, ext = os.path.splitext(file)
-		if ext == '.pro':
-			profile = os.path.join(graphdir, file)
-			xmlfile	= os.path.join(graphdir, '%s.xml' % base)
-			shutil.copyfile(profile, xmlfile)
+    #
+    # convert any .pro files to .xml
+    #
+    graphdir = "/export/stack/pallets/%s/%s/%s/redhat/%s/graph" % (
+        pallet[0],
+        pallet[1],
+        pallet[2],
+        pallet[3],
+    )
+    #
+    # If graph directory does not exist, this could
+    # indicate a foreign pallet. Ignore, and move on
+    #
+    if not os.path.exists(graphdir):
+        continue
+    for file in os.listdir(graphdir):
+        base, ext = os.path.splitext(file)
+        if ext == ".pro":
+            profile = os.path.join(graphdir, file)
+            xmlfile = os.path.join(graphdir, "%s.xml" % base)
+            shutil.copyfile(profile, xmlfile)
 
 # RHEL 7 needs the repodata files too
 wget_cmd = "/usr/bin/wget -r -nH -R TRANS.TBL --cut-dirs=2"
 for pallet in g.rolls:
-	repodata_url = "%s/%s/%s/%s/redhat/%s/repodata" % (pallet[4],pallet[0],pallet[1],pallet[2],pallet[3])
-	os.system("%s %s" % (wget_cmd, repodata_url))
+    repodata_url = "%s/%s/%s/%s/redhat/%s/repodata" % (
+        pallet[4],
+        pallet[0],
+        pallet[1],
+        pallet[2],
+        pallet[3],
+    )
+    os.system("%s %s" % (wget_cmd, repodata_url))
 
 os.chdir(cwd)
 
 #
 # now generate the kickstart file with the command line
 #
-cmd = '/opt/stack/bin/stack list node xml server '
+cmd = "/opt/stack/bin/stack list node xml server "
 cmd += 'attrs="/tmp/site.attrs" > /tmp/ks.xml 2> /tmp/ks.xml.debug'
 os.system(cmd)
 
-cmd = 'cat /tmp/ks.xml | '
-cmd += '/opt/stack/bin/stack list host profile chapter=main '
-cmd += '> /tmp/ks.cfg 2> /tmp/ks.cfg.debug'
+cmd = "cat /tmp/ks.xml | "
+cmd += "/opt/stack/bin/stack list host profile chapter=main "
+cmd += "> /tmp/ks.cfg 2> /tmp/ks.cfg.debug"
 os.system(cmd)
 
 #
@@ -69,6 +92,5 @@ os.system(cmd)
 # access to the repodata files which fakes out the installer just long enough
 # for us to drop in the real repodata files
 #
-cmd = 'rm -f /install ; ln -s /export/stack /install'
+cmd = "rm -f /install ; ln -s /export/stack /install"
 os.system(cmd)
-

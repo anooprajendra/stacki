@@ -5,11 +5,11 @@
 # @copyright@
 
 import stack.commands
+
+
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "api"
 
-	def provides(self):
-		return 'api'
-
-	def run(self, args):
-		return self.owner.command('dump.api')
-
+    def run(self, args):
+        return self.owner.command("dump.api")

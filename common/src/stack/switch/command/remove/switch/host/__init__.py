@@ -5,15 +5,19 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import CommandError, ArgRequired
+from stack.exception import ArgRequired, CommandError
 
-class command(stack.commands.SwitchArgumentProcessor,
-	      stack.commands.HostArgumentProcessor,
-	      stack.commands.remove.command):
-	pass
+
+class command(
+    stack.commands.SwitchArgumentProcessor,
+    stack.commands.HostArgumentProcessor,
+    stack.commands.remove.command,
+):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	Stop managing a host connected to a switch.
 
 	<arg type='string' name='switch'>
@@ -33,19 +37,17 @@ class Command(command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		if len(args) < 1:
-			raise ArgRequired(self, 'switch')
+    def run(self, params, args):
+        if len(args) < 1:
+            raise ArgRequired(self, "switch")
 
-		switch, = self.getSwitchNames(args)
+        (switch,) = self.getSwitchNames(args)
 
-		host, port, interface = self.fillParams([
-			('host', None, True),
-			('port', None, True),
-			('interface', None, True)
-		])
+        host, port, interface = self.fillParams(
+            [("host", None, True), ("port", None, True), ("interface", None, True)]
+        )
 
-		# Check if host exists
-		self.getHostnames([host])
+        # Check if host exists
+        self.getHostnames([host])
 
-		self.delSwitchHost(switch, port, host, interface)
+        self.delSwitchHost(switch, port, host, interface)

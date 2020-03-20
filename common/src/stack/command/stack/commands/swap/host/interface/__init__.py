@@ -16,7 +16,7 @@ from stack.exception import CommandError
 
 
 class Command(stack.commands.swap.host.command):
-	"""
+    """
 	Swaps two host interfaces in the database.
 
 	<arg type='string' name='host' optional='0' repeat='1'>
@@ -33,48 +33,54 @@ class Command(stack.commands.swap.host.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		interfaces, sync_config = self.fillParams([
-			('interfaces', None, True),
-			('sync-config', 'yes')
-		])
+        interfaces, sync_config = self.fillParams(
+            [("interfaces", None, True), ("sync-config", "yes")]
+        )
 
-		sync_config = self.str2bool(sync_config)
+        sync_config = self.str2bool(sync_config)
 
-		interface = interfaces.split(',')
-		if len(interface) != 2:
-			raise CommandError(self, 'must supply exactly two interfaces')
+        interface = interfaces.split(",")
+        if len(interface) != 2:
+            raise CommandError(self, "must supply exactly two interfaces")
 
-		for host in hosts:
-			# Get the data for our two interfaces to swap
-			rows = self.db.select("""
+        for host in hosts:
+            # Get the data for our two interfaces to swap
+            rows = self.db.select(
+                """
 				id, device, mac, module, options FROM networks
 				WHERE node=(select id from nodes where name=%s)
 				AND device in (%s, %s)
-			""", (host, *interface))
+			""",
+                (host, *interface),
+            )
 
-			# We gotta have two interfaces to swap
-			if len(rows) != 2:
-				raise CommandError(
-					self, 'one or more of the interfaces are missing'
-				)
+            # We gotta have two interfaces to swap
+            if len(rows) != 2:
+                raise CommandError(self, "one or more of the interfaces are missing")
 
-			# Swap the first interface
-			self.db.execute("""
+            # Swap the first interface
+            self.db.execute(
+                """
 				UPDATE networks
 				SET device=%s, mac=%s, module=%s, options=%s
 				WHERE id=%s
-			""", (*rows[1][1:], rows[0][0]))
+			""",
+                (*rows[1][1:], rows[0][0]),
+            )
 
-			# And now the second
-			self.db.execute("""
+            # And now the second
+            self.db.execute(
+                """
 				UPDATE networks
 				SET device=%s, mac=%s, module=%s, options=%s
 				WHERE id=%s
-			""", (*rows[0][1:], rows[1][0]))
+			""",
+                (*rows[0][1:], rows[1][0]),
+            )
 
-		if sync_config:
-			self.command('sync.host.config', hosts)
-			self.command('sync.host.network', hosts)
+        if sync_config:
+            self.command("sync.host.config", hosts)
+            self.command("sync.host.network", hosts)

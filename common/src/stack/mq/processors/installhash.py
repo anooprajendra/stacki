@@ -8,19 +8,19 @@ import stack.mq.processors
 
 
 class Processor(stack.mq.processors.ProcessorBase):
-	"""
+    """
         Listen for install hash messages and store them in the redis database.
 	"""
 
-	def isActive(self):
-		return self.redis
+    def isActive(self):
+        return self.redis
 
-	def channel(self):
-		return 'installhash'
+    def channel(self):
+        return "installhash"
 
-	def process(self, msg):
-		id = self.getKey('host:%s:id' % msg.getSource())
-		if id:
-			self.setKey('host:%s:installhash' % id, msg.getPayload())
+    def process(self, msg):
+        id = self.getKey("host:%s:id" % msg.getSource())
+        if id:
+            self.setKey("host:%s:installhash" % id, msg.getPayload())
 
-		return None
+        return None

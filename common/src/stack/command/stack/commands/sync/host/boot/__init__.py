@@ -8,7 +8,7 @@ import stack.commands
 
 
 class Command(stack.commands.sync.host.command):
-	"""
+    """
 	You'll rarely have to use this command.
 
 	It usually gets run as part of the
@@ -27,9 +27,10 @@ class Command(stack.commands.sync.host.command):
 	Rebuild all tftpboot files for backend nodes.
 	</example>
 	"""
-	def run(self, params, args):
 
-		self.notify('Sync Host Boot')
+    def run(self, params, args):
 
-		argv = self.getHostnames(args, managed_only=True)
-		self.report('report.host.bootfile', argv)
+        self.notify("Sync Host Boot")
+
+        argv = self.getHostnames(args, managed_only=True)
+        self.report("report.host.bootfile", argv)

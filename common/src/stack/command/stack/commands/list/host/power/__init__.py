@@ -9,7 +9,7 @@ from stack.exception import ArgRequired, ParamError
 
 
 class Command(stack.commands.list.host.command):
-	"""
+    """
 	Sends a "power status" command to a host.
 	
 	<arg type='string' name='host' repeat='1'>
@@ -21,21 +21,21 @@ class Command(stack.commands.list.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if not len(args):
-			raise ArgRequired(self, 'host')
+    def run(self, params, args):
+        if not len(args):
+            raise ArgRequired(self, "host")
 
-		self.beginOutput()
-		
-		for host in self.getHostnames(args):
-			status = None
-			output = self.call('set.host.power', [ host, 'command=status' ])
-			for o in output:
-				line = o['col-1']
-				if line.startswith('Chassis Power is'):
-					l = line.split()
-					if len(l) == 4:
-						status = l[3].strip()
-			self.addOutput(host, (status,))
+        self.beginOutput()
 
-		self.endOutput(header=['host', 'power'], trimOwner=False)
+        for host in self.getHostnames(args):
+            status = None
+            output = self.call("set.host.power", [host, "command=status"])
+            for o in output:
+                line = o["col-1"]
+                if line.startswith("Chassis Power is"):
+                    l = line.split()
+                    if len(l) == 4:
+                        status = l[3].strip()
+            self.addOutput(host, (status,))
+
+        self.endOutput(header=["host", "power"], trimOwner=False)

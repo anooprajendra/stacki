@@ -12,41 +12,39 @@
 
 import spwd
 import subprocess
+
 import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "unix"
 
-	def provides(self):
-		return 'unix'
+    def run(self, args):
+        if len(args) != 2:
+            return
 
+        old_password = args[0]
+        new_password = args[1]
 
-	def run(self, args):
-		if len(args) != 2:
-			return
+        #
+        # use the system to change the password
+        #
+        self._exec("/usr/sbin/chpasswd", input=f"root:{new_password}")
 
-		old_password = args[0]
-		new_password = args[1]
+        #
+        # get the new crypted password
+        #
+        shadow_info = spwd.getspnam("root")
 
-		#
-		# use the system to change the password
-		#
-		self._exec('/usr/sbin/chpasswd', input=f'root:{new_password}')
+        if shadow_info:
+            newpw = shadow_info.sp_pwd
 
-		#
-		# get the new crypted password
-		#
-		shadow_info = spwd.getspnam('root')
-
-		if shadow_info:
-			newpw = shadow_info.sp_pwd
-			
-			#
-			# store it in the database
-			# 
-			self.owner.command('set.attr',
-				[ 'attr=Kickstart_PrivateRootPassword', 
-				  'value=%s' % newpw ] )
-		else:
-			print('Could not read the new password for root')
-
+            #
+            # store it in the database
+            #
+            self.owner.command(
+                "set.attr", ["attr=Kickstart_PrivateRootPassword", "value=%s" % newpw]
+            )
+        else:
+            print("Could not read the new password for root")

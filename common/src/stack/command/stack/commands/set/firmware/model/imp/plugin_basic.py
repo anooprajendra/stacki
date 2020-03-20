@@ -11,41 +11,36 @@
 # @rocks@
 
 import stack.commands
-from stack.util import unique_everseen, lowered
-from stack.exception import ArgRequired, ParamRequired, ParamError
+from stack.exception import ArgRequired, ParamError, ParamRequired
+from stack.util import lowered, unique_everseen
+
 
 class Plugin(stack.commands.Plugin):
-	"""Attempts to associate an implementation with models."""
+    """Attempts to associate an implementation with models."""
 
-	def provides(self):
-		return "basic"
+    def provides(self):
+        return "basic"
 
-	def run(self, args):
-		params, args = args
-		models = tuple(unique_everseen(lowered(args)))
+    def run(self, args):
+        params, args = args
+        models = tuple(unique_everseen(lowered(args)))
 
-		imp, make, = lowered(
-			self.owner.fillParams(
-				names = [
-					("imp", ""),
-					("make", ""),
-				],
-				params = params,
-			),
-		)
-		self.owner.ensure_models_exist(make = make, models = models)
-		self.owner.ensure_imp_exists(imp = imp)
+        imp, make, = lowered(
+            self.owner.fillParams(names=[("imp", ""), ("make", ""),], params=params,),
+        )
+        self.owner.ensure_models_exist(make=make, models=models)
+        self.owner.ensure_imp_exists(imp=imp)
 
-		# get the implementation ID
-		imp_id = self.owner.get_imp_id(imp = imp)
-		# associate the models with the imp
-		self.owner.db.execute(
-			"""
+        # get the implementation ID
+        imp_id = self.owner.get_imp_id(imp=imp)
+        # associate the models with the imp
+        self.owner.db.execute(
+            """
 			UPDATE firmware_model
 				INNER JOIN firmware_make
 					ON firmware_model.make_id = firmware_make.id
 			SET firmware_model.imp_id=%s
 			WHERE firmware_make.name = %s AND firmware_model.name IN %s
 			""",
-			(imp_id, make, models),
-		)
+            (imp_id, make, models),
+        )

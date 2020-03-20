@@ -8,9 +8,8 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "health"
 
-	def provides(self):
-		return 'health'
-
-	def run(self, hosts):
-		return [ 'state', 'ssh' ]
+    def run(self, hosts):
+        return ["state", "ssh"]

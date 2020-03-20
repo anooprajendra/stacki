@@ -8,20 +8,21 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "bootaction"
 
-	def provides(self):
-		return 'bootaction'
+    def run(self, section):
 
-	def run(self, section):
+        self.owner.set_scope("global")
 
-		self.owner.set_scope('global')
+        for a in section:
+            args = a.get("name")
+            params = {
+                "type": a.get("type"),
+                "os": a.get("os"),
+                "kernel": a.get("kernel"),
+                "ramdisk": a.get("ramdisk"),
+                "args": a.get("args"),
+            }
 
-		for a in section:
-			args   = a.get('name')
-			params = {'type'   : a.get('type'),
-				  'os'     : a.get('os'),
-				  'kernel' : a.get('kernel'),
-				  'ramdisk': a.get('ramdisk'),
-				  'args'   : a.get('args')}
-
-			self.owner.stack('add.bootaction', args, **params)
+            self.owner.stack("add.bootaction", args, **params)

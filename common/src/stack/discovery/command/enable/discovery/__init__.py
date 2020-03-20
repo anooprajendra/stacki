@@ -6,14 +6,15 @@
 
 import logging
 import os
+import time
+
 import stack.commands
 from stack.discovery import Discovery
 from stack.exception import CommandError
-import time
 
 
 class Command(stack.commands.enable.command):
-	"""
+    """
 	Start the node discovery daemon.
 
 	<param type='string' name='appliance' optional='1'>
@@ -54,56 +55,67 @@ class Command(stack.commands.enable.command):
 
 	<related>disable discovery</related>
 	<related>report discovery</related>
-	"""		
+	"""
 
-	def run(self, params, args):
-		(appliance, base_name, rack, rank, box, install_action, install, debug) = self.fillParams([
-			("appliance", None),
-			("basename", None),
-			("rack", None),
-			("rank", None),
-			("box", None),
-			("installaction", None),
-			("install", True),
-			("debug", False)
-		])
-		install = self.str2bool(install)
-		debug = self.str2bool(debug)
-		
-		if debug:
-			discovery = Discovery(logging_level=logging.DEBUG)
-		else:
-			discovery = Discovery()
+    def run(self, params, args):
+        (
+            appliance,
+            base_name,
+            rack,
+            rank,
+            box,
+            install_action,
+            install,
+            debug,
+        ) = self.fillParams(
+            [
+                ("appliance", None),
+                ("basename", None),
+                ("rack", None),
+                ("rank", None),
+                ("box", None),
+                ("installaction", None),
+                ("install", True),
+                ("debug", False),
+            ]
+        )
+        install = self.str2bool(install)
+        debug = self.str2bool(debug)
 
-		try:
-			# Call start
-			discovery.start(
-				self,
-				appliance_name=appliance,
-				base_name=base_name,
-				rack=rack,
-				rank=rank,
-				box=box,
-				install_action=install_action,
-				install=install
-			)
-			
-			# Wait up to a few seconds for the daemon to start
-			for _ in range(8):
-				# Are we up yet?
-				if discovery.is_running():
-					self.beginOutput()
-					self.addOutput('', "Discovery daemon has started")
-					self.endOutput()
+        if debug:
+            discovery = Discovery(logging_level=logging.DEBUG)
+        else:
+            discovery = Discovery()
 
-					break
+        try:
+            # Call start
+            discovery.start(
+                self,
+                appliance_name=appliance,
+                base_name=base_name,
+                rack=rack,
+                rank=rank,
+                box=box,
+                install_action=install_action,
+                install=install,
+            )
 
-				# Take a quarter second nap
-				time.sleep(0.25)
-			else:
-				self.beginOutput()
-				self.addOutput('', "Warning: daemon might have not started")
-				self.endOutput()
-		
-		except ValueError as e:
-			raise CommandError(self, str(e)) from None
+            # Wait up to a few seconds for the daemon to start
+            for _ in range(8):
+                # Are we up yet?
+                if discovery.is_running():
+                    self.beginOutput()
+                    self.addOutput("", "Discovery daemon has started")
+                    self.endOutput()
+
+                    break
+
+                # Take a quarter second nap
+                time.sleep(0.25)
+            else:
+                self.beginOutput()
+                self.addOutput("", "Warning: daemon might have not started")
+                self.endOutput()
+
+        except ValueError as e:
+            raise CommandError(self, str(e)) from None

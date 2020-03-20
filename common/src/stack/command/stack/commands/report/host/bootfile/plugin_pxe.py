@@ -5,31 +5,39 @@
 # @copyright@
 
 import os
+
 import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
-	"""
+    """
 	Generate a PXE specific configuration file
 	"""
 
-	def provides(self):
-		return 'pxe'
+    def provides(self):
+        return "pxe"
 
-	def run(self, ha):
+    def run(self, ha):
 
-		for host in ha:
-			if 'interfaces' not in ha[host]:
-				continue
-			for interface in ha[host]['interfaces']:
-				filename = os.path.join(os.path.sep, 
-							'tftpboot', 
-							'pxelinux', 
-							'pxelinux.cfg', # IP as Hex
-							''.join(map(lambda x: '%02X' % int(x), interface['ip'].split('.'))))
-				self.owner.addOutput(host, """
+        for host in ha:
+            if "interfaces" not in ha[host]:
+                continue
+            for interface in ha[host]["interfaces"]:
+                filename = os.path.join(
+                    os.path.sep,
+                    "tftpboot",
+                    "pxelinux",
+                    "pxelinux.cfg",  # IP as Hex
+                    "".join(map(lambda x: "%02X" % int(x), interface["ip"].split("."))),
+                )
+                self.owner.addOutput(
+                    host,
+                    """
 <stack:file stack:name="%s" stack:owner="root:apache" stack:perms="0664"
-            stack:rcs="off"><![CDATA[""" % filename)
-				self.owner.runImplementation("%s_pxe" % ha[host]['os'], 
-							     (ha[host], interface))
-				self.owner.addOutput(host, ']]>\n</stack:file>')
+            stack:rcs="off"><![CDATA["""
+                    % filename,
+                )
+                self.owner.runImplementation(
+                    "%s_pxe" % ha[host]["os"], (ha[host], interface)
+                )
+                self.owner.addOutput(host, "]]>\n</stack:file>")

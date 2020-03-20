@@ -14,7 +14,7 @@ import stack.commands
 
 
 class Command(stack.commands.remove.os.command):
-	"""
+    """
 	Remove an attribute for an OS.
 
 	<arg type='string' name='os' optional='1' repeat='1'>
@@ -30,7 +30,8 @@ class Command(stack.commands.remove.os.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.command('set.attr', self._argv + [ 'scope=os', 'value=' ], verbose_errors = False)
-		return self.rc
-
+    def run(self, params, args):
+        self.command(
+            "set.attr", self._argv + ["scope=os", "value="], verbose_errors=False
+        )
+        return self.rc

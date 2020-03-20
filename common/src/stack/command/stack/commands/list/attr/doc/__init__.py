@@ -5,12 +5,13 @@
 # @copyright@
 
 import fnmatch
+
 import stack.commands
 from stack.exception import CommandError
 
 
 class Command(stack.commands.Command):
-	"""
+    """
 	Lists the set of global attributes.
 
 	<param type='string' name='attr'>
@@ -23,27 +24,28 @@ class Command(stack.commands.Command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(glob, ) = self.fillParams([ 
-			('attr',   None),
-		])
-		all_attrs = {row[0]: row[1] for row in self.db.select("""
+        (glob,) = self.fillParams([("attr", None),])
+        all_attrs = {
+            row[0]: row[1]
+            for row in self.db.select(
+                """
                         attr, doc from attributes_doc
-                        """)}
+                        """
+            )
+        }
 
-		attrs = {}
-		if glob:
-			for key in fnmatch.filter(all_attrs.keys(), glob):
-				attrs[key] = all_attrs[key]
-		else:
-			attrs = all_attrs
+        attrs = {}
+        if glob:
+            for key in fnmatch.filter(all_attrs.keys(), glob):
+                attrs[key] = all_attrs[key]
+        else:
+            attrs = all_attrs
 
-		self.beginOutput()
+        self.beginOutput()
 
-		for attr, doc in attrs.items():
-			self.addOutput(attr, doc)
-					
-		self.endOutput(header=['attr', 'doc'])
+        for attr, doc in attrs.items():
+            self.addOutput(attr, doc)
 
-
+        self.endOutput(header=["attr", "doc"])

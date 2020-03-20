@@ -9,7 +9,7 @@ from stack.discovery import Discovery
 
 
 class Command(stack.commands.report.command):
-	"""
+    """
 	Report the status of the node discovery daemon.
 
 	<example cmd='report discovery'>
@@ -18,14 +18,14 @@ class Command(stack.commands.report.command):
 
 	<related>enable discovery</related>
 	<related>disable discovery</related>
-	"""		
+	"""
 
-	def run(self, params, args):
-		discovery = Discovery()
+    def run(self, params, args):
+        discovery = Discovery()
 
-		self.beginOutput()
-		if discovery.is_running():
-			self.addOutput('', "Discovery daemon is running")
-		else:
-			self.addOutput('', "Discovery daemon is stopped")
-		self.endOutput()
+        self.beginOutput()
+        if discovery.is_running():
+            self.addOutput("", "Discovery daemon is running")
+        else:
+            self.addOutput("", "Discovery daemon is stopped")
+        self.endOutput()

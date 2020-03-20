@@ -14,13 +14,12 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class command(stack.commands.HostArgumentProcessor,
-		stack.commands.remove.command):
-	pass
+class command(stack.commands.HostArgumentProcessor, stack.commands.remove.command):
+    pass
 
 
 class Command(command):
-	"""
+    """
 	Remove a host from the database. This command will remove all
 	related database rows for each specified host.
 
@@ -33,22 +32,22 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) < 1:
-			raise ArgRequired(self, 'host')
+    def run(self, params, args):
+        if len(args) < 1:
+            raise ArgRequired(self, "host")
 
-		hosts = self.getHostnames(args)
-		if not hosts:
-			raise ArgRequired(self, 'host')
+        hosts = self.getHostnames(args)
+        if not hosts:
+            raise ArgRequired(self, "host")
 
-		# Don't allow the user to remove the host the command
-		# is running on.  Right now that means cannot remove
-		# the Frontend, but checked this way will allow for
-		# future multiple Frontend's where you may still want 
-		# to remove some but not all of them.
-		me = self.db.getHostname()
-		if me in hosts:
-			raise CommandError(self, 'cannot remove "%s"' % me)
+        # Don't allow the user to remove the host the command
+        # is running on.  Right now that means cannot remove
+        # the Frontend, but checked this way will allow for
+        # future multiple Frontend's where you may still want
+        # to remove some but not all of them.
+        me = self.db.getHostname()
+        if me in hosts:
+            raise CommandError(self, 'cannot remove "%s"' % me)
 
-		self.runPlugins(hosts)
-		self.command('sync.config')
+        self.runPlugins(hosts)
+        self.command("sync.config")

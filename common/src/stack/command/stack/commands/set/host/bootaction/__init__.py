@@ -5,11 +5,11 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import ParamValue, CommandError
+from stack.exception import CommandError, ParamValue
 
 
 class Command(stack.commands.set.host.command):
-	"""
+    """
 	Update bootaction for a host.
 
 	<arg type='string' name='host' repeat='1'>
@@ -34,38 +34,34 @@ class Command(stack.commands.set.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(req_action, req_type, req_sync) = self.fillParams([
-			('action', None, True),
-			('type', None, True),
-			('sync', True)
-		])
+        (req_action, req_type, req_sync) = self.fillParams(
+            [("action", None, True), ("type", None, True), ("sync", True)]
+        )
 
-		req_sync = self.str2bool(req_sync)
-		req_type = req_type.lower()
-		req_action = req_action.lower()
+        req_sync = self.str2bool(req_sync)
+        req_type = req_type.lower()
+        req_action = req_action.lower()
 
-		if req_type not in ('os', 'install'):
-			raise ParamValue(self, 'type', 'one of: os, install')
+        if req_type not in ("os", "install"):
+            raise ParamValue(self, "type", "one of: os, install")
 
-		# Make sure our bootaction exists
-		if len(self.call(
-			'list.bootaction',
-			[req_action, 'type=%s' % req_type ]
-		)) == 0:
-			raise CommandError(
-				self, f'bootaction "{req_action}" does not exist'
-			)
+        # Make sure our bootaction exists
+        if len(self.call("list.bootaction", [req_action, "type=%s" % req_type])) == 0:
+            raise CommandError(self, f'bootaction "{req_action}" does not exist')
 
-		for host in hosts:
-			self.db.execute(f"""
+        for host in hosts:
+            self.db.execute(
+                f"""
 				update nodes set {req_type}action=(
 					select id from bootnames where name=%s and type=%s
 				)
 				where nodes.name=%s
-			""", (req_action, req_type, host))
+			""",
+                (req_action, req_type, host),
+            )
 
-		if req_sync:
-			self.command('sync.host.boot', hosts)
+        if req_sync:
+            self.command("sync.host.boot", hosts)

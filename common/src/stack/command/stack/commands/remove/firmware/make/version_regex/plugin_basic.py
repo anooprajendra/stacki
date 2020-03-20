@@ -11,23 +11,26 @@
 # @rocks@
 
 import stack.commands
-from stack.util import lowered, unique_everseen
 from stack.exception import ArgRequired
+from stack.util import lowered, unique_everseen
+
 
 class Plugin(stack.commands.Plugin):
-	"""Attempts to disassociate version_regexes from makes."""
+    """Attempts to disassociate version_regexes from makes."""
 
-	def provides(self):
-		return "basic"
+    def provides(self):
+        return "basic"
 
-	def run(self, args):
-		# Require make names
-		if not args:
-			raise ArgRequired(cmd = self.owner, arg = "makes")
-		# lowercase all args and remove any duplicates
-		args = tuple(unique_everseen(lowered(args)))
-		# The makes must exist
-		self.owner.ensure_makes_exist(makes = args)
+    def run(self, args):
+        # Require make names
+        if not args:
+            raise ArgRequired(cmd=self.owner, arg="makes")
+        # lowercase all args and remove any duplicates
+        args = tuple(unique_everseen(lowered(args)))
+        # The makes must exist
+        self.owner.ensure_makes_exist(makes=args)
 
-		# disassociate the makes from version_regexes
-		self.owner.db.execute("UPDATE firmware_make SET version_regex_id=NULL WHERE name IN %s", (args,))
+        # disassociate the makes from version_regexes
+        self.owner.db.execute(
+            "UPDATE firmware_make SET version_regex_id=NULL WHERE name IN %s", (args,)
+        )

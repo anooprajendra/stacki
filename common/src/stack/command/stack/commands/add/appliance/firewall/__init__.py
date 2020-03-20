@@ -15,7 +15,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.add.appliance.command):
-	"""
+    """
 	Add a firewall rule for an appliance type.
 
 	<arg type='string' name='appliance' repeat='1' optional='0'>
@@ -101,9 +101,11 @@ class Command(stack.commands.add.appliance.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'appliance')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "appliance")
 
-		self.command('add.firewall', self._argv + ['scope=appliance'], verbose_errors = False)
-		return self.rc
+        self.command(
+            "add.firewall", self._argv + ["scope=appliance"], verbose_errors=False
+        )
+        return self.rc

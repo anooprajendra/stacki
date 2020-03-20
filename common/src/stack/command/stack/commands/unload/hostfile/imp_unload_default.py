@@ -5,56 +5,61 @@
 # @copyright@
 
 
-import stack.csv
 import stack.commands
+import stack.csv
 from stack.exception import CommandError
 
 
-class Implementation(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor, stack.commands.Implementation):	
+class Implementation(
+    stack.commands.ApplianceArgumentProcessor,
+    stack.commands.HostArgumentProcessor,
+    stack.commands.Implementation,
+):
 
-	"""
+    """
 	Unload (remove) hosts from the database based on comma-separated
 	formatted file.
 	"""
 
-	def run(self, args):
-		filename, = args
+    def run(self, args):
+        (filename,) = args
 
-		hosts = self.getHostnames()
+        hosts = self.getHostnames()
 
-		try:
-			reader = stack.csv.reader(open(filename, encoding='ascii'))
-			header = None
-			dict   = {}
-			for row in reader:
-				if not header:
-					header = row
+        try:
+            reader = stack.csv.reader(open(filename, encoding="ascii"))
+            header = None
+            dict = {}
+            for row in reader:
+                if not header:
+                    header = row
 
-					#
-					# make checking the header easier
-					#
-					required = [ 'name' ] 
+                    #
+                    # make checking the header easier
+                    #
+                    required = ["name"]
 
-					for i in range(0, len(row)):
-						if header[i] in required:
-							required.remove(header[i])
+                    for i in range(0, len(row)):
+                        if header[i] in required:
+                            required.remove(header[i])
 
-					if len(required) > 0:
-						raise CommandError(self.owner, 'csv file is missing column(s) "%s"' % ', '.join(required))
+                    if len(required) > 0:
+                        raise CommandError(
+                            self.owner,
+                            'csv file is missing column(s) "%s"' % ", ".join(required),
+                        )
 
-					continue
+                    continue
 
-				for i in range(0, len(row)):
-					field = row[i]
+                for i in range(0, len(row)):
+                    field = row[i]
 
-					if header[i] == 'name' and field in hosts:
-						dict[field] = True
-		except UnicodeDecodeError:
-			raise CommandError(self.owner, 'non-ascii character in file')
+                    if header[i] == "name" and field in hosts:
+                        dict[field] = True
+        except UnicodeDecodeError:
+            raise CommandError(self.owner, "non-ascii character in file")
 
-		for host in dict.keys():
-			self.owner.call('remove.host', [ host ])
-		self.owner.call('sync.config')
-		self.owner.call('sync.host.config')
-
+        for host in dict.keys():
+            self.owner.call("remove.host", [host])
+        self.owner.call("sync.config")
+        self.owner.call("sync.host.config")

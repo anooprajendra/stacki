@@ -15,7 +15,7 @@ from stack.exception import ParamRequired
 
 
 class Command(stack.commands.set.host.interface.command):
-	"""
+    """
 	Sets the options for a device module for a named interface. On Linux,
 	this will get translated to an entry in /etc/modprobe.conf.
 
@@ -60,48 +60,50 @@ class Command(stack.commands.set.host.interface.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(options, interface, mac, network) = self.fillParams([
-			('options', None, True),
-			('interface', None),
-			('mac', None),
-			('network', None)
-		])
+        (options, interface, mac, network) = self.fillParams(
+            [
+                ("options", None, True),
+                ("interface", None),
+                ("mac", None),
+                ("network", None),
+            ]
+        )
 
-		# Gotta have one of these
-		if not any([interface, mac, network]):
-			raise ParamRequired(self, ('interface', 'mac', 'network'))
+        # Gotta have one of these
+        if not any([interface, mac, network]):
+            raise ParamRequired(self, ("interface", "mac", "network"))
 
-		# Make sure interface, mac, and/or network exist on our hosts
-		self.validate(hosts, interface, mac, network)
+        # Make sure interface, mac, and/or network exist on our hosts
+        self.validate(hosts, interface, mac, network)
 
-		# Options set to the string "NULL" is a null in the DB
-		if options.upper() == 'NULL':
-			options = None
+        # Options set to the string "NULL" is a null in the DB
+        if options.upper() == "NULL":
+            options = None
 
-		for host in hosts:
-			if network:
-				sql = """
+        for host in hosts:
+            if network:
+                sql = """
 					update networks,nodes,subnets set networks.options=%s
 					where nodes.name=%s and subnets.name=%s
 					and networks.node=nodes.id and networks.subnet=subnets.id
 				"""
-				values = [options, host, network]
-			else:
-				sql = """
+                values = [options, host, network]
+            else:
+                sql = """
 					update networks,nodes set networks.options=%s
 					where nodes.name=%s and networks.node=nodes.id
 				"""
-				values = [options, host]
+                values = [options, host]
 
-			if interface:
-				sql += " and networks.device=%s"
-				values.append(interface)
+            if interface:
+                sql += " and networks.device=%s"
+                values.append(interface)
 
-			if mac:
-				sql += " and networks.mac=%s"
-				values.append(mac)
+            if mac:
+                sql += " and networks.mac=%s"
+                values.append(mac)
 
-			self.db.execute(sql, values)
+            self.db.execute(sql, values)

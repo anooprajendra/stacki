@@ -9,7 +9,7 @@ from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
 class Command(stack.commands.add.command):
-	"""
+    """
 	Adds Group.
 
 	Groups are generic sets of hosts, they have no semantics other
@@ -20,20 +20,17 @@ class Command(stack.commands.add.command):
 	The name of the group to be created.
 	</arg>
 
-	"""		
+	"""
 
-	def run(self, params, args):
-		if not len(args):
-			raise ArgRequired(self, 'group')
-		if len(args) > 1:
-			raise ArgUnique(self, 'group')
+    def run(self, params, args):
+        if not len(args):
+            raise ArgRequired(self, "group")
+        if len(args) > 1:
+            raise ArgUnique(self, "group")
 
-		group = args[0]
+        group = args[0]
 
-		if self.db.count('(ID) from groups where name=%s', (group,)) > 0:
-			raise CommandError(self, '"%s" group already exists' % group)
+        if self.db.count("(ID) from groups where name=%s", (group,)) > 0:
+            raise CommandError(self, '"%s" group already exists' % group)
 
-		self.db.execute(
-			'insert into groups(name) values (%s)',
-			(group,)
-		)
+        self.db.execute("insert into groups(name) values (%s)", (group,))

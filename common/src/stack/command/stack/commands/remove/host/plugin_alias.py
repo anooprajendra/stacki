@@ -14,17 +14,19 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "alias"
 
-	def provides(self):
-		return 'alias'
-
-	def run(self, hosts):
-		for host in hosts:
-			self.owner.db.execute("""
+    def run(self, hosts):
+        for host in hosts:
+            self.owner.db.execute(
+                """
 				delete from aliases
 				where network IN (
 					select id from networks where node=(
 						select id from nodes where name=%s
 					)
 				)
-			""", (host,))
+			""",
+                (host,),
+            )

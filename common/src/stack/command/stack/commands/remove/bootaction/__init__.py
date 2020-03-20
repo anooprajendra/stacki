@@ -1,5 +1,5 @@
 # $Id$
-# 
+#
 # @rocks@
 # Copyright (c) 2000 - 2010 The Regents of the University of California
 # All rights reserved. Rocks(r) v5.4 www.rocksclusters.org
@@ -27,11 +27,13 @@ import stack.commands.set.bootaction
 from stack.exception import CommandError
 
 
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.set.bootaction.command,
-	stack.commands.remove.command):
+class Command(
+    stack.commands.HostArgumentProcessor,
+    stack.commands.set.bootaction.command,
+    stack.commands.remove.command,
+):
 
-	"""
+    """
 	Remove a boot action specification from the system.
 
 	<arg type='string' name='action'>
@@ -52,21 +54,30 @@ class Command(stack.commands.HostArgumentProcessor,
 	</example>
 	"""
 
-	def run(self, params, args):
-		(b_action, b_type, b_os) = self.getBootActionTypeOS(params, args)
+    def run(self, params, args):
+        (b_action, b_type, b_os) = self.getBootActionTypeOS(params, args)
 
-		if not self.actionExists(b_action, b_type, b_os):
-			raise CommandError(self, 'action/type/os "%s/%s/%s" does not exists' % (b_action, b_type, b_os))
+        if not self.actionExists(b_action, b_type, b_os):
+            raise CommandError(
+                self,
+                'action/type/os "%s/%s/%s" does not exists' % (b_action, b_type, b_os),
+            )
 
-		if not b_os:
-			self.db.execute("""
+        if not b_os:
+            self.db.execute(
+                """
 				delete from bootactions
 				where os is NULL
 				and bootname=(select id from bootnames where name=%s and type=%s)
-			""", (b_action, b_type))
-		else:
-			self.db.execute("""
+			""",
+                (b_action, b_type),
+            )
+        else:
+            self.db.execute(
+                """
 				delete from bootactions
 				where os=(select id from oses where name=%s)
 				and bootname=(select id from bootnames where name=%s and type=%s)
-			""", (b_os, b_action, b_type))
+			""",
+                (b_os, b_action, b_type),
+            )

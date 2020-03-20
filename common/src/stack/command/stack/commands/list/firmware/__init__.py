@@ -13,11 +13,13 @@
 import stack.commands
 from stack.argument_processors.firmware import FirmwareArgumentProcessor
 
+
 class command(stack.commands.list.command, FirmwareArgumentProcessor):
-	pass
+    pass
+
 
 class Command(command):
-	"""
+    """
 	Lists all firmware images tracked by stacki.
 
 	<param type='bool' name='expanded'>
@@ -29,20 +31,17 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		expanded, = self.fillParams(
-			names = [("expanded", False)],
-			params = params,
-		)
-		expanded = self.str2bool(expanded)
+    def run(self, params, args):
+        (expanded,) = self.fillParams(names=[("expanded", False)], params=params,)
+        expanded = self.str2bool(expanded)
 
-		header = []
-		values = []
-		for provides, results in self.runPlugins(args = expanded):
-			header.extend(results["keys"])
-			values.extend(results["values"])
+        header = []
+        values = []
+        for provides, results in self.runPlugins(args=expanded):
+            header.extend(results["keys"])
+            values.extend(results["values"])
 
-		self.beginOutput()
-		for owner, vals in values:
-			self.addOutput(owner = owner, vals = vals)
-		self.endOutput(header = header)
+        self.beginOutput()
+        for owner, vals in values:
+            self.addOutput(owner=owner, vals=vals)
+        self.endOutput(header=header)

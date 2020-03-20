@@ -11,11 +11,11 @@
 # @rocks@
 
 import stack.commands
-from stack.exception import ParamType, ParamRequired
+from stack.exception import ParamRequired, ParamType
 
 
 class Command(stack.commands.set.host.interface.command):
-	"""
+    """
 	Sets the logical name of a network interface on a particular host.
 
 	<arg type='string' name='host' optional='0'>
@@ -49,52 +49,54 @@ class Command(stack.commands.set.host.interface.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		host = self.getSingleHost(args)
+    def run(self, params, args):
+        host = self.getSingleHost(args)
 
-		(name, interface, mac, network) = self.fillParams([
-			('name', None, True),
-			('interface', None),
-			('mac', None),
-			('network', None)
-		])
+        (name, interface, mac, network) = self.fillParams(
+            [
+                ("name", None, True),
+                ("interface", None),
+                ("mac", None),
+                ("network", None),
+            ]
+        )
 
-		# Name can't be a FQDN (IE: have dots)
-		if '.' in name:
-			raise ParamType(self, 'name', 'non-FQDN (base hostname)')
+        # Name can't be a FQDN (IE: have dots)
+        if "." in name:
+            raise ParamType(self, "name", "non-FQDN (base hostname)")
 
-		# Gotta have one of these
-		if not any([interface, mac, network]):
-			raise ParamRequired(self, ('interface', 'mac', 'network'))
+        # Gotta have one of these
+        if not any([interface, mac, network]):
+            raise ParamRequired(self, ("interface", "mac", "network"))
 
-		# Make sure interface, mac, and/or network exist on our hosts
-		self.validate([host], interface, mac, network)
+        # Make sure interface, mac, and/or network exist on our hosts
+        self.validate([host], interface, mac, network)
 
-		# If name is set to 'NULL' it gets the host name
-		if name.upper() == 'NULL':
-			name = host
+        # If name is set to 'NULL' it gets the host name
+        if name.upper() == "NULL":
+            name = host
 
-		# Make the change in the DB
-		if network:
-			sql = """
+        # Make the change in the DB
+        if network:
+            sql = """
 				update networks,nodes,subnets set networks.name=%s
 				where nodes.name=%s and subnets.name=%s
 				and networks.node=nodes.id and networks.subnet=subnets.id
 			"""
-			values = [name, host, network]
-		else:
-			sql = """
+            values = [name, host, network]
+        else:
+            sql = """
 				update networks,nodes set networks.name=%s
 				where nodes.name=%s and networks.node=nodes.id
 			"""
-			values = [name, host]
+            values = [name, host]
 
-		if interface:
-			sql += " and networks.device=%s"
-			values.append(interface)
+        if interface:
+            sql += " and networks.device=%s"
+            values.append(interface)
 
-		if mac:
-			sql += " and networks.mac=%s"
-			values.append(mac)
+        if mac:
+            sql += " and networks.mac=%s"
+            values.append(mac)
 
-		self.db.execute(sql, values)
+        self.db.execute(sql, values)

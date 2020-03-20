@@ -12,13 +12,14 @@
 
 import stack
 import stack.commands
-from stack.exception import ArgUnique, CommandError, ArgNotFound
 from stack.argument_processors.box import BoxArgumentProcessor
+from stack.exception import ArgNotFound, ArgUnique, CommandError
 
-class Command(BoxArgumentProcessor,
-	stack.commands.OSArgumentProcessor,
-	stack.commands.add.command):
-	"""
+
+class Command(
+    BoxArgumentProcessor, stack.commands.OSArgumentProcessor, stack.commands.add.command
+):
+    """
 	Add a box specification to the database.
 
 	<arg type='string' name='box'>
@@ -34,19 +35,22 @@ class Command(BoxArgumentProcessor,
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) != 1:
-			raise ArgUnique(self, 'box')
+    def run(self, params, args):
+        if len(args) != 1:
+            raise ArgUnique(self, "box")
 
-		box = args[0]
+        box = args[0]
 
-		if box in self.get_box_names():
-			raise CommandError(self, 'box "%s" exists' % box)
+        if box in self.get_box_names():
+            raise CommandError(self, 'box "%s" exists' % box)
 
-		OS, = self.fillParams([ ('os', self.os) ])
+        (OS,) = self.fillParams([("os", self.os)])
 
-		if OS not in self.getOSNames():
-			raise ArgNotFound(self, OS, 'OS')
+        if OS not in self.getOSNames():
+            raise ArgNotFound(self, OS, "OS")
 
-		self.db.execute("""insert into boxes (name, os) values
-			(%s, (select id from oses where name=%s))""", (box, OS))
+        self.db.execute(
+            """insert into boxes (name, os) values
+			(%s, (select id from oses where name=%s))""",
+            (box, OS),
+        )

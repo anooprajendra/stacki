@@ -4,7 +4,14 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
+from collections import defaultdict
+
+import stack.api
+from ansible.errors import AnsibleError, AnsibleParserError
+from ansible.plugins.inventory import BaseInventoryPlugin
+
 __metaclass__ = type
 
 
@@ -54,78 +61,72 @@ ansible-playbook --limit b_default playbook.yml
 ansible-inventory --list
 """
 
-from collections import defaultdict
-
-from ansible.errors import AnsibleError, AnsibleParserError
-from ansible.plugins.inventory import BaseInventoryPlugin
-import stack.api
-
 
 class InventoryModule(BaseInventoryPlugin):
-	NAME = "stacki"
+    NAME = "stacki"
 
-	def verify_file(self, path):
-		return path.endswith("@stacki")
+    def verify_file(self, path):
+        return path.endswith("@stacki")
 
-	def parse(self, inventory, loader, path, cache=True):
-		super(InventoryModule, self).parse(inventory, loader, "@stacki")
+    def parse(self, inventory, loader, path, cache=True):
+        super(InventoryModule, self).parse(inventory, loader, "@stacki")
 
-		# Carve up the host info
-		appliances = defaultdict(list)
-		oses = defaultdict(list)
-		boxes = defaultdict(list)
-		racks = defaultdict(list)
-		environments = defaultdict(list)
-		groups = defaultdict(list)
+        # Carve up the host info
+        appliances = defaultdict(list)
+        oses = defaultdict(list)
+        boxes = defaultdict(list)
+        racks = defaultdict(list)
+        environments = defaultdict(list)
+        groups = defaultdict(list)
 
-		for row in stack.api.Call("list host"):
-			# Add the host
-			self.inventory.add_host(row["host"])
+        for row in stack.api.Call("list host"):
+            # Add the host
+            self.inventory.add_host(row["host"])
 
-			# Record the groups it will belong to
-			appliances[row["appliance"]].append(row["host"])
-			oses[row["os"]].append(row["host"])
-			boxes[row["box"]].append(row["host"])
-			racks[row["rack"]].append(row["host"])
+            # Record the groups it will belong to
+            appliances[row["appliance"]].append(row["host"])
+            oses[row["os"]].append(row["host"])
+            boxes[row["box"]].append(row["host"])
+            racks[row["rack"]].append(row["host"])
 
-			if row["environment"]:
-				environments[row["environment"]].append(row["host"])
+            if row["environment"]:
+                environments[row["environment"]].append(row["host"])
 
-		# Get the host groups
-		for row in stack.api.Call("list host group"):
-			for group in row["groups"].split():
-				groups[group].append(row["host"])
+        # Get the host groups
+        for row in stack.api.Call("list host group"):
+            for group in row["groups"].split():
+                groups[group].append(row["host"])
 
-		# Add the 'colon' selector groups
-		selectors = (
-			('a', appliances),
-			('o', oses),
-			('b', boxes),
-			('r', racks),
-			('e', environments),
-			('g', groups)
-		)
+        # Add the 'colon' selector groups
+        selectors = (
+            ("a", appliances),
+            ("o", oses),
+            ("b", boxes),
+            ("r", racks),
+            ("e", environments),
+            ("g", groups),
+        )
 
-		for selector, hash_table in selectors:
-			for key in hash_table:
-				group = "%s_%s" % (selector, key)
-				self.inventory.add_group(group)
+        for selector, hash_table in selectors:
+            for key in hash_table:
+                group = "%s_%s" % (selector, key)
+                self.inventory.add_group(group)
 
-				for host in hash_table[key]:
-					self.inventory.add_child(group, host)
+                for host in hash_table[key]:
+                    self.inventory.add_child(group, host)
 
-		# Add the host attrs
-		for row in stack.api.Call("list host attr"):
-			value = row["value"]
+        # Add the host attrs
+        for row in stack.api.Call("list host attr"):
+            value = row["value"]
 
-			# Convert boolean-like strings to Python booleans
-			try:
-				if value.lower() in ("true", "on"):
-					value = True
-				elif value.lower() in ("false", "off"):
-					value = False
-			except AttributeError:
-				# Value wasn't string-like
-				pass
+            # Convert boolean-like strings to Python booleans
+            try:
+                if value.lower() in ("true", "on"):
+                    value = True
+                elif value.lower() in ("false", "off"):
+                    value = False
+            except AttributeError:
+                # Value wasn't string-like
+                pass
 
-			self.inventory.set_variable(row["host"], "stacki_%s" % row["attr"], value)
+            self.inventory.set_variable(row["host"], "stacki_%s" % row["attr"], value)

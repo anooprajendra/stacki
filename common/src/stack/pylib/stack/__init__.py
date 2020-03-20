@@ -1,2 +1,2 @@
-version = 'no-version'
-release = 'no-release'
+version = "no-version"
+release = "no-release"

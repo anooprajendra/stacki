@@ -14,13 +14,15 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "key"
 
-	def provides(self):
-		return 'key'
-
-	def run(self, hosts):
-		for host in hosts:
-			self.owner.db.execute("""
+    def run(self, hosts):
+        for host in hosts:
+            self.owner.db.execute(
+                """
 				delete from public_keys
 				where node=(select id from nodes where name=%s)
-			""", (host,))
+			""",
+                (host,),
+            )

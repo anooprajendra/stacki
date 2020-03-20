@@ -7,26 +7,27 @@
 #
 
 import stack.commands
-from stack.exception import *
 import stack.django_env
-
 from django.contrib.auth.models import Group
+from stack.exception import *
+
 
 class Command(stack.commands.Command):
-	"""
+    """
 	Remove a group from the API
 	<arg type="string" name="group">
 	Group to remove
 	</arg>
 	"""
-	def run(self, params, args):
-		if len(args) < 1:
-			raise ArgRequired(self, "Group Name")
-		for arg in args:
-			if arg == "default":
-				raise CommandError(self, "Cannot remove 'default' group")
-			try:
-				g = Group.objects.get(name=arg)
-				g.delete()
-			except:
-				raise CommandError(self, "Cannot find group %s" % arg)
+
+    def run(self, params, args):
+        if len(args) < 1:
+            raise ArgRequired(self, "Group Name")
+        for arg in args:
+            if arg == "default":
+                raise CommandError(self, "Cannot remove 'default' group")
+            try:
+                g = Group.objects.get(name=arg)
+                g.delete()
+            except:
+                raise CommandError(self, "Cannot find group %s" % arg)

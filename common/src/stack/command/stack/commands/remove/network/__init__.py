@@ -14,9 +14,8 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.NetworkArgumentProcessor,
-	stack.commands.remove.command):
-	"""
+class Command(stack.commands.NetworkArgumentProcessor, stack.commands.remove.command):
+    """
 	Remove network definition from the system. If there are still nodes
 	defined in the database that are assigned to the network name you
 	are trying to remove, the command will not remove the network
@@ -31,23 +30,22 @@ class Command(stack.commands.NetworkArgumentProcessor,
 	</example>
 	"""
 
-	def run(self, params, args):
-		if not len(args):
-			raise ArgRequired(self, 'network')
+    def run(self, params, args):
+        if not len(args):
+            raise ArgRequired(self, "network")
 
-		networks = self.getNetworkNames(args)
+        networks = self.getNetworkNames(args)
 
-		# Get a list of networks currently attached to host interfaces
-		in_use = {
-			interface['network']
-			for interface in self.call('list.host.interface')
-		}
+        # Get a list of networks currently attached to host interfaces
+        in_use = {
+            interface["network"] for interface in self.call("list.host.interface")
+        }
 
-		# See if any are in use
-		for network in networks:
-			if network in in_use:
-				raise CommandError(self, f'network "{network}" in use')
+        # See if any are in use
+        for network in networks:
+            if network in in_use:
+                raise CommandError(self, f'network "{network}" in use')
 
-		# Safe to delete them
-		for network in networks:
-			self.db.execute('delete from subnets where name=%s', (network,))
+        # Safe to delete them
+        for network in networks:
+            self.db.execute("delete from subnets where name=%s", (network,))

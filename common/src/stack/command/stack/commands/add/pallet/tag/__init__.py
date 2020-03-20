@@ -8,7 +8,7 @@ import stack.commands
 
 
 class Command(stack.commands.add.pallet.command):
-	"""
+    """
 	Adds a tag to one or more pallets if it does not
 	already exists.
 
@@ -41,7 +41,6 @@ class Command(stack.commands.add.pallet.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		self.command('set.pallet.tag', self._argv + [ 'force=no' ])
-		return self.rc
-
+    def run(self, params, args):
+        self.command("set.pallet.tag", self._argv + ["force=no"])
+        return self.rc

@@ -10,7 +10,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.environment.command):
-	"""
+    """
 	Remove an environment static route.
 
 	<arg type='string' name='environment' optional='0' repeat='1'>
@@ -22,9 +22,11 @@ class Command(stack.commands.remove.environment.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'environment')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "environment")
 
-		self.command('remove.route', self._argv + ['scope=environment'], verbose_errors = False)
-		return self.rc
+        self.command(
+            "remove.route", self._argv + ["scope=environment"], verbose_errors=False
+        )
+        return self.rc

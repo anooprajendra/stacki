@@ -15,7 +15,7 @@ from stack.exception import CommandError
 
 
 class Command(stack.commands.set.host.command):
-	"""
+    """
 	Set the comment field for a list of hosts.
 
 	<arg type='string' name='host' repeat='1'>
@@ -31,20 +31,15 @@ class Command(stack.commands.set.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(comment, ) = self.fillParams([
-			('comment', None, True)
-		])
+        (comment,) = self.fillParams([("comment", None, True)])
 
-		if len(comment) > 140:
-			raise CommandError(
-				self, 'comments must be no longer than 140 characters'
-			)
+        if len(comment) > 140:
+            raise CommandError(self, "comments must be no longer than 140 characters")
 
-		for host in hosts:
-			self.db.execute(
-				'update nodes set comment=%s where name=%s',
-				(comment, host)
-			)
+        for host in hosts:
+            self.db.execute(
+                "update nodes set comment=%s where name=%s", (comment, host)
+            )

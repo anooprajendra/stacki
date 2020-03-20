@@ -15,7 +15,7 @@ from stack.exception import ParamRequired, ParamType
 
 
 class Command(stack.commands.set.host.interface.command):
-	"""
+    """
 	Sets the VLAN ID for an interface on one of more hosts.
 
 	<arg type='string' name='host' repeat='1' optional='0'>
@@ -44,54 +44,56 @@ class Command(stack.commands.set.host.interface.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(vlan, interface, mac, network) = self.fillParams([
-			('vlan', None, True),
-			('interface', None),
-			('mac', None),
-			('network', None)
-		])
+        (vlan, interface, mac, network) = self.fillParams(
+            [
+                ("vlan", None, True),
+                ("interface", None),
+                ("mac", None),
+                ("network", None),
+            ]
+        )
 
-		# Gotta have one of these
-		if not any([interface, mac, network]):
-			raise ParamRequired(self, ('interface', 'mac', 'network'))
+        # Gotta have one of these
+        if not any([interface, mac, network]):
+            raise ParamRequired(self, ("interface", "mac", "network"))
 
-		# Make sure interface, mac, and/or network exist on our hosts
-		self.validate(hosts, interface, mac, network)
+        # Make sure interface, mac, and/or network exist on our hosts
+        self.validate(hosts, interface, mac, network)
 
-		# vlan has to be an integer
-		try:
-			vlan = int(vlan)
-		except:
-			raise ParamType(self, 'vlan', 'integer')
+        # vlan has to be an integer
+        try:
+            vlan = int(vlan)
+        except:
+            raise ParamType(self, "vlan", "integer")
 
-		# If vlan is 0 then it should be NULL in the db
-		if vlan == 0:
-			vlan = None
+        # If vlan is 0 then it should be NULL in the db
+        if vlan == 0:
+            vlan = None
 
-		for host in hosts:
-			if network:
-				sql = """
+        for host in hosts:
+            if network:
+                sql = """
 					update networks,nodes,subnets set networks.vlanid=%s
 					where nodes.name=%s and subnets.name=%s
 					and networks.node=nodes.id and networks.subnet=subnets.id
 				"""
-				values = [vlan, host, network]
-			else:
-				sql = """
+                values = [vlan, host, network]
+            else:
+                sql = """
 					update networks,nodes set networks.vlanid=%s
 					where nodes.name=%s and networks.node=nodes.id
 				"""
-				values = [vlan, host]
+                values = [vlan, host]
 
-			if interface:
-				sql += " and networks.device=%s"
-				values.append(interface)
+            if interface:
+                sql += " and networks.device=%s"
+                values.append(interface)
 
-			if mac:
-				sql += " and networks.mac=%s"
-				values.append(mac)
+            if mac:
+                sql += " and networks.mac=%s"
+                values.append(mac)
 
-			self.db.execute(sql, values)
+            self.db.execute(sql, values)

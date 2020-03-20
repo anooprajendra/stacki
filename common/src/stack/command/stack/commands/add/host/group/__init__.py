@@ -9,7 +9,7 @@ from stack.exception import ArgRequired, CommandError
 
 
 class Command(stack.commands.add.host.command):
-	"""
+    """
 	Adds a group to one or more hosts.
 
 	<arg type='string' name='host' repeat='1'>
@@ -25,35 +25,35 @@ class Command(stack.commands.add.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
-		
-		(group, ) = self.fillParams([
-			('group', None, True)
-		])
-		
-		exists = False
-		for row in self.call('list.group'):
-			if group == row['group']:
-				exists = True
-				break
-		if not exists:
-			raise CommandError(self, 'group %s does not exist' % group)
-			
-		membership  = {}
-		for row in self.call('list.host.group'):
-			membership[row['host']] = row['groups']
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
+        (group,) = self.fillParams([("group", None, True)])
 
-		for host in hosts:
-			if group in membership[host]:
-				raise CommandError(self, '%s already member of %s' % (host, group))
+        exists = False
+        for row in self.call("list.group"):
+            if group == row["group"]:
+                exists = True
+                break
+        if not exists:
+            raise CommandError(self, "group %s does not exist" % group)
 
-		for host in hosts:
-			self.db.execute("""
+        membership = {}
+        for row in self.call("list.host.group"):
+            membership[row["host"]] = row["groups"]
+
+        for host in hosts:
+            if group in membership[host]:
+                raise CommandError(self, "%s already member of %s" % (host, group))
+
+        for host in hosts:
+            self.db.execute(
+                """
 				insert into memberships(nodeid, groupid)
 				values (
 					(select id from nodes where name=%s),
 					(select id from groups where name=%s)
 				)
-			""", (host, group))
+			""",
+                (host, group),
+            )

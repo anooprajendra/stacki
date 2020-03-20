@@ -8,7 +8,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.environment.command):
-	"""
+    """
 	Lists the set of attributes for environments.
 
 	<arg optional='1' type='string' name='environment'>
@@ -20,6 +20,10 @@ class Command(stack.commands.list.environment.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.addText(self.command('list.attr', self._argv + [ 'scope=environment' ], verbose_errors = False))
-		return self.rc
+    def run(self, params, args):
+        self.addText(
+            self.command(
+                "list.attr", self._argv + ["scope=environment"], verbose_errors=False
+            )
+        )
+        return self.rc

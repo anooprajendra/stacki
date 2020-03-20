@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.remove.firmware.command):
-	"""
+    """
 	Removes a firmware model from the stacki database.
 
 	<arg type='string' name='model' repeat='1'>
@@ -30,5 +31,5 @@ class Command(stack.commands.remove.firmware.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.runPlugins(args = (params, args))
+    def run(self, params, args):
+        self.runPlugins(args=(params, args))

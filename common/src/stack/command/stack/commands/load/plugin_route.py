@@ -8,15 +8,12 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "route"
 
-	def provides(self):
-		return 'route'
+    def requires(self):
+        return ["network"]
 
-	def requires(self):
-		return [ 'network' ]
-
-	def run(self, section):
-		self.owner.set_scope('global')
-		self.owner.load_route(section)
-
-
+    def run(self, section):
+        self.owner.set_scope("global")
+        self.owner.load_route(section)

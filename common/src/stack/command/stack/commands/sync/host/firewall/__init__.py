@@ -11,12 +11,11 @@
 # @rocks@
 
 import stack.commands
-from stack.commands.sync.host import Parallel
-from stack.commands.sync.host import timeout
+from stack.commands.sync.host import Parallel, timeout
 
 
 class Command(stack.commands.sync.host.command):
-	"""
+    """
 	Reconfigure and optionally restart firewall for named hosts.
 
 	<param type='boolean' name='restart'>
@@ -30,101 +29,100 @@ class Command(stack.commands.sync.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		restart, = self.fillParams([ ('restart', 'yes') ])
-		restartit = self.str2bool(restart)
+    def run(self, params, args):
+        (restart,) = self.fillParams([("restart", "yes")])
+        restartit = self.str2bool(restart)
 
-		hosts = self.getHostnames(args, managed_only=1)
-		run_hosts = self.getRunHosts(hosts)
+        hosts = self.getHostnames(args, managed_only=1)
+        run_hosts = self.getRunHosts(hosts)
 
-		me = self.db.getHostname('localhost')
+        me = self.db.getHostname("localhost")
 
-		threads = []
-		out = {}
-		host_output = {}
+        threads = []
+        out = {}
+        host_output = {}
 
+        ha = self.call("list.host.attr", hosts)
+        g = lambda x: (x["attr"], x["value"])
 
-		ha = self.call('list.host.attr', hosts)
-		g = lambda x: (x['attr'], x['value'])
+        host_attrs = {}
+        for host in hosts:
+            if host not in host_attrs:
+                host_attrs[host] = {}
+            f = lambda x: x["host"] == host
+            tmp_f = list(filter(f, ha))
+            host_attrs[host] = dict(list(map(g, tmp_f)))
 
-		host_attrs = {}
-		for host in hosts:
-			if host not in host_attrs:
-				host_attrs[host] = {}
-			f = lambda x : x['host'] == host
-			tmp_f = list(filter(f, ha))
-			host_attrs[host] = dict(list(map(g, tmp_f)))
+        for h in run_hosts:
+            host = h["host"]
+            hostname = h["name"]
+            host_output[host] = {"output": "", "error": "", "rc": 0}
+            out[host] = ""
+            attrs = host_attrs[host]
 
-		for h in run_hosts:
-			host = h['host']
-			hostname = h['name']
-			host_output[host] = {"output": "", "error": "", "rc": 0}
-			out[host] = ""
-			attrs = host_attrs[host]
+            if self.str2bool(attrs.get("firewall")) is not True:
+                continue
 
-			if self.str2bool(attrs.get('firewall')) is not True:
-				continue
+            cmd = "/opt/stack/bin/stack report host firewall "
+            cmd += "%s | " % host
+            cmd += "/opt/stack/bin/stack report script "
+            cmd += 'attrs="%s" | ' % attrs
+            if me != host:
+                cmd += "ssh -T -x %s " % hostname
+            cmd += "bash > /dev/null 2>&1 "
 
-			cmd = '/opt/stack/bin/stack report host firewall '
-			cmd += '%s | ' % host
-			cmd += '/opt/stack/bin/stack report script '
-			cmd += 'attrs="%s" | ' % attrs
-			if me != host:
-				cmd += 'ssh -T -x %s ' % hostname
-			cmd += 'bash > /dev/null 2>&1 '
+            p = Parallel(cmd, host_output[host])
+            threads.append(p)
+            p.start()
+        #
+        # collect the threads
+        #
+        for thread in threads:
+            thread.join(timeout)
 
-			p = Parallel(cmd, host_output[host])
-			threads.append(p)
-			p.start()
-		#
-		# collect the threads
-		#
-		for thread in threads:
-			thread.join(timeout)
+        for host in host_output:
+            if host_output[host]["rc"]:
+                out[host] += host_output[host]["output"]
 
-		for host in host_output:
-			if host_output[host]["rc"]:
-				out[host] += host_output[host]['output']
+        if restartit:
+            threads = []
+            for h in run_hosts:
+                host = h["host"]
+                hostname = h["name"]
+                os_version = host_attrs[host]["os.version"]
+                os_name = host_attrs[host]["os"]
+                if os_name == "redhat":
+                    cmd = "systemctl restart iptables"
+                else:
+                    if os_version == "11.x":
+                        cmd = "/sbin/service stacki-iptables restart"
+                    else:
+                        cmd = "systemctl restart stacki-iptables"
 
-		if restartit:
-			threads = []
-			for h in run_hosts:
-				host = h['host']
-				hostname = h['name']
-				os_version = host_attrs[host]['os.version']
-				os_name = host_attrs[host]['os']
-				if os_name == 'redhat':
-					cmd = 'systemctl restart iptables'
-				else:
-					if os_version == '11.x':
-						cmd = '/sbin/service stacki-iptables restart'
-					else:
-						cmd = 'systemctl restart stacki-iptables'
+                if me != host:
+                    cmd = 'ssh -T -x %s "%s"' % (hostname, cmd)
+                host_output[host] = {"output": "", "error": "", "rc": 0}
+                p = Parallel(cmd, host_output[host])
+                threads.append(p)
+                p.start()
 
-				if me != host:
-					cmd = 'ssh -T -x %s "%s"' % (hostname, cmd)
-				host_output[host] = {"output": "", "error": "", "rc": 0}
-				p = Parallel(cmd, host_output[host])
-				threads.append(p)
-				p.start()
+            #
+            # collect the threads
+            #
+            for thread in threads:
+                thread.join(timeout)
 
-			#
-			# collect the threads
-			#
-			for thread in threads:
-				thread.join(timeout)
+        for host in host_output:
+            if host_output[host]["rc"]:
+                if isinstance((host_output[host]["output"]), bytes):
+                    out[host] += host_output[host]["output"].decode()
+                else:
+                    out[host] += str(host_output[host]["output"])
 
-		for host in host_output:
-			if host_output[host]["rc"]:
-				if isinstance((host_output[host]['output']), bytes):
-					out[host] += host_output[host]['output'].decode()
-				else:
-					out[host] += str(host_output[host]['output'])
+        self.beginOutput()
+        for host in out:
+            if len(out[host]):
+                self.addOutput(host, out[host])
 
-		self.beginOutput()
-		for host in out:
-			if len(out[host]):
-				self.addOutput(host, out[host])
-
-		self.runPlugins(hosts)
-		self.endOutput(header=['host', 'output'])
+        self.runPlugins(hosts)
+        self.endOutput(header=["host", "output"])

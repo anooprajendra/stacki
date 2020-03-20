@@ -12,153 +12,153 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+import cgi
+import json
 import os
 import re
-import sys
-import cgi
 import socket
-import json
+import sys
 import syslog
-import stack.lock
+
 import stack.api
 import stack.bool
-import stack.mq
 import stack.commands
+import stack.lock
+import stack.mq
 
 
 class Client:
-	"""
+    """
 	Metadata for the calling client, this is always passed to
 	the profile-os module to generate the installer script.
 	"""
 
-	def __init__(self, **kwargs):
-		self.form = cgi.FieldStorage()
-		self.addr = kwargs.get('addr')
-		self.port = kwargs.get('port')
-		self.arch = kwargs.get('arch')
-		self.np	  = kwargs.get('np')
-		self.os	  = kwargs.get('os')
+    def __init__(self, **kwargs):
+        self.form = cgi.FieldStorage()
+        self.addr = kwargs.get("addr")
+        self.port = kwargs.get("port")
+        self.arch = kwargs.get("arch")
+        self.np = kwargs.get("np")
+        self.os = kwargs.get("os")
 
-		if self.addr is None:
-			self.addr = os.environ['REMOTE_ADDR']
-		if self.port is None:
-			self.port = int(os.environ['REMOTE_PORT'])
+        if self.addr is None:
+            self.addr = os.environ["REMOTE_ADDR"]
+        if self.port is None:
+            self.port = int(os.environ["REMOTE_PORT"])
 
-		if not self.arch:
-			try:
-				self.arch = self.form['arch'].value
-			except:
-				self.arch = None
-			if not self.arch or re.search('[^a-zA-Z0-9_]+', self.arch):
-				print("Content-type: text/html")
-				print("Status: 500 Internal Error\n")
-				print("<h1>Invalid arch field</h1>")
-				self.status('install profile error (Invalid arch field)')
-				sys.exit(1)
+        if not self.arch:
+            try:
+                self.arch = self.form["arch"].value
+            except:
+                self.arch = None
+            if not self.arch or re.search("[^a-zA-Z0-9_]+", self.arch):
+                print("Content-type: text/html")
+                print("Status: 500 Internal Error\n")
+                print("<h1>Invalid arch field</h1>")
+                self.status("install profile error (Invalid arch field)")
+                sys.exit(1)
 
-		if not self.np:
-			try:
-				self.np = self.form['np'].value
-			except:
-				self.np = None
-			if not self.np or re.search('[^0-9]+', self.np):
-				print("Content-type: text/html")
-				print("Status: 500 Internal Error\n")
-				print("<h1>Invalid np field</h1>")
-				self.status('install profile error (Invalid np field)')
-				sys.exit(1)
+        if not self.np:
+            try:
+                self.np = self.form["np"].value
+            except:
+                self.np = None
+            if not self.np or re.search("[^0-9]+", self.np):
+                print("Content-type: text/html")
+                print("Status: 500 Internal Error\n")
+                print("<h1>Invalid np field</h1>")
+                self.status("install profile error (Invalid np field)")
+                sys.exit(1)
 
-		if not self.os:
-			try:
-				self.os = self.form['os'].value
-			except:
-				self.os = None
-			if not self.os:
-				print("Content-type: text/html")
-				print("Status: 500 Internal Error\n")
-				print("<h1>Invalid os field</h1>")
-				self.status('install profile error (Invalid os field)')
-				sys.exit(1)
+        if not self.os:
+            try:
+                self.os = self.form["os"].value
+            except:
+                self.os = None
+            if not self.os:
+                print("Content-type: text/html")
+                print("Status: 500 Internal Error\n")
+                print("<h1>Invalid os field</h1>")
+                self.status("install profile error (Invalid os field)")
+                sys.exit(1)
 
-		try:
-			osModule     = __import__('profile.%s' % self.os)
-			osClass	     = eval('osModule.%s.Profile' % self.os)
-			self.profile = osClass()
-		except ImportError:
-			self.profile = None
+        try:
+            osModule = __import__("profile.%s" % self.os)
+            osClass = eval("osModule.%s.Profile" % self.os)
+            self.profile = osClass()
+        except ImportError:
+            self.profile = None
 
-
-	def pre(self):
-		"""
+    def pre(self):
+        """
 		Run the OS-specific pre-semaphore code.
 		"""
-		if self.profile:
-			self.profile.pre(self)
+        if self.profile:
+            self.profile.pre(self)
 
-	def main(self):
-		"""
+    def main(self):
+        """
 		Run the OS-specific profile generator.
 		"""
-		if self.profile:
-			self.profile.main(self)
+        if self.profile:
+            self.profile.main(self)
 
-	def post(self):
-		"""
+    def post(self):
+        """
 		Run the OS-specific post-semaphore code.
 		"""
-		if self.profile:
-			self.profile.post(self)
-		else:
-			print("Content-type: text/html")
-			print("Status: 500 Internal Error\n")
-			print("<h1>Unsupported OS</h1>")
+        if self.profile:
+            self.profile.post(self)
+        else:
+            print("Content-type: text/html")
+            print("Status: 500 Internal Error\n")
+            print("<h1>Unsupported OS</h1>")
 
-	def status(self, message):
-		if self.interactive == 1:
-			return
-			
-		msg = { 'source' : self.addr, 
-			'channel': 'health', 
-			'payload': '{"state": "%s"}' % message }
+    def status(self, message):
+        if self.interactive == 1:
+            return
 
-		tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		tx.sendto(json.dumps(msg).encode(), 
-			  ('127.0.0.1', stack.mq.ports.publish))
-		tx.close()
-	
+        msg = {
+            "source": self.addr,
+            "channel": "health",
+            "payload": '{"state": "%s"}' % message,
+        }
+
+        tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        tx.sendto(json.dumps(msg).encode(), ("127.0.0.1", stack.mq.ports.publish))
+        tx.close()
+
+
 ##
 ## MAIN
 ##
 
 
-mutex	  = stack.lock.Mutex('/var/tmp/profile.mutex')
-semaphore = stack.lock.Semaphore('/var/tmp/profile.semaphore')
+mutex = stack.lock.Mutex("/var/tmp/profile.mutex")
+semaphore = stack.lock.Semaphore("/var/tmp/profile.semaphore")
 
-if 'REMOTE_ADDR' not in os.environ:
+if "REMOTE_ADDR" not in os.environ:
 
-	# CGI's always set this, so if it doesn't exist someone is
-	# running this directly on the command line for debugging
+    # CGI's always set this, so if it doesn't exist someone is
+    # running this directly on the command line for debugging
 
-	if len(sys.argv) == 2:
-		client_os = sys.argv[1]
-	else:
-		client_os = 'redhat'
-	client = Client(**{ 'addr' : '127.0.0.1',
-			    'port' : 0,
-			    'arch' : 'x86_64',
-			    'os'   : client_os,
-			    'np'   : '1' })
+    if len(sys.argv) == 2:
+        client_os = sys.argv[1]
+    else:
+        client_os = "redhat"
+    client = Client(
+        **{"addr": "127.0.0.1", "port": 0, "arch": "x86_64", "os": client_os, "np": "1"}
+    )
 
-	client.interactive = 1
+    client.interactive = 1
 else:
-	client = Client()
-	client.interactive = 0
+    client = Client()
+    client.interactive = 0
 
-client.status('install profile request')
+client.status("install profile request")
 
-syslog.openlog('profile', syslog.LOG_PID, syslog.LOG_LOCAL0)
-syslog.syslog(syslog.LOG_DEBUG, 'request %s:%s' % (client.addr, client.port))
+syslog.openlog("profile", syslog.LOG_PID, syslog.LOG_LOCAL0)
+syslog.syslog(syslog.LOG_DEBUG, "request %s:%s" % (client.addr, client.port))
 client.pre()
 
 # Use a semaphore to restrict the number of concurrent profile
@@ -169,38 +169,38 @@ empty = False
 mutex.acquire()
 count = semaphore.read()
 if count is None:
-	syslog.syslog(syslog.LOG_DEBUG, 'semaphore not found')
-	try:
-		cmd = "grep 'processor' /proc/cpuinfo | wc -l"
-		out = os.popen(cmd).readline()
-		count = int(out)
-	except:
-		count = 8
+    syslog.syslog(syslog.LOG_DEBUG, "semaphore not found")
+    try:
+        cmd = "grep 'processor' /proc/cpuinfo | wc -l"
+        out = os.popen(cmd).readline()
+        count = int(out)
+    except:
+        count = 8
 if count == 0:
-	syslog.syslog(syslog.LOG_DEBUG, 'semaphore found but zero')
-	# Out of resources force the client to retry,
-	# and exit the cgi after we release the mutex.
-	print("Content-type: text/html")
-	print("Status: 503 Service Busy")
-	print("Retry-After: 15")
-	print()
-	print("<h1>Service is Busy</h1>")
-	empty = True
-	client.status('install profile retry')
+    syslog.syslog(syslog.LOG_DEBUG, "semaphore found but zero")
+    # Out of resources force the client to retry,
+    # and exit the cgi after we release the mutex.
+    print("Content-type: text/html")
+    print("Status: 503 Service Busy")
+    print("Retry-After: 15")
+    print()
+    print("<h1>Service is Busy</h1>")
+    empty = True
+    client.status("install profile retry")
 else:
-	count -= 1
-	semaphore.write(count)
+    count -= 1
+    semaphore.write(count)
 mutex.release()
 if empty:
-	sys.exit(0)
+    sys.exit(0)
 
-syslog.syslog(syslog.LOG_DEBUG, 'semaphore push %d' % count)
+syslog.syslog(syslog.LOG_DEBUG, "semaphore push %d" % count)
 
 #
 # set some values in the database based on the web request
 #
-stack.api.Call('set host attr', [ client.addr, 'attr=arch', 'value=%s' % client.arch ])
-stack.api.Call('set host attr', [ client.addr, 'attr=cpus', 'value=%s' % client.np ])
+stack.api.Call("set host attr", [client.addr, "attr=arch", "value=%s" % client.arch])
+stack.api.Call("set host attr", [client.addr, "attr=cpus", "value=%s" % client.np])
 
 #
 # update the MAC info in the database
@@ -210,75 +210,73 @@ stack.api.Call('set host attr', [ client.addr, 'attr=cpus', 'value=%s' % client.
 #
 profile_update_macs = 1
 
-output = stack.api.Call('list host attr',
-	[ client.addr, 'attr=profile.update_macs' ])
+output = stack.api.Call("list host attr", [client.addr, "attr=profile.update_macs"])
 
 if output:
-	row = output[0]
+    row = output[0]
 
-	if not stack.bool.str2bool(row['value']):
-		profile_update_macs = 0
+    if not stack.bool.str2bool(row["value"]):
+        profile_update_macs = 0
 
 if profile_update_macs:
-	#
-	# add all the detected network interfaces to the database
-	#
-	ifaces = []
-	macs = []
-	modules = []
-	flags = []
+    #
+    # add all the detected network interfaces to the database
+    #
+    ifaces = []
+    macs = []
+    modules = []
+    flags = []
 
-	for i in os.environ:
-		if re.match('HTTP_X_RHN_PROVISIONING_MAC_[0-9]+', i):
-			devinfo = os.environ[i].split()
-			iface	= devinfo[0]
-			macaddr = devinfo[1].lower()
-			module	= ''
-			if len(devinfo) > 2:
-				module = devinfo[2]
+    for i in os.environ:
+        if re.match("HTTP_X_RHN_PROVISIONING_MAC_[0-9]+", i):
+            devinfo = os.environ[i].split()
+            iface = devinfo[0]
+            macaddr = devinfo[1].lower()
+            module = ""
+            if len(devinfo) > 2:
+                module = devinfo[2]
 
-			ks = ''
-			if len(devinfo) > 3:
-				ks = 'ks'
+            ks = ""
+            if len(devinfo) > 3:
+                ks = "ks"
 
-			ifaces.append(iface)
-			macs.append(macaddr)
-			modules.append(module)
-			flags.append(ks)
+            ifaces.append(iface)
+            macs.append(macaddr)
+            modules.append(module)
+            flags.append(ks)
 
-	params = []
-	if len(ifaces) > 0 and len(macs) > 0:
-		params.append('interface=%s' % ','.join(ifaces))
-		params.append('mac=%s' % ','.join(macs))
-		params.append('sync=False')
+    params = []
+    if len(ifaces) > 0 and len(macs) > 0:
+        params.append("interface=%s" % ",".join(ifaces))
+        params.append("mac=%s" % ",".join(macs))
+        params.append("sync=False")
 
-		if len(modules) > 0:
-			params.append('module=%s' % (','.join(modules)))
-		if len(flags) > 0:
-			params.append('flag=%s' % (','.join(flags)))
+        if len(modules) > 0:
+            params.append("module=%s" % (",".join(modules)))
+        if len(flags) > 0:
+            params.append("flag=%s" % (",".join(flags)))
 
-		stack.api.Call('config host interface',
-			[ client.addr ] + params)
+        stack.api.Call("config host interface", [client.addr] + params)
 
 # See if we are actually installing
 do_install = True
-output = stack.api.Call('list host attr', [client.addr, 'attr=discovery.install'])
-if output and not stack.bool.str2bool(output[0]['value']):
-	do_install = False
+output = stack.api.Call("list host attr", [client.addr, "attr=discovery.install"])
+if output and not stack.bool.str2bool(output[0]["value"]):
+    do_install = False
 
 if do_install:
-	# Generate the system profile
-	client.main()
+    # Generate the system profile
+    client.main()
 else:
-	# Signal to the node to shutdown
-	print("Status: 204 No Content")
-	print()
+    # Signal to the node to shutdown
+    print("Status: 204 No Content")
+    print()
 
-	# Set the boot action back to os
-	stack.api.Call("set host boot", [client.addr, "action=os"])
+    # Set the boot action back to os
+    stack.api.Call("set host boot", [client.addr, "action=os"])
 
-	# Remove the discovery.install attribute
-	stack.api.Call("remove host attr", [client.addr, "attr=discovery.install"])
+    # Remove the discovery.install attribute
+    stack.api.Call("remove host attr", [client.addr, "attr=discovery.install"])
 
 #
 # Release resource semaphore.
@@ -287,6 +285,6 @@ mutex.acquire()
 count = semaphore.read() + 1
 semaphore.write(count)
 mutex.release()
-syslog.syslog(syslog.LOG_DEBUG, 'semaphore pop %d' % count)
+syslog.syslog(syslog.LOG_DEBUG, "semaphore pop %d" % count)
 client.post()
-client.status('install profile sent')
+client.status("install profile sent")

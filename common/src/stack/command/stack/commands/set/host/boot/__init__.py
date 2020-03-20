@@ -15,7 +15,7 @@ from stack.exception import ParamValue
 
 
 class Command(stack.commands.set.host.command):
-	"""
+    """
 	Set a bootaction for a host. A hosts action can be set to 'install'
 	or to 'os'.
 
@@ -48,53 +48,59 @@ class Command(stack.commands.set.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(action, nukedisks, nukecontroller, sync) = self.fillParams([
-			('action', None, True),
-			('nukedisks', None, False),
-			('nukecontroller', None, False),
-			('sync', True)
-		])
+        (action, nukedisks, nukecontroller, sync) = self.fillParams(
+            [
+                ("action", None, True),
+                ("nukedisks", None, False),
+                ("nukecontroller", None, False),
+                ("sync", True),
+            ]
+        )
 
-		sync = self.str2bool(sync)
-		if action not in ['os', 'install']:
-			raise ParamValue(self, 'action', 'one of: os, install')
+        sync = self.str2bool(sync)
+        if action not in ["os", "install"]:
+            raise ParamValue(self, "action", "one of: os, install")
 
-		# Get the mapping of hosts with boot actions and thier PK
-		hosts_with_boot = {row[0]: row[1] for row in self.db.select(
-			'nodes.name, nodes.id from nodes, boot where nodes.id=boot.node'
-		)}
+        # Get the mapping of hosts with boot actions and thier PK
+        hosts_with_boot = {
+            row[0]: row[1]
+            for row in self.db.select(
+                "nodes.name, nodes.id from nodes, boot where nodes.id=boot.node"
+            )
+        }
 
-		for host in hosts:
-			if host in hosts_with_boot:
-				self.db.execute(
-					'update boot set action=%s where node=%s',
-					(action, hosts_with_boot[host])
-				)
-			else:
-				self.db.execute("""
+        for host in hosts:
+            if host in hosts_with_boot:
+                self.db.execute(
+                    "update boot set action=%s where node=%s",
+                    (action, hosts_with_boot[host]),
+                )
+            else:
+                self.db.execute(
+                    """
 					insert into boot(action, node) values (
 						%s, (select id from nodes where name=%s)
 					)
-				""", (action, host))
+				""",
+                    (action, host),
+                )
 
-		if nukedisks is not None:
-			args = hosts.copy()
-			args.extend([
-				'attr=nukedisks', 'value=%s' % self.str2bool(nukedisks)
-			])
+        if nukedisks is not None:
+            args = hosts.copy()
+            args.extend(["attr=nukedisks", "value=%s" % self.str2bool(nukedisks)])
 
-			self.command('set.host.attr', args)
+            self.command("set.host.attr", args)
 
-		if nukecontroller is not None:
-			args = hosts.copy()
-			args.extend([
-				'attr=nukecontroller', 'value=%s' % self.str2bool(nukecontroller)
-			])
+        if nukecontroller is not None:
+            args = hosts.copy()
+            args.extend(
+                ["attr=nukecontroller", "value=%s" % self.str2bool(nukecontroller)]
+            )
 
-			self.command('set.host.attr', args)
+            self.command("set.host.attr", args)
 
-		if sync:
-			self.command('sync.host.boot', hosts)
+        if sync:
+            self.command("sync.host.boot", hosts)

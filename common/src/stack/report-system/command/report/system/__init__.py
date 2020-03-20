@@ -5,18 +5,19 @@
 # @copyright@
 #
 
-import stack.commands
-from stack.exception import CommandError
-import shutil
-from collections import namedtuple
-from pytest import main
-from glob import glob
 import os
 import pathlib
+import shutil
+from collections import namedtuple
+from glob import glob
 
-class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
-	"""
+import stack.commands
+from pytest import main
+from stack.exception import CommandError
+
+
+class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
+    """
 	<arg type='string' name='options' repeat='1'>
 	Zero or more options to pass to pytest.
 	</arg>
@@ -47,35 +48,38 @@ class Command(stack.commands.Command,
 
 	"""
 
-	def run(self, params, args):
-		(exitonfail, pretty) = self.fillParams([
-			('exitonfail', False),
-			('pretty', True)
-			])
+    def run(self, params, args):
+        (exitonfail, pretty) = self.fillParams(
+            [("exitonfail", False), ("pretty", True)]
+        )
 
-		exitonfail = self.str2bool(exitonfail)
-		pretty = self.str2bool(pretty)
+        exitonfail = self.str2bool(exitonfail)
+        pretty = self.str2bool(pretty)
 
-		current_dir = os.getcwd()
-		os.chdir(pathlib.Path(__file__).parent)
-		tests = glob('tests/*')
+        current_dir = os.getcwd()
+        os.chdir(pathlib.Path(__file__).parent)
+        tests = glob("tests/*")
 
-		# make it real ugly.
-		# Pytest -rs option is used to output message when a test is skipped
-		if exitonfail and not pretty:
-			_return_code = main(['--verbose', '--exitfirst', '-rs', *args, *tests])
-		# exit with first failure
-		elif exitonfail:
-			_return_code = main(['--verbose', '--capture=no', '--exitfirst', '-rs', *args, *tests])
-		# show tracebacks of failures but don't fail.
-		elif not pretty:
-			_return_code = main(['--verbose', '--capture=no', '-rs', *args, *tests])
-		# pretty and no tracebacks
-		else:
-			_return_code = main(['--verbose', '--capture=no', '--tb=no', '-rs', *args, *tests])
+        # make it real ugly.
+        # Pytest -rs option is used to output message when a test is skipped
+        if exitonfail and not pretty:
+            _return_code = main(["--verbose", "--exitfirst", "-rs", *args, *tests])
+        # exit with first failure
+        elif exitonfail:
+            _return_code = main(
+                ["--verbose", "--capture=no", "--exitfirst", "-rs", *args, *tests]
+            )
+        # show tracebacks of failures but don't fail.
+        elif not pretty:
+            _return_code = main(["--verbose", "--capture=no", "-rs", *args, *tests])
+        # pretty and no tracebacks
+        else:
+            _return_code = main(
+                ["--verbose", "--capture=no", "--tb=no", "-rs", *args, *tests]
+            )
 
-		os.chdir(current_dir)
+        os.chdir(current_dir)
 
-		# If any of the tests failed, throw an error
-		if _return_code > 0:
-			raise CommandError(self, "One or more tests failed")
+        # If any of the tests failed, throw an error
+        if _return_code > 0:
+            raise CommandError(self, "One or more tests failed")

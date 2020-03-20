@@ -10,29 +10,29 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+import atexit
 import pathlib
 import shutil
-from contextlib import ExitStack
-import atexit
+import subprocess
 import tempfile
+from contextlib import ExitStack
 from operator import attrgetter
 from textwrap import dedent
-import subprocess
 
 import stack.commands
 from stack import probepal
-from stack.util import flatten
 from stack.exception import CommandError, UsageError
+from stack.util import flatten
 
-info_getter = attrgetter('name', 'version', 'release', 'distro_family', 'arch')
+info_getter = attrgetter("name", "version", "release", "distro_family", "arch")
 
 
 class command(stack.commands.add.command):
-	pass
+    pass
 
 
 class Command(command):
-	"""
+    """
 	Add pallets to this machine's pallet directory. This command copies all
 	files in ISOs or paths recognized by stacki to be pallets to the local
 	machine. The default location is a directory under /export/stack/pallets.
@@ -90,249 +90,274 @@ class Command(command):
 	<related>create new pallet</related>
 	"""
 
-	def write_pallet_xml(self, stacki_pallet_root, pallet_info):
-		'''
+    def write_pallet_xml(self, stacki_pallet_root, pallet_info):
+        """
 		Create a roll-*.xml file compatible with the rest of stacki's tooling
 		note: if we copied an existing roll-*.xml, don't overwrite it here as it may have
 		more metadata
-		'''
-		destdir = pathlib.Path(stacki_pallet_root).joinpath(*info_getter(pallet_info))
-		name, version, release, distro_family, arch = info_getter(pallet_info)
+		"""
+        destdir = pathlib.Path(stacki_pallet_root).joinpath(*info_getter(pallet_info))
+        name, version, release, distro_family, arch = info_getter(pallet_info)
 
-		if destdir.joinpath(f'roll-{name}.xml').exists():
-			return
+        if destdir.joinpath(f"roll-{name}.xml").exists():
+            return
 
-		with open(f'{destdir}/roll-{name}.xml', 'w') as xml:
-			xml.write(dedent(f'''\
+        with open(f"{destdir}/roll-{name}.xml", "w") as xml:
+            xml.write(
+                dedent(
+                    f"""\
 			<roll name="{name}" interface="6.0.2">
 			<info version="{version}" release="{release}" arch="{arch}" os="{distro_family}"/>
 			<iso maxsize="0" addcomps="0" bootable="0"/>
 			<rpm rolls="0" bin="1" src="0"/>
 			</roll>
-			'''))
+			"""
+                )
+            )
 
-
-	def copy(self, stacki_pallet_root, pallet_info, clean):
-		'''
+    def copy(self, stacki_pallet_root, pallet_info, clean):
+        """
 		Copy a pallet to the local filesystem
 
 		Specifically, rsync from `pallet_info.pallet_root` to
 		`stacki_pallet_root`/name/version/release/os/arch/
-		'''
-		pallet_dir = pallet_info.pallet_root
-		destdir = pathlib.Path(stacki_pallet_root).joinpath(*info_getter(pallet_info))
-
-		if destdir.exists() and clean:
-			print(f'Cleaning {"-".join(info_getter(pallet_info))} from pallets directory')
-			shutil.rmtree(destdir)
-
-		print(f'Copying {"-".join(info_getter(pallet_info))} ...')
-
-		if not destdir.exists():
-			destdir.mkdir(parents=True, exist_ok=True)
-
-		# use rsync to perform the copy
-		# archive implies
-		# --recursive,
-		# --links - copy symlinks as symlinks
-		# --perms - preserve permissions
-		# --times - preserve mtimes
-		# --group - preserve group
-		# --owner - preserve owner
-		# --devices - preserve device files
-		# --specials - preserve special files
-		# we then overwrite the permissions to make apache happy.
-		cmd = f'rsync --archive --chmod=D755 --chmod=F644 --exclude "TRANS.TBL" {pallet_dir}/ {destdir}/'
-		result = self._exec(cmd, shlexsplit=True)
-		if result.returncode != 0:
-			raise CommandError(self, f'Unable to copy pallet:\n{result.stderr}')
-
-		return destdir
-
-
-	def update_db(self, pallet_info, URL):
 		"""
+        pallet_dir = pallet_info.pallet_root
+        destdir = pathlib.Path(stacki_pallet_root).joinpath(*info_getter(pallet_info))
+
+        if destdir.exists() and clean:
+            print(
+                f'Cleaning {"-".join(info_getter(pallet_info))} from pallets directory'
+            )
+            shutil.rmtree(destdir)
+
+        print(f'Copying {"-".join(info_getter(pallet_info))} ...')
+
+        if not destdir.exists():
+            destdir.mkdir(parents=True, exist_ok=True)
+
+        # use rsync to perform the copy
+        # archive implies
+        # --recursive,
+        # --links - copy symlinks as symlinks
+        # --perms - preserve permissions
+        # --times - preserve mtimes
+        # --group - preserve group
+        # --owner - preserve owner
+        # --devices - preserve device files
+        # --specials - preserve special files
+        # we then overwrite the permissions to make apache happy.
+        cmd = f'rsync --archive --chmod=D755 --chmod=F644 --exclude "TRANS.TBL" {pallet_dir}/ {destdir}/'
+        result = self._exec(cmd, shlexsplit=True)
+        if result.returncode != 0:
+            raise CommandError(self, f"Unable to copy pallet:\n{result.stderr}")
+
+        return destdir
+
+    def update_db(self, pallet_info, URL):
+        """
 		Insert the pallet information into the database if not already present.
 		"""
 
-		rows = self.db.select(
-			'id FROM rolls WHERE name=%s AND version=%s AND rel=%s AND os=%s AND arch=%s',
-			info_getter(pallet_info)
-		)
+        rows = self.db.select(
+            "id FROM rolls WHERE name=%s AND version=%s AND rel=%s AND os=%s AND arch=%s",
+            info_getter(pallet_info),
+        )
 
-		if len(rows) == 0:
-			# New pallet
-			self.db.execute("""
+        if len(rows) == 0:
+            # New pallet
+            self.db.execute(
+                """
 				insert into rolls(name, version, rel, os, arch, URL)
 				values (%s, %s, %s, %s, %s, %s)
-				""", (*info_getter(pallet_info), URL)
-			)
-		else:
-			# Re-added the pallet. Update the URL.
-			self.db.execute('UPDATE rolls SET url=%s WHERE id=%s', (URL, rows[0][0]))
+				""",
+                (*info_getter(pallet_info), URL),
+            )
+        else:
+            # Re-added the pallet. Update the URL.
+            self.db.execute("UPDATE rolls SET url=%s WHERE id=%s", (URL, rows[0][0]))
 
-	def mount(self, iso_name, mount_point):
-		'''
+    def mount(self, iso_name, mount_point):
+        """
 		mount `iso_name` to `mount_point`
 		we automatically register an unmount callback
-		'''
+		"""
 
-		# mount readonly explicitly to get around a weird behavior
-		# in sles12 that prevents re-mounting an already mounted iso
-		proc = self._exec(f'mount --read-only -o loop {iso_name} {mount_point}', shlexsplit=True)
-		if proc.returncode != 0:
-			msg = f'Pallet could not be added - unable to mount {iso_name}.'
-			msg += f'\nTried: {" ".join(str(arg) for arg in proc.args)}'
-			raise CommandError(self, f'{msg}\n{proc.stdout}\n{proc.stderr}')
-		self.deferred.callback(self.umount, iso_name, mount_point)
+        # mount readonly explicitly to get around a weird behavior
+        # in sles12 that prevents re-mounting an already mounted iso
+        proc = self._exec(
+            f"mount --read-only -o loop {iso_name} {mount_point}", shlexsplit=True
+        )
+        if proc.returncode != 0:
+            msg = f"Pallet could not be added - unable to mount {iso_name}."
+            msg += f'\nTried: {" ".join(str(arg) for arg in proc.args)}'
+            raise CommandError(self, f"{msg}\n{proc.stdout}\n{proc.stderr}")
+        self.deferred.callback(self.umount, iso_name, mount_point)
 
-
-	def umount(self, iso_name, mount_point):
-		'''
+    def umount(self, iso_name, mount_point):
+        """
 		un-mount `mount_point`, first checking to see if it is actually mounted
-		'''
+		"""
 
-		proc = self._exec(f'mount | grep {mount_point}', shell=True)
-		if proc.returncode == 1 and proc.stdout.strip() == '':
-			return
-		proc = self._exec(f'umount {mount_point}', shlexsplit=True)
-		if proc.returncode != 0:
-			msg = f'Pallet could not be unmounted from {mount_point} ({iso_name}).'
-			msg += f'\nTried: {" ".join(str(arg) for arg in proc.args)}'
-			raise CommandError(self, f'{msg}\n{proc.stdout}\n{proc.stderr}')
+        proc = self._exec(f"mount | grep {mount_point}", shell=True)
+        if proc.returncode == 1 and proc.stdout.strip() == "":
+            return
+        proc = self._exec(f"umount {mount_point}", shlexsplit=True)
+        if proc.returncode != 0:
+            msg = f"Pallet could not be unmounted from {mount_point} ({iso_name})."
+            msg += f'\nTried: {" ".join(str(arg) for arg in proc.args)}'
+            raise CommandError(self, f"{msg}\n{proc.stdout}\n{proc.stderr}")
 
-
-	def patch_pallet(self, pallet_info):
-		'''
+    def patch_pallet(self, pallet_info):
+        """
 		Run any available pallet patches
-		'''
+		"""
 
-		pallet_patch_dir = '-'.join(info_getter(pallet_info))
-		patch_dir = pathlib.Path(f'/opt/stack/pallet-patches/{pallet_patch_dir}')
-		print(f'checking for patches in {patch_dir}')
-		if not patch_dir.is_dir():
-			return
+        pallet_patch_dir = "-".join(info_getter(pallet_info))
+        patch_dir = pathlib.Path(f"/opt/stack/pallet-patches/{pallet_patch_dir}")
+        print(f"checking for patches in {patch_dir}")
+        if not patch_dir.is_dir():
+            return
 
-		patches = sorted(list(patch_dir.glob('*.sh')) + list(patch_dir.glob('*.py')), key=lambda p: p.name)
-		for patch in patches:
-			print(f'applying patch: {patch}')
-			try:
-				self._exec(str(patch), cwd=patch_dir, check=True)
-			except PermissionError as e:
-				raise CommandError(self, f'Unable to apply patch: {str(patch)}\n{e}')
-			except subprocess.CalledProcessError as e:
-				print(e)
+        patches = sorted(
+            list(patch_dir.glob("*.sh")) + list(patch_dir.glob("*.py")),
+            key=lambda p: p.name,
+        )
+        for patch in patches:
+            print(f"applying patch: {patch}")
+            try:
+                self._exec(str(patch), cwd=patch_dir, check=True)
+            except PermissionError as e:
+                raise CommandError(self, f"Unable to apply patch: {str(patch)}\n{e}")
+            except subprocess.CalledProcessError as e:
+                print(e)
 
+    def run(self, params, args):
+        (
+            clean,
+            stacki_pallet_dir,
+            updatedb,
+            self.username,
+            self.password,
+        ) = self.fillParams(
+            [
+                ("clean", False),
+                ("dir", "/export/stack/pallets"),
+                ("updatedb", True),
+                ("username", None),
+                ("password", None),
+            ]
+        )
 
-	def run(self, params, args):
-		clean, stacki_pallet_dir, updatedb, self.username, self.password = self.fillParams([
-			('clean', False),
-			('dir', '/export/stack/pallets'),
-			('updatedb', True),
-			('username', None),
-			('password', None),
-		])
+        # need to provide either both or none
+        if self.username or self.password and not all((self.username, self.password)):
+            raise UsageError(self, "must supply a password along with the username")
 
-		# need to provide either both or none
-		if self.username or self.password and not all((self.username, self.password)):
-			raise UsageError(self, 'must supply a password along with the username')
+        clean = self.str2bool(clean)
+        updatedb = self.str2bool(updatedb)
 
-		clean = self.str2bool(clean)
-		updatedb = self.str2bool(updatedb)
+        # create a contextmanager that we can append cleanup jobs to
+        # add its closing to run atexit, so we know it will run
+        self.deferred = ExitStack()
+        atexit.register(self.deferred.close)
 
-		# create a contextmanager that we can append cleanup jobs to
-		# add its closing to run atexit, so we know it will run
-		self.deferred = ExitStack()
-		atexit.register(self.deferred.close)
+        # special case: no args were specified - check if a pallet is mounted at /mnt/cdrom
+        if not args:
+            mount_point = "/mnt/cdrom"
+            result = self._exec(f"mount | grep {mount_point}", shell=True)
+            if result.returncode != 0:
+                raise CommandError(
+                    self, "no pallets specified and /mnt/cdrom is unmounted"
+                )
+            args.append(mount_point)
 
-		# special case: no args were specified - check if a pallet is mounted at /mnt/cdrom
-		if not args:
-			mount_point = '/mnt/cdrom'
-			result = self._exec(f'mount | grep {mount_point}', shell=True)
-			if result.returncode != 0:
-				raise CommandError(self, 'no pallets specified and /mnt/cdrom is unmounted')
-			args.append(mount_point)
+        # resolve args and check for existence
+        bad_args = []
+        for i, arg in enumerate(list(args)):
+            # TODO: is this a problem?
+            if arg.startswith(("https://", "http://", "ftp://")):
+                args[i] = arg
+                continue
 
-		# resolve args and check for existence
-		bad_args = []
-		for i, arg in enumerate(list(args)):
-			# TODO: is this a problem?
-			if arg.startswith(('https://', 'http://', 'ftp://')):
-				args[i] = arg
-				continue
+            p = pathlib.Path(arg)
+            if not p.exists():
+                bad_args.append(arg)
+            else:
+                args[i] = str(p.resolve())
 
-			p = pathlib.Path(arg)
-			if not p.exists():
-				bad_args.append(arg)
-			else:
-				args[i] = str(p.resolve())
+        if bad_args:
+            msg = "The following arguments appear to be local paths that do not exist: "
+            raise CommandError(self, msg + ", ".join(bad_args))
 
-		if bad_args:
-			msg = 'The following arguments appear to be local paths that do not exist: '
-			raise CommandError(self, msg + ', '.join(bad_args))
+        # most plugins will need a temporary directory, so allocate them here so we do cleanup
+        # 'canonical_arg' is the arg provided by the user, but cleaned to be explicit (relative
+        # paths resolved, etc)
+        # 'exploded_path' is the directory where we will start searching for pallets
+        # 'matched_pallets' is a list of pallet_info objects found at that path.
+        pallet_args = {}
+        for arg in args:
+            tmpdir = tempfile.mkdtemp()
+            self.deferred.callback(shutil.rmtree, tmpdir)
+            pallet_args[arg] = {
+                "canonical_arg": arg,
+                "exploded_path": tmpdir,
+                "matched_pallets": [],
+            }
 
-		# most plugins will need a temporary directory, so allocate them here so we do cleanup
-		# 'canonical_arg' is the arg provided by the user, but cleaned to be explicit (relative
-		# paths resolved, etc)
-		# 'exploded_path' is the directory where we will start searching for pallets
-		# 'matched_pallets' is a list of pallet_info objects found at that path.
-		pallet_args = {}
-		for arg in args:
-			tmpdir = tempfile.mkdtemp()
-			self.deferred.callback(shutil.rmtree, tmpdir)
-			pallet_args[arg] = {
-				'canonical_arg': arg,
-				'exploded_path': tmpdir,
-				'matched_pallets': [],
-			}
+        self.runPlugins(pallet_args)
 
-		self.runPlugins(pallet_args)
+        prober = probepal.Prober()
+        pallet_infos = prober.find_pallets(
+            *[pallet_args[path]["exploded_path"] for path in pallet_args]
+        )
 
-		prober = probepal.Prober()
-		pallet_infos = prober.find_pallets(
-			*[pallet_args[path]['exploded_path'] for path in pallet_args]
-		)
+        # pallet_infos returns a dict {path: [pallet1, ...]}
+        # note the list - an exploded_path can point to a jumbo pallet
 
-		# pallet_infos returns a dict {path: [pallet1, ...]}
-		# note the list - an exploded_path can point to a jumbo pallet
+        for path, pals in pallet_infos.items():
+            for arg in pallet_args:
+                if pallet_args[arg]["exploded_path"] == path:
+                    pallet_args[arg]["matched_pallets"] = pals
 
-		for path, pals in pallet_infos.items():
-			for arg in pallet_args:
-				if pallet_args[arg]['exploded_path'] == path:
-					pallet_args[arg]['matched_pallets'] = pals
+        # TODO what to do if we match something twice.
+        bad_args = [
+            arg for arg, info in pallet_args.items() if not info["matched_pallets"]
+        ]
+        if bad_args:
+            msg = "The following arguments do not appear to be pallets: "
+            raise CommandError(self, msg + ", ".join(bad_args))
 
-		# TODO what to do if we match something twice.
-		bad_args = [arg for arg, info in pallet_args.items() if not info['matched_pallets']]
-		if bad_args:
-			msg = 'The following arguments do not appear to be pallets: '
-			raise CommandError(self, msg + ', '.join(bad_args))
+        # work off of a copy of pallet args, as we modify it as we go
+        for arg, data in pallet_args.copy().items():
+            if len(data["matched_pallets"]) == 1:
+                pallet_args[arg]["exploded_path"] = data["matched_pallets"][
+                    0
+                ].pallet_root
+                continue
 
-		# work off of a copy of pallet args, as we modify it as we go
-		for arg, data in pallet_args.copy().items():
-			if len(data['matched_pallets']) == 1:
-				pallet_args[arg]['exploded_path'] = data['matched_pallets'][0].pallet_root
-				continue
+            # delete the arg pointing to a jumbo and replace it with N new 'dummy' args
+            del pallet_args[arg]
+            for pal in data["matched_pallets"]:
+                fake_arg_name = "-".join(info_getter(pal))
+                pallet_args[fake_arg_name] = data.copy()
+                pallet_args[fake_arg_name]["exploded_path"] = pal.pallet_root
+                pallet_args[fake_arg_name]["matched_pallets"] = [pal]
 
-			# delete the arg pointing to a jumbo and replace it with N new 'dummy' args
-			del pallet_args[arg]
-			for pal in data['matched_pallets']:
-				fake_arg_name = '-'.join(info_getter(pal))
-				pallet_args[fake_arg_name] = data.copy()
-				pallet_args[fake_arg_name]['exploded_path'] = pal.pallet_root
-				pallet_args[fake_arg_name]['matched_pallets'] = [pal]
+        # we want to be able to go tempdir to arg
+        # this is because we want `canonical_arg` to be what goes in as the `URL` field in the db
+        paths_to_args = {
+            data["exploded_path"]: data["canonical_arg"]
+            for data in pallet_args.values()
+        }
 
-		# we want to be able to go tempdir to arg
-		# this is because we want `canonical_arg` to be what goes in as the `URL` field in the db
-		paths_to_args = {data['exploded_path']: data['canonical_arg'] for data in pallet_args.values()}
+        # we have everything we need, copy the pallet to the fs, add it to the db, and maybe patch it
+        for pallet in flatten(pallet_infos.values()):
+            self.copy(stacki_pallet_dir, pallet, clean)
+            self.write_pallet_xml(stacki_pallet_dir, pallet)
+            if updatedb:
+                self.update_db(pallet, paths_to_args[pallet.pallet_root])
+            if stacki_pallet_dir == "/export/stack/pallets":
+                self.patch_pallet(pallet)
 
-		# we have everything we need, copy the pallet to the fs, add it to the db, and maybe patch it
-		for pallet in flatten(pallet_infos.values()):
-			self.copy(stacki_pallet_dir, pallet, clean)
-			self.write_pallet_xml(stacki_pallet_dir, pallet)
-			if updatedb:
-				self.update_db(pallet, paths_to_args[pallet.pallet_root])
-			if stacki_pallet_dir == '/export/stack/pallets':
-				self.patch_pallet(pallet)
-
-		# Clear the old packages
-		self._exec('systemctl start ludicrous-cleaner'.split())
+        # Clear the old packages
+        self._exec("systemctl start ludicrous-cleaner".split())

@@ -14,7 +14,7 @@ import stack.commands
 
 
 class Command(stack.commands.remove.host.command):
-	"""
+    """
 	Remove an attribute for a host.
 
 	<arg type='string' name='host' optional='1' repeat='1'>
@@ -30,6 +30,8 @@ class Command(stack.commands.remove.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.command('set.attr', self._argv + [ 'scope=host', 'value=' ], verbose_errors = False)
-		return self.rc
+    def run(self, params, args):
+        self.command(
+            "set.attr", self._argv + ["scope=host", "value="], verbose_errors=False
+        )
+        return self.rc

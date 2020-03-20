@@ -12,25 +12,26 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
-	"""Returns information about all firmware versions tracked in the database.
+    """Returns information about all firmware versions tracked in the database.
 
 	If expanded is set to True, additional information is returned.
 	"""
 
-	def provides(self):
-		return "basic"
+    def provides(self):
+        return "basic"
 
-	def run(self, args):
-		expanded = args
-		keys = ["make", "model", "version"]
-		if expanded:
-			keys.extend(["source", "hash", "hash_alg"])
+    def run(self, args):
+        expanded = args
+        keys = ["make", "model", "version"]
+        if expanded:
+            keys.extend(["source", "hash", "hash_alg"])
 
-		values = [
-			(row[0], row[1:])
-			for row in self.owner.db.select(
-				f"""
+        values = [
+            (row[0], row[1:])
+            for row in self.owner.db.select(
+                f"""
 				firmware_make.name, firmware_model.name, firmware.version{
 					", firmware.source, firmware.hash, firmware.hash_alg" if expanded else ""
 				}
@@ -40,7 +41,7 @@ class Plugin(stack.commands.Plugin):
 					INNER JOIN firmware_make
 						ON firmware_model.make_id=firmware_make.id
 				""",
-			)
-		]
+            )
+        ]
 
-		return {"keys": keys, "values": values}
+        return {"keys": keys, "values": values}

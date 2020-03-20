@@ -8,12 +8,13 @@ import stack.commands
 import stack.util
 from stack.exception import CommandError
 
-class command(stack.commands.SwitchArgumentProcessor,
-	stack.commands.list.command):
-	pass
+
+class command(stack.commands.SwitchArgumentProcessor, stack.commands.list.command):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	List the running-config for the switch.
 
 	<arg optional='1' type='string' name='switch' repeat='1'>
@@ -37,34 +38,27 @@ class Command(command):
 	List raw running-config for switch-0-0.
 	</example>
 	"""
-	def run(self, params, args):
 
-		(raw,) = self.fillParams([
-			('raw', False),
-			])
+    def run(self, params, args):
 
-		raw = self.str2bool(raw)
-		self.raw = raw
+        (raw,) = self.fillParams([("raw", False),])
 
-		_switches = self.getSwitchNames(args)
+        raw = self.str2bool(raw)
+        self.raw = raw
 
-		# Begin standard output if raw is False
-		if not raw:
-			self.beginOutput()
+        _switches = self.getSwitchNames(args)
 
-		for switch in self.call('list.host.interface',  _switches):
+        # Begin standard output if raw is False
+        if not raw:
+            self.beginOutput()
 
-			switch_name = switch['host']
-			model = self.getHostAttr(switch_name, 'component.model')
-			self.runImplementation(model, [switch])
+        for switch in self.call("list.host.interface", _switches):
 
-		if not raw:
-			self.endOutput(header=[
-				'switch',
-				'port',
-				'vlan',
-				'type',
-				'host',
-				'interface',
-				])
+            switch_name = switch["host"]
+            model = self.getHostAttr(switch_name, "component.model")
+            self.runImplementation(model, [switch])
 
+        if not raw:
+            self.endOutput(
+                header=["switch", "port", "vlan", "type", "host", "interface",]
+            )

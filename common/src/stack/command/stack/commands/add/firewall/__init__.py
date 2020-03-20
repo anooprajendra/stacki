@@ -15,12 +15,12 @@ import string
 import uuid
 
 import stack.commands
-from stack.exception import CommandError, ParamRequired, ParamError
+from stack.exception import CommandError, ParamError, ParamRequired
 from stack.util import blank_str_to_None
 
 
 class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command):
-	"""
+    """
 	Add a global firewall rule for the all hosts in the cluster.
 
 	<param type='string' name='service' optional='0'>
@@ -106,83 +106,92 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command)
 	</example>
 	"""
 
-	def run(self, params, args):
-		# Get the scope and make sure the args are valid
-		scope, = self.fillParams([('scope', 'global')])
-		scope_mappings = self.getScopeMappings(args, scope)
+    def run(self, params, args):
+        # Get the scope and make sure the args are valid
+        (scope,) = self.fillParams([("scope", "global")])
+        scope_mappings = self.getScopeMappings(args, scope)
 
-		# Now validate the params
-		(name, table_type, chain, action, service, protocol, input_network,
-		output_network, flags, comment) = self.fillParams([
-			('rulename', None),
-			('table', 'filter'),
-			('chain', None, True),
-			('action', None, True),
-			('service', None, True),
-			('protocol', None, True),
-			('network', None),
-			('output-network', None),
-			('flags', None),
-			('comment', None)
-		])
+        # Now validate the params
+        (
+            name,
+            table_type,
+            chain,
+            action,
+            service,
+            protocol,
+            input_network,
+            output_network,
+            flags,
+            comment,
+        ) = self.fillParams(
+            [
+                ("rulename", None),
+                ("table", "filter"),
+                ("chain", None, True),
+                ("action", None, True),
+                ("service", None, True),
+                ("protocol", None, True),
+                ("network", None),
+                ("output-network", None),
+                ("flags", None),
+                ("comment", None),
+            ]
+        )
 
-		# Generate a random firewall rule name if needed
-		if not name:
-			name = str(uuid.uuid1())
+        # Generate a random firewall rule name if needed
+        if not name:
+            name = str(uuid.uuid1())
 
-		# Make sure table is a valid choice
-		if table_type not in {'filter', 'raw', 'mangle', 'nat'}:
-			raise ParamError(self, 'table', 'is not valid')
+        # Make sure table is a valid choice
+        if table_type not in {"filter", "raw", "mangle", "nat"}:
+            raise ParamError(self, "table", "is not valid")
 
-		# Catch any blank parameters in chain, action, service, and protocol
-		if not chain:
-			raise ParamRequired(self, 'chain')
+        # Catch any blank parameters in chain, action, service, and protocol
+        if not chain:
+            raise ParamRequired(self, "chain")
 
-		if not action:
-			raise ParamRequired(self, 'action')
+        if not action:
+            raise ParamRequired(self, "action")
 
-		if not service:
-			raise ParamRequired(self, 'service')
+        if not service:
+            raise ParamRequired(self, "service")
 
-		if not protocol:
-			raise ParamRequired(self, 'protocol')
+        if not protocol:
+            raise ParamRequired(self, "protocol")
 
-		# Uppercase chain and action
-		chain = chain.upper()
-		action = action.upper()
+        # Uppercase chain and action
+        chain = chain.upper()
+        action = action.upper()
 
-		# Convert our networks to subnet ids
-		input_network = blank_str_to_None(input_network)
-		if input_network:
-			rows = self.db.select('id from subnets where name=%s', (input_network,))
+        # Convert our networks to subnet ids
+        input_network = blank_str_to_None(input_network)
+        if input_network:
+            rows = self.db.select("id from subnets where name=%s", (input_network,))
 
-			if not rows:
-				raise CommandError(
-					self, f'"{input_network}" is not a valid network'
-				)
+            if not rows:
+                raise CommandError(self, f'"{input_network}" is not a valid network')
 
-			in_subnet_id = rows[0][0]
-		else:
-			in_subnet_id = None
+            in_subnet_id = rows[0][0]
+        else:
+            in_subnet_id = None
 
-		output_network = blank_str_to_None(output_network)
-		if output_network:
-			rows = self.db.select('id from subnets where name = %s', (output_network,))
+        output_network = blank_str_to_None(output_network)
+        if output_network:
+            rows = self.db.select("id from subnets where name = %s", (output_network,))
 
-			if not rows:
-				raise CommandError(
-					self, f'"{output_network}" is not a valid network'
-				)
+            if not rows:
+                raise CommandError(self, f'"{output_network}" is not a valid network')
 
-			out_subnet_id = rows[0][0]
-		else:
-			out_subnet_id = None
+            out_subnet_id = rows[0][0]
+        else:
+            out_subnet_id = None
 
-		# Normalize the service sting by stripping whitespace and lowercasing it
-		service = re.sub(r'\s+', '', service).lower()
+        # Normalize the service sting by stripping whitespace and lowercasing it
+        service = re.sub(r"\s+", "", service).lower()
 
-		# Make sure the service string is valid
-		if not re.fullmatch(r"""
+        # Make sure the service string is valid
+        if not re.fullmatch(
+            r"""
 			all 				# 'all'
 			|				# OR
 			(?:
@@ -198,18 +207,23 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command)
 					[a-z]+
 				)
 			)*
-		""", service, re.VERBOSE):
-			raise CommandError(
-				self, f'"{service}" is not a valid service specification'
-			)
+		""",
+            service,
+            re.VERBOSE,
+        ):
+            raise CommandError(
+                self, f'"{service}" is not a valid service specification'
+            )
 
-		# Make sure blank strings are None for flags and comment
-		flags = blank_str_to_None(flags)
-		comment = blank_str_to_None(comment)
+        # Make sure blank strings are None for flags and comment
+        flags = blank_str_to_None(flags)
+        comment = blank_str_to_None(comment)
 
-		for scope_mapping in scope_mappings:
-			# Check that the rule name is unique for the scope
-			if self.db.count("""
+        for scope_mapping in scope_mappings:
+            # Check that the rule name is unique for the scope
+            if (
+                self.db.count(
+                    """
 		 		(firewall_rules.id) FROM firewall_rules,scope_map
 				WHERE firewall_rules.scope_map_id = scope_map.id
 				AND firewall_rules.name = %s
@@ -218,11 +232,17 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command)
 				AND scope_map.os_id <=> %s
 				AND scope_map.environment_id <=> %s
 				AND scope_map.node_id <=> %s
-			""", (name, *scope_mapping)) != 0:
-		 		raise CommandError(self, f'rule named "{name}" already exists')
+			""",
+                    (name, *scope_mapping),
+                )
+                != 0
+            ):
+                raise CommandError(self, f'rule named "{name}" already exists')
 
-			# And that the rule is unique for the scope
-			if self.db.count("""
+            # And that the rule is unique for the scope
+            if (
+                self.db.count(
+                    """
 		 		(firewall_rules.id) FROM firewall_rules,scope_map
 				WHERE firewall_rules.scope_map_id = scope_map.id
 				AND firewall_rules.table_type = %s
@@ -238,30 +258,55 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command)
 				AND scope_map.os_id <=> %s
 				AND scope_map.environment_id <=> %s
 				AND scope_map.node_id <=> %s
-			""", (
-				table_type, chain, action, service, protocol, in_subnet_id,
-				out_subnet_id, flags, *scope_mapping
-			)) != 0:
-				raise CommandError(self, 'firewall rule already exists')
+			""",
+                    (
+                        table_type,
+                        chain,
+                        action,
+                        service,
+                        protocol,
+                        in_subnet_id,
+                        out_subnet_id,
+                        flags,
+                        *scope_mapping,
+                    ),
+                )
+                != 0
+            ):
+                raise CommandError(self, "firewall rule already exists")
 
-		# Everything looks good, add the new rules
-		for scope_mapping in scope_mappings:
-			# First add the scope mapping for the new rule
-			self.db.execute("""
+        # Everything looks good, add the new rules
+        for scope_mapping in scope_mappings:
+            # First add the scope mapping for the new rule
+            self.db.execute(
+                """
 				INSERT INTO scope_map(
 					scope, appliance_id, os_id, environment_id, node_id
 				)
 				VALUES (%s, %s, %s, %s, %s)
-			""", scope_mapping)
+			""",
+                scope_mapping,
+            )
 
-			# Then add the rule itself
-			self.db.execute("""
+            # Then add the rule itself
+            self.db.execute(
+                """
 				INSERT INTO firewall_rules(
 					scope_map_id, name, table_type, chain, action, service,
 					protocol, in_subnet_id, out_subnet_id, flags, comment
 				)
 				VALUES (LAST_INSERT_ID(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-			""", (
-				name, table_type, chain, action, service, protocol, in_subnet_id,
-				out_subnet_id, flags, comment
-			))
+			""",
+                (
+                    name,
+                    table_type,
+                    chain,
+                    action,
+                    service,
+                    protocol,
+                    in_subnet_id,
+                    out_subnet_id,
+                    flags,
+                    comment,
+                ),
+            )

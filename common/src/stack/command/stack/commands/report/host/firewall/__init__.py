@@ -15,9 +15,8 @@ from collections import defaultdict
 import stack.commands
 
 
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.report.command):
-	"""
+class Command(stack.commands.HostArgumentProcessor, stack.commands.report.command):
+    """
 	Create a report that outputs the firewall rules for a host.
 
 	<arg optional='0' type='string' name='host'>
@@ -29,122 +28,118 @@ class Command(stack.commands.HostArgumentProcessor,
 	</example>
 	"""
 
-	def expandRules(self, lines, parameter, items):
-		return [
-			f'{line} {parameter} {item}'
-			for line in lines
-			for item in items
-		]
+    def expandRules(self, lines, parameter, items):
+        return [f"{line} {parameter} {item}" for line in lines for item in items]
 
-	def printRules(self, host, table, rules):
-		if len(rules) == 0 and table != 'filter':
-			return
+    def printRules(self, host, table, rules):
+        if len(rules) == 0 and table != "filter":
+            return
 
-		# Blank line to seperate table types
-		if table != 'filter':
-			self.addOutput(host, '')
+        # Blank line to seperate table types
+        if table != "filter":
+            self.addOutput(host, "")
 
-		# Output the table type and the filter preamble
-		self.addOutput(host, f'*{table}')
-		if table == 'filter':
-			self.addOutput(host, ':INPUT ACCEPT [0:0]')
-			self.addOutput(host, ':FORWARD ACCEPT [0:0]')
-			self.addOutput(host, ':OUTPUT ACCEPT [0:0]')
-			self.addOutput(host, '')
+        # Output the table type and the filter preamble
+        self.addOutput(host, f"*{table}")
+        if table == "filter":
+            self.addOutput(host, ":INPUT ACCEPT [0:0]")
+            self.addOutput(host, ":FORWARD ACCEPT [0:0]")
+            self.addOutput(host, ":OUTPUT ACCEPT [0:0]")
+            self.addOutput(host, "")
 
-		# Create a mapping of networks to interfaces for this host
-		network_to_interfaces = defaultdict(list)
-		for row in self.call('list.host.interface', [host]):
-			network_to_interfaces[row['network']].append(row['interface'])
+        # Create a mapping of networks to interfaces for this host
+        network_to_interfaces = defaultdict(list)
+        for row in self.call("list.host.interface", [host]):
+            network_to_interfaces[row["network"]].append(row["interface"])
 
-		for rule in rules:
-			if rule['comment']:
-				comment = f"# {rule['comment']}"
-			else:
-				comment = f"# {rule['action']} rule"
+        for rule in rules:
+            if rule["comment"]:
+                comment = f"# {rule['comment']}"
+            else:
+                comment = f"# {rule['action']} rule"
 
-				if rule['network']:
-					comment += f" for {rule['network']} network"
-				else:
-					comment += ' for all networks'
+                if rule["network"]:
+                    comment += f" for {rule['network']} network"
+                else:
+                    comment += " for all networks"
 
-			# Base of the rule
-			line = f"-A {rule['chain']} -j {rule['action']}"
+            # Base of the rule
+            line = f"-A {rule['chain']} -j {rule['action']}"
 
-			if rule['flags']:
-				line += f" {rule['flags']}"
+            if rule["flags"]:
+                line += f" {rule['flags']}"
 
-			# A single input rule can map to multiple lines in iptables
-			lines = [line]
+            # A single input rule can map to multiple lines in iptables
+            lines = [line]
 
-			# If the 'protocol' is 'all' and if there is a 'service'
-			# defined, then we need two rules: one with '-p tcp' and
-			# one with '-p udp'
+            # If the 'protocol' is 'all' and if there is a 'service'
+            # defined, then we need two rules: one with '-p tcp' and
+            # one with '-p udp'
 
-			service = None
-			if rule['service'] != 'all' and rule['service']:
-				service = rule['service']
+            service = None
+            if rule["service"] != "all" and rule["service"]:
+                service = rule["service"]
 
-			if rule['protocol'] and rule['protocol'] != 'all':
-				lines = self.expandRules(lines, '-p', [rule['protocol']])
-			elif rule['protocol'] == 'all' and service:
-				lines = self.expandRules(lines, '-p', ['tcp', 'udp'])
+            if rule["protocol"] and rule["protocol"] != "all":
+                lines = self.expandRules(lines, "-p", [rule["protocol"]])
+            elif rule["protocol"] == "all" and service:
+                lines = self.expandRules(lines, "-p", ["tcp", "udp"])
 
-			# Order is important here: '--dport' must come immediately after '-p'
-			if service:
-				lines = self.expandRules(lines, '--dport', [service])
+            # Order is important here: '--dport' must come immediately after '-p'
+            if service:
+                lines = self.expandRules(lines, "--dport", [service])
 
-			if rule['network'] and rule['network'] != 'all':
-				# Skip the rule if there is no interface on this network
-				if not network_to_interfaces[rule['network']]:
-					continue
+            if rule["network"] and rule["network"] != "all":
+                # Skip the rule if there is no interface on this network
+                if not network_to_interfaces[rule["network"]]:
+                    continue
 
-				lines = self.expandRules(
-					lines, '-i', network_to_interfaces[rule['network']]
-				)
+                lines = self.expandRules(
+                    lines, "-i", network_to_interfaces[rule["network"]]
+                )
 
-			if rule['output-network'] and rule['output-network'] != 'all':
-				# Skip the rule if there is no interface on this network
-				if not network_to_interfaces[rule['output-network']]:
-					continue
+            if rule["output-network"] and rule["output-network"] != "all":
+                # Skip the rule if there is no interface on this network
+                if not network_to_interfaces[rule["output-network"]]:
+                    continue
 
-				lines = self.expandRules(
-					lines, '-o', network_to_interfaces[rule['output-network']]
-				)
+                lines = self.expandRules(
+                    lines, "-o", network_to_interfaces[rule["output-network"]]
+                )
 
-			# Output the rules
-			self.addOutput(host, comment)
+            # Output the rules
+            self.addOutput(host, comment)
 
-			for line in lines:
-				self.addOutput(host, line)
+            for line in lines:
+                self.addOutput(host, line)
 
-			self.addOutput(host, '')
+            self.addOutput(host, "")
 
-		self.addOutput(host, 'COMMIT')
+        self.addOutput(host, "COMMIT")
 
-	def run(self, params, args):
-		self.beginOutput()
+    def run(self, params, args):
+        self.beginOutput()
 
-		hosts = self.getHostnames(args)
-		for host in hosts:
-			self.addOutput(
-				host,
-				'<stack:file stack:name="/etc/sysconfig/iptables" stack:perms="500">'
-			)
+        hosts = self.getHostnames(args)
+        for host in hosts:
+            self.addOutput(
+                host,
+                '<stack:file stack:name="/etc/sysconfig/iptables" stack:perms="500">',
+            )
 
-			# Get the rules for our host
-			rules = self.call('list.host.firewall', [host])
+            # Get the rules for our host
+            rules = self.call("list.host.firewall", [host])
 
-			# Run through the rules (they are listed in sorted order) and
-			# seperate them by table type: filter, nat, raw, and mangle tables
-			tables = defaultdict(list)
-			for rule in rules:
-				tables[rule['table']].append(rule)
+            # Run through the rules (they are listed in sorted order) and
+            # seperate them by table type: filter, nat, raw, and mangle tables
+            tables = defaultdict(list)
+            for rule in rules:
+                tables[rule["table"]].append(rule)
 
-			# Generate rules for each of the table types
-			for table in ('filter', 'nat', 'raw', 'mangle'):
-				self.printRules(host, table, tables[table])
+            # Generate rules for each of the table types
+            for table in ("filter", "nat", "raw", "mangle"):
+                self.printRules(host, table, tables[table])
 
-			self.addOutput(host, '</stack:file>')
+            self.addOutput(host, "</stack:file>")
 
-		self.endOutput(padChar='', trimOwner=True)
+        self.endOutput(padChar="", trimOwner=True)

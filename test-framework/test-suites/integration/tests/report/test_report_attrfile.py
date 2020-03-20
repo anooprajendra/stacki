@@ -1,22 +1,22 @@
 class TestReportAttrfile:
-	"""
+    """
 	Test that the report function reports a csv that both loadable and consistent
 	consistent meaning that report -> load -> report should yield the same result
 	"""
 
-	def test_roundtrip(self, host, revert_etc):
-		results = host.run(f'stack report attrfile')
-		assert results.rc == 0
-		output1 = results.stdout
+    def test_roundtrip(self, host, revert_etc):
+        results = host.run(f"stack report attrfile")
+        assert results.rc == 0
+        output1 = results.stdout
 
-		with open ('attrfiletest.csv', 'w+') as file:
-			file.write(output1)
+        with open("attrfiletest.csv", "w+") as file:
+            file.write(output1)
 
-		results = host.run(f'stack load attrfile file=attrfiletest.csv')
-		assert results.rc == 0
+        results = host.run(f"stack load attrfile file=attrfiletest.csv")
+        assert results.rc == 0
 
-		results = host.run(f'stack report attrfile')
-		assert results.rc == 0
-		output2 = results.stdout
+        results = host.run(f"stack report attrfile")
+        assert results.rc == 0
+        output2 = results.stdout
 
-		assert output1 == output2
+        assert output1 == output2

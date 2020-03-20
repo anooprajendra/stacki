@@ -15,62 +15,62 @@ from xml.etree import ElementTree
 
 import stack.commands
 import stack.gen
-from stack.exception import CommandError, ArgUnique
+from stack.exception import ArgUnique, CommandError
 
 
 class implementation(stack.commands.Implementation):
-	def generator(self):
-		raise NotImplementedError
+    def generator(self):
+        raise NotImplementedError
 
-	def get_chapter(self, generator, chapter):
-		output = []
+    def get_chapter(self, generator, chapter):
+        output = []
 
-		output.append(f'<chapter name="{chapter}">')
-		output.extend(generator.generate(chapter))
-		output.append('</chapter>')
+        output.append(f'<chapter name="{chapter}">')
+        output.extend(generator.generate(chapter))
+        output.append("</chapter>")
 
-		return output
+        return output
 
-	def run(self, args):
-		xml_input, profile_type, chapter = args
+    def run(self, args):
+        xml_input, profile_type, chapter = args
 
-		generator = self.generator()
-		generator.setProfileType(profile_type)
-		generator.parse(xml_input)
+        generator = self.generator()
+        generator.setProfileType(profile_type)
+        generator.parse(xml_input)
 
-		profile = []
+        profile = []
 
-		if chapter:
-			# If we only need a specific chapter, just fetch it
-			chapter_xml = '\n'.join(self.get_chapter(generator, chapter))
+        if chapter:
+            # If we only need a specific chapter, just fetch it
+            chapter_xml = "\n".join(self.get_chapter(generator, chapter))
 
-			# Then pull out the section contents
-			root = ElementTree.fromstring(chapter_xml)
-			for element in root.iter():
-				content = element.text.strip()
-				if content:
-					profile.append(content)
-		else:
-			# We need to fetch it all
-			profile.append(f'<profile type="{profile_type}">')
+            # Then pull out the section contents
+            root = ElementTree.fromstring(chapter_xml)
+            for element in root.iter():
+                content = element.text.strip()
+                if content:
+                    profile.append(content)
+        else:
+            # We need to fetch it all
+            profile.append(f'<profile type="{profile_type}">')
 
-			# Stacki chapter
-			profile.extend(self.get_chapter(generator, 'stacki'))
+            # Stacki chapter
+            profile.extend(self.get_chapter(generator, "stacki"))
 
-			# Debug chapter
-			profile.extend(self.get_chapter(generator, 'debug'))
+            # Debug chapter
+            profile.extend(self.get_chapter(generator, "debug"))
 
-			# Main chapter
-			profile.extend(self.get_chapter(generator, 'main'))
+            # Main chapter
+            profile.extend(self.get_chapter(generator, "main"))
 
-			profile.append('</profile>')
+            profile.append("</profile>")
 
-		for line in profile:
-			self.owner.addOutput('', line)
+        for line in profile:
+            self.owner.addOutput("", line)
 
 
 class Command(stack.commands.list.host.command):
-	"""
+    """
 	Outputs a XML wrapped installer profile for the given hosts.
 
 	If no hosts are specified the profiles for all hosts are listed.
@@ -99,63 +99,61 @@ class Command(stack.commands.list.host.command):
 
 	"""
 
-	MustBeRoot = 1
+    MustBeRoot = 1
 
-	def run(self, params, args):
-		(profile, hashit, chapter) = self.fillParams([
-			('profile', 'native'),
-			('hash', 'n'),
-			('chapter', None)
-		])
+    def run(self, params, args):
+        (profile, hashit, chapter) = self.fillParams(
+            [("profile", "native"), ("hash", "n"), ("chapter", None)]
+        )
 
-		xmlinput = ''
-		osname = None
+        xmlinput = ""
+        osname = None
 
-		# If the command is not on a TTY, then try to read XML input.
-		if not sys.stdin.isatty():
-			for line in sys.stdin.readlines():
-				if line.find('<stack:profile stack:os="') == 0:
-					osname = line.split()[1][9:].strip('"')
-				xmlinput += line
-		if xmlinput and not osname:
-			raise CommandError(self, "OS name not specified in profile")
+        # If the command is not on a TTY, then try to read XML input.
+        if not sys.stdin.isatty():
+            for line in sys.stdin.readlines():
+                if line.find('<stack:profile stack:os="') == 0:
+                    osname = line.split()[1][9:].strip('"')
+                xmlinput += line
+        if xmlinput and not osname:
+            raise CommandError(self, "OS name not specified in profile")
 
-		self.beginOutput()
+        self.beginOutput()
 
-		# If there's no XML input, either we have TTY, or we're running
-		# in an environment where TTY cannot be created (ie. apache)
-		if not xmlinput:
-			hosts = self.getHostnames(args)
-			if len(hosts) != 1:
-				raise ArgUnique(self, 'host')
-			host = hosts[0]
+        # If there's no XML input, either we have TTY, or we're running
+        # in an environment where TTY cannot be created (ie. apache)
+        if not xmlinput:
+            hosts = self.getHostnames(args)
+            if len(hosts) != 1:
+                raise ArgUnique(self, "host")
+            host = hosts[0]
 
-			osname	 = self.db.getHostOS(host)
-			xmlinput = self.command('list.host.xml', [ host ])
+            osname = self.db.getHostOS(host)
+            xmlinput = self.command("list.host.xml", [host])
 
-			self.runImplementation(osname, (xmlinput, profile, chapter))
+            self.runImplementation(osname, (xmlinput, profile, chapter))
 
-		# If we DO have XML input, simply parse it.
-		else:
-			self.runImplementation(osname, (xmlinput, profile, chapter))
+        # If we DO have XML input, simply parse it.
+        else:
+            self.runImplementation(osname, (xmlinput, profile, chapter))
 
-		self.endOutput(padChar='')
+        self.endOutput(padChar="")
 
-		if self.str2bool(hashit):
-			import hashlib
+        if self.str2bool(hashit):
+            import hashlib
 
-			#
-			# remove lines that contain attributes which we know will change after
-			# the host installs
-			#
-			m = hashlib.md5()
+            #
+            # remove lines that contain attributes which we know will change after
+            # the host installs
+            #
+            m = hashlib.md5()
 
-			skip = [ 'nukedisks', 'nukecontroller' ]
-			for line in self.getText().split('\n'):
-				if any(s in line for s in skip):
-					continue
+            skip = ["nukedisks", "nukecontroller"]
+            for line in self.getText().split("\n"):
+                if any(s in line for s in skip):
+                    continue
 
-				l = line + '\n'
-				m.update(l.encode())
+                l = line + "\n"
+                m.update(l.encode())
 
-			sys.stderr.write('%s  profile\n' % m.hexdigest())
+            sys.stderr.write("%s  profile\n" % m.hexdigest())

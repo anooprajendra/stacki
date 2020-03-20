@@ -10,33 +10,34 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-from pymysql import IntegrityError
 import stack.commands
-from stack.util import unique_everseen, lowered
+from pymysql import IntegrityError
 from stack.exception import ArgRequired, CommandError
+from stack.util import lowered, unique_everseen
+
 
 class Plugin(stack.commands.Plugin):
-	"""Attempts to remove implementations."""
+    """Attempts to remove implementations."""
 
-	def provides(self):
-		return "basic"
+    def provides(self):
+        return "basic"
 
-	def run(self, args):
-		# remove any duplicates
-		args = tuple(unique_everseen(lowered(args)))
-		# The imps must exist
-		self.owner.ensure_imps_exist(imps = args)
+    def run(self, args):
+        # remove any duplicates
+        args = tuple(unique_everseen(lowered(args)))
+        # The imps must exist
+        self.owner.ensure_imps_exist(imps=args)
 
-		# remove the implementations
-		try:
-			self.owner.db.execute("DELETE FROM firmware_imp WHERE name IN %s", (args,))
-		except IntegrityError:
-			raise CommandError(
-				cmd = self.owner,
-				msg = (
-					"Failed to remove all implementations because some are still in use."
-					" Please run 'stack list firmware model expanded=true' to list the"
-					" models still using the implementation and 'stack remove firmware model'"
-					" to remove them."
-				)
-			)
+        # remove the implementations
+        try:
+            self.owner.db.execute("DELETE FROM firmware_imp WHERE name IN %s", (args,))
+        except IntegrityError:
+            raise CommandError(
+                cmd=self.owner,
+                msg=(
+                    "Failed to remove all implementations because some are still in use."
+                    " Please run 'stack list firmware model expanded=true' to list the"
+                    " models still using the implementation and 'stack remove firmware model'"
+                    " to remove them."
+                ),
+            )

@@ -9,7 +9,7 @@ from stack.exception import *
 
 
 class Command(stack.commands.set.network.command):
-	"""
+    """
 	Sets the MTU for one or more networks.
 
 	<arg type='string' name='network' optional='0' repeat='1'>
@@ -30,20 +30,17 @@ class Command(stack.commands.set.network.command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(networks, mtu) = self.fillSetNetworkParams(args, 'mtu')
+        (networks, mtu) = self.fillSetNetworkParams(args, "mtu")
 
-		if not mtu:
-			mtu = None
-		else:
-			try:
-				mtu = int(mtu)
-			except:
-				raise ParamType(self, 'mtu', 'integer')
+        if not mtu:
+            mtu = None
+        else:
+            try:
+                mtu = int(mtu)
+            except:
+                raise ParamType(self, "mtu", "integer")
 
-		for network in networks:
-			self.db.execute(
-				'update subnets set mtu=%s where name=%s',
-				(mtu, network)
-			)
+        for network in networks:
+            self.db.execute("update subnets set mtu=%s where name=%s", (mtu, network))

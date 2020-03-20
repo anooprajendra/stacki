@@ -14,188 +14,186 @@
 
 import os
 import shutil
-import stack.file
+
 import stack.api
+import stack.file
 
 
 class Bootable:
+    def __init__(self, localdir, palletdir):
+        self.palletdir = palletdir
+        self.filetree = {}
 
-	def __init__(self, localdir, palletdir):
-		self.palletdir = palletdir
-		self.filetree = {}
+        #
+        # find all the pallets and carts associated with this host
+        # (the host that is building the pallet), and build file trees
+        # for each pallet/cart.
+        #
+        box = None
+        for o in stack.api.Call("list host", ["localhost"]):
+            box = o["box"]
 
-		#
-		# find all the pallets and carts associated with this host
-		# (the host that is building the pallet), and build file trees
-		# for each pallet/cart.
-		#
-		box = None
-		for o in stack.api.Call('list host', [ 'localhost']):
-			box = o['box']
+        self.filetree["local"] = stack.file.Tree(localdir)
 
-		self.filetree['local'] = stack.file.Tree(localdir)
+        pallets = []
+        for o in stack.api.Call("list pallet"):
+            boxes = o["boxes"].split()
+            if box in boxes:
+                pallets.append((o["name"], o["version"], o["release"], o["arch"]))
 
-		pallets = []
-		for o in stack.api.Call('list pallet'):
-			boxes  = o['boxes'].split()
-			if box in boxes:
-				pallets.append((o['name'], o['version'],
-					o['release'], o['arch']))
+        for name, ver, release, arch in pallets:
+            palletpath = os.path.join(
+                "/export", "stack", "pallets", name, ver, release, "redhat", arch
+            )
 
-		for name, ver, release, arch in pallets:
-			palletpath = os.path.join('/export', 'stack', 'pallets',
-				name, ver, release, 'redhat', arch)
+            self.filetree[name] = stack.file.Tree(palletpath)
 
-			self.filetree[name] = stack.file.Tree(palletpath)
+    def applyRPM(self, rpm, root, flags=""):
+        print("applyRPM", rpm.getBaseName(), root)
 
+        dbdir = os.path.join(root, "var", "lib", "rpm")
 
-	def applyRPM(self, rpm, root, flags=''):
-		print('applyRPM', rpm.getBaseName(), root)
+        os.makedirs(os.path.join(root, dbdir))
+        reloc = os.system(
+            "rpm -q --queryformat '%{prefixes}\n' -p "
+            + rpm.getFullName()
+            + "| grep none > /dev/null"
+        )
 
-		dbdir = os.path.join(root, 'var', 'lib', 'rpm')
+        cmd = "rpm -i --nomd5 --force --nodeps --ignorearch " + "--dbpath %s " % (dbdir)
+        if reloc:
+            cmd = cmd + "--prefix %s %s %s" % (root, flags, rpm.getFullName())
+        else:
+            cmd = cmd + "--badreloc --relocate /=%s %s %s" % (
+                root,
+                flags,
+                rpm.getFullName(),
+            )
 
-		os.makedirs(os.path.join(root, dbdir))
-		reloc = os.system("rpm -q --queryformat '%{prefixes}\n' -p " +
-			rpm.getFullName() + "| grep none > /dev/null")
+        retval = os.system(cmd + " > /dev/null 2>&1")
+        shutil.rmtree(os.path.join(root, dbdir))
 
-		cmd = 'rpm -i --nomd5 --force --nodeps --ignorearch ' + \
-			'--dbpath %s ' % (dbdir)
-		if reloc:
-			cmd = cmd + '--prefix %s %s %s' % (root, flags,
-							rpm.getFullName())
-		else:
-			cmd = cmd + '--badreloc --relocate /=%s %s %s' \
-					% (root, flags, rpm.getFullName())
+        if retval == 256:
+            raise ValueError("could not apply RPM %s" % rpm.getFullName())
 
-		retval = os.system(cmd + ' > /dev/null 2>&1')
-		shutil.rmtree(os.path.join(root, dbdir))
+        return retval
 
-		if retval == 256:
-			raise ValueError("could not apply RPM %s" % rpm.getFullName())
+    def findFile(self, name):
+        trees = self.filetree.keys()
 
-		return retval
+        #
+        # look in the local tree first
+        #
+        if "local" in trees:
+            tree = self.filetree["local"]
+            for d in tree.getDirs():
+                for file in tree.getFiles(d):
+                    try:
+                        if file.getPackageName() == name:
+                            return file
+                    except:
+                        pass
 
+                    try:
+                        if file.getName() == name:
+                            return file
+                    except:
+                        pass
+        for key in trees:
+            if key == "local":
+                continue
 
-	def findFile(self, name):
-		trees = self.filetree.keys()
+            tree = self.filetree[key]
+            for d in tree.getDirs():
+                for file in tree.getFiles(d):
+                    try:
+                        if file.getPackageName() == name:
+                            return file
+                    except:
+                        pass
 
-		#
-		# look in the local tree first
-		#
-		if 'local' in trees:
-			tree = self.filetree['local']
-			for d in tree.getDirs():
-				for file in tree.getFiles(d):
-					try:
-						if file.getPackageName() == name:
-							return file
-					except:
-						pass
+                    try:
+                        if file.getName() == name:
+                            return file
+                    except:
+                        pass
 
-					try:
-						if file.getName() == name:
-							return file
-					except:
-						pass
-		for key in trees:
-			if key == 'local':
-				continue
+        return None
 
-			tree = self.filetree[key]
-			for d in tree.getDirs():
-				for file in tree.getFiles(d):
-					try:
-						if file.getPackageName() == name:
-							return file
-					except:
-						pass
+    def installBootfiles(self, destination):
+        import stat
+        import stack
 
-					try:
-						if file.getName() == name:
-							return file
-					except:
-						pass
+        print("Applying boot files")
 
-		return None
+        name = "stack-images"
+        RPM = self.findFile(name)
+        if not RPM:
+            raise ValueError("could not find %s" % name)
 
+        self.applyRPM(RPM, destination)
 
-	def installBootfiles(self, destination):
-		import stat
-		import stack
+        images = os.path.join(destination, "opt", "stack", "images")
+        isolinux = os.path.join(destination, "isolinux")
 
-		print('Applying boot files')
+        shutil.move(os.path.join(images, "isolinux"), isolinux)
 
-		name = 'stack-images'
-		RPM = self.findFile(name)
-		if not RPM:
-			raise ValueError("could not find %s" % name)
+        #
+        # vmlinuz and initrd.img
+        #
+        for file in os.listdir(images):
+            if file.startswith("vmlinuz-"):
+                shutil.move(
+                    os.path.join(images, file), os.path.join(isolinux, "vmlinuz")
+                )
+            if file.startswith("initrd.img-"):
+                shutil.move(
+                    os.path.join(images, file), os.path.join(isolinux, "initrd.img")
+                )
 
-		self.applyRPM(RPM, destination)
+        imagesdir = os.path.join(self.palletdir, "images")
 
-		images = os.path.join(destination, 'opt', 'stack', 'images')
-		isolinux = os.path.join(destination, 'isolinux')
+        if not os.path.exists(imagesdir):
+            os.makedirs(imagesdir)
 
-		shutil.move(os.path.join(images, 'isolinux'), isolinux)
+        if stack.release == "redhat7":
+            #
+            # updates.img
+            #
+            fileold = os.path.join(os.path.join(images, "updates.img"))
+            filenew = os.path.join(imagesdir, "updates.img")
 
-		#
-		# vmlinuz and initrd.img
-		#
-		for file in os.listdir(images):
-			if file.startswith('vmlinuz-'):
-				shutil.move(os.path.join(images, file),
-					os.path.join(isolinux, 'vmlinuz'))
-			if file.startswith('initrd.img-'):
-				shutil.move(os.path.join(images, file),
-					os.path.join(isolinux, 'initrd.img'))
+            if not os.path.exists(fileold):
+                raise ValueError("cound not find '%s'" % fileold)
 
-		imagesdir = os.path.join(self.palletdir, 'images')
+            os.rename(fileold, filenew)
+            os.chmod(filenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
-		if not os.path.exists(imagesdir):
-			os.makedirs(imagesdir)
+            #
+            # squashfs.img from LiveOS
+            #
+            f = self.findFile("squashfs.img")
+            if not f:
+                raise ValueError("could not find 'squashfs.img'")
 
-		if stack.release == 'redhat7':
-			#
-			# updates.img
-			#
-			fileold = os.path.join(os.path.join(images, 'updates.img'))
-			filenew = os.path.join(imagesdir, 'updates.img')
+            fileold = f.getFullName()
+            print("fileold %s" % f.getFullName())
 
-			if not os.path.exists(fileold):
-				raise ValueError("cound not find '%s'" % fileold)
+            livenewdir = os.path.join(self.palletdir, "LiveOS")
+            if not os.path.exists(livenewdir):
+                os.makedirs(livenewdir)
 
-			os.rename(fileold, filenew)
-			os.chmod(filenew,
-				stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+            filenew = os.path.join(livenewdir, "squashfs.img")
 
-			#
-			# squashfs.img from LiveOS
-			#
-			f = self.findFile('squashfs.img')
-			if not f:
-				raise ValueError("could not find 'squashfs.img'")
+            print("fileold %s" % fileold)
+            print("filenew %s" % filenew)
+            shutil.copy(fileold, filenew)
+            os.chmod(filenew, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
-			fileold = f.getFullName()
-			print('fileold %s' % f.getFullName())
+        #
+        # clean up other image files from the stack-image RPM
+        #
+        shutil.rmtree(os.path.join(destination, "opt"), ignore_errors=1)
+        shutil.rmtree(os.path.join(destination, "var"), ignore_errors=1)
 
-			livenewdir = os.path.join(self.palletdir, 'LiveOS')
-			if not os.path.exists(livenewdir):
-				os.makedirs(livenewdir)
-
-			filenew = os.path.join(livenewdir, 'squashfs.img')
-
-			print('fileold %s' % fileold)
-			print('filenew %s' % filenew)
-			shutil.copy(fileold, filenew)
-			os.chmod(filenew,
-				stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
-
-		#
-		# clean up other image files from the stack-image RPM
-		#
-		shutil.rmtree(os.path.join(destination, 'opt'),
-			ignore_errors=1)
-		shutil.rmtree(os.path.join(destination, 'var'),
-			ignore_errors=1)
-
-		return
-
+        return

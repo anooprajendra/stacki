@@ -14,7 +14,7 @@ import stack.commands
 
 
 class Command(stack.commands.report.command):
-	"""
+    """
 	Output the version of Stacki.
 
 	<example cmd='report version'>
@@ -22,10 +22,7 @@ class Command(stack.commands.report.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.beginOutput()
-		self.addOutput('stacki', stack.version)
-		self.endOutput(header=['layer', 'version'], 
-			       trimOwner=True,
-			       trimHeader=True)
-
+    def run(self, params, args):
+        self.beginOutput()
+        self.addOutput("stacki", stack.version)
+        self.endOutput(header=["layer", "version"], trimOwner=True, trimHeader=True)

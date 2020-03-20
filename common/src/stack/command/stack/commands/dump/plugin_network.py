@@ -6,11 +6,10 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "network"
 
-	def provides(self):
-		return 'network'
-
-
-	def run(self, args):
-		return self.owner.command('dump.network')
+    def run(self, args):
+        return self.owner.command("dump.network")

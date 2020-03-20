@@ -8,9 +8,10 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class Command(stack.commands.EnvironmentArgumentProcessor,
-	      stack.commands.set.host.command):
-	"""
+class Command(
+    stack.commands.EnvironmentArgumentProcessor, stack.commands.set.host.command
+):
+    """
 	Specifies an Environment for the gives hosts.  Environments are
 	used to add another level to attribute resolution.  This is commonly
 	used to partition a single Frontend into managing multiple clusters.
@@ -28,19 +29,20 @@ class Command(stack.commands.EnvironmentArgumentProcessor,
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(environment, ) = self.fillParams([
-			('environment', None, True)
-		])
+        (environment,) = self.fillParams([("environment", None, True)])
 
-		if environment not in self.getEnvironmentNames():
-			raise CommandError(self, 'environment parameter not valid')
+        if environment not in self.getEnvironmentNames():
+            raise CommandError(self, "environment parameter not valid")
 
-		for host in hosts:
-			self.db.execute("""
+        for host in hosts:
+            self.db.execute(
+                """
 				update nodes set environment=(
 					select id from environments where name=%s
 				) where name=%s
-			""", (environment, host))
+			""",
+                (environment, host),
+            )

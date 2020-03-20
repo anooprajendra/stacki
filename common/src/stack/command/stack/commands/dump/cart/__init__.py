@@ -4,14 +4,15 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import json
+from collections import OrderedDict
+
 import stack
 import stack.commands
-from collections import OrderedDict
-import json
 
 
 class Command(stack.commands.dump.command):
-	"""
+    """
 	Dump the contents of the stacki database as json.
 
 	This command dumps specifically cart data.  For each cart,
@@ -24,14 +25,16 @@ class Command(stack.commands.dump.command):
 	<related>load</related>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		self.set_scope('software')
+        self.set_scope("software")
 
-		dump = []
-		for row in self.call('list.cart'):
-			dump.append(OrderedDict(name = row['name']))
+        dump = []
+        for row in self.call("list.cart"):
+            dump.append(OrderedDict(name=row["name"]))
 
-		self.addText(json.dumps(OrderedDict(version  = stack.version,
-						    software = {'cart' : dump}),
-					indent=8))
+        self.addText(
+            json.dumps(
+                OrderedDict(version=stack.version, software={"cart": dump}), indent=8
+            )
+        )

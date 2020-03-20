@@ -6,22 +6,20 @@
 # @copyright@
 #
 
-import os
-import sys
-import stack.django_env
-
-from stack.password import Password
 import base64
 import json
+import os
+import sys
+
 import stack.commands
-
+import stack.django_env
+from django.contrib.auth.models import Group, User
 from stack.exception import *
+from stack.password import Password
 
-from django.contrib.auth.models import User, Group
 
-class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
-	"""
+class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
+    """
 	Create a user to the REST API.
 	This command will print out a JSON
 	string that contains the Username, API Key,
@@ -45,60 +43,53 @@ class Command(stack.commands.Command,
 	</example>
 	"""
 
-	def gen_random_pw(self):
-		p = Password()
-		return p.get_cleartext_pw()
+    def gen_random_pw(self):
+        p = Password()
+        return p.get_cleartext_pw()
 
-	def run(self, params, args):
-		# Get Username
-		if len(args) != 1:
-			raise ArgRequired(self, "username")
-		username = args[0]
-		if not username.isalnum():
-			raise ArgError(self, "username", "must be alphanumeric")
+    def run(self, params, args):
+        # Get Username
+        if len(args) != 1:
+            raise ArgRequired(self, "username")
+        username = args[0]
+        if not username.isalnum():
+            raise ArgError(self, "username", "must be alphanumeric")
 
-		# Get Groups that you want the user to belong to
-		(g, admin) = self.fillParams([
-				("group", "default"),
-				("admin", "False"),
-				])
-		group_list = g.split(',')
+        # Get Groups that you want the user to belong to
+        (g, admin) = self.fillParams([("group", "default"), ("admin", "False"),])
+        group_list = g.split(",")
 
-		# Check to see if username is taken
-		try:
-			u = User.objects.get(username = username)
-		except User.DoesNotExist:
-			u = None
-		if u:
-			raise CommandError(self,
-				"Username %s is already in use"
-				% username)
+        # Check to see if username is taken
+        try:
+            u = User.objects.get(username=username)
+        except User.DoesNotExist:
+            u = None
+        if u:
+            raise CommandError(self, "Username %s is already in use" % username)
 
+        admin = self.str2bool(admin)
 
-		admin = self.str2bool(admin)
+        passwd = self.gen_random_pw()
 
-		passwd = self.gen_random_pw()
+        groups = []
+        for group in group_list:
+            try:
+                g = Group.objects.get(name=group)
+                groups.append(g)
+            except Group.DoesNotExist:
+                raise CommandError(self, "Group %s does not exist." % group)
 
-		groups = []
-		for group in group_list:
-			try:
-				g = Group.objects.get(name = group)
-				groups.append(g)
-			except Group.DoesNotExist:
-				raise CommandError(self, "Group %s does not exist." % group )
+        u = User(username=username)
+        u.set_password(passwd)
+        u.is_superuser = admin
+        u.save()
+        u.groups.set(groups)
 
+        hostname = self.getHostnames(["localhost"])[0]
+        domainname = self.getHostAttr("localhost", "domainname")
+        if domainname and domainname != "":
+            hostname = "%s.%s" % (hostname, domainname)
 
-		u = User(username = username)
-		u.set_password(passwd)
-		u.is_superuser = admin
-		u.save()
-		u.groups.set(groups)
-
-		hostname = self.getHostnames(['localhost'])[0]
-		domainname = self.getHostAttr('localhost','domainname')
-		if domainname and domainname != '':
-			hostname = "%s.%s" % (hostname, domainname)
-
-		self.beginOutput()
-		self.addOutput(username, [hostname, passwd])
-		self.endOutput(header=["username", "hostname","key"])
+        self.beginOutput()
+        self.addOutput(username, [hostname, passwd])
+        self.endOutput(header=["username", "hostname", "key"])

@@ -8,7 +8,7 @@ import stack.commands.set.network
 
 
 class Command(stack.commands.set.network.command):
-	"""
+    """
 	Enables or Disables DNS for one of more networks.
 
 	If DNS is enabled for a network then all known hosts on that network
@@ -28,13 +28,10 @@ class Command(stack.commands.set.network.command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(networks, dns) = self.fillSetNetworkParams(args, 'dns')
-		dns = self.str2bool(dns)
+        (networks, dns) = self.fillSetNetworkParams(args, "dns")
+        dns = self.str2bool(dns)
 
-		for network in networks:
-			self.db.execute(
-				'update subnets set dns=%s where name=%s',
-				(dns, network)
-			)
+        for network in networks:
+            self.db.execute("update subnets set dns=%s where name=%s", (dns, network))

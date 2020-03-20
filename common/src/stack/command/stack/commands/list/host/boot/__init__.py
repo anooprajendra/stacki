@@ -15,7 +15,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.host.command):
-	"""
+    """
 	Lists the current bot action for hosts. For each host supplied on the
 	command line, this command prints the hostname and boot action for
 	that host. The boot action describes what the host will do the next
@@ -35,39 +35,40 @@ class Command(stack.commands.list.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		boot = {}
-		for h, b in self.db.select(
-			"""
+        boot = {}
+        for h, b in self.db.select(
+            """
 			n.name, b.action from nodes n
 			left join boot b on
 			n.id = b.node
-			"""):
-			boot[h] = b
+			"""
+        ):
+            boot[h] = b
 
-		self.beginOutput()
-		hosts = self.getHostnames(args)
-		attrs = self.call('list.host.attr',hosts)
-		for host in hosts:
-			nukecontroller = False
-			nukedisks = False
-			f_nukedisks = lambda x: (x['host'] == host and x['attr'] == 'nukedisks')
-			nd = list(filter(f_nukedisks, attrs))
-			if nd:
-				nukedisks = nd[0]['value']
-			f_nukecon = lambda x: (x['host'] == host and x['attr'] == 'nukecontroller')
-			nc = list(filter(f_nukecon, attrs))
-			if nc:
-				nukecontroller = nc[0]['value']
-			if not nukedisks:
-				nukedisks = False
-			else:
-				nukedisks = self.str2bool(nukedisks)
-			if not nukecontroller:
-				nukecontroller = False
-			else:
-				nukecontroller = self.str2bool(nukecontroller)
-			self.addOutput(host, (boot[host], nukedisks, nukecontroller))
+        self.beginOutput()
+        hosts = self.getHostnames(args)
+        attrs = self.call("list.host.attr", hosts)
+        for host in hosts:
+            nukecontroller = False
+            nukedisks = False
+            f_nukedisks = lambda x: (x["host"] == host and x["attr"] == "nukedisks")
+            nd = list(filter(f_nukedisks, attrs))
+            if nd:
+                nukedisks = nd[0]["value"]
+            f_nukecon = lambda x: (x["host"] == host and x["attr"] == "nukecontroller")
+            nc = list(filter(f_nukecon, attrs))
+            if nc:
+                nukecontroller = nc[0]["value"]
+            if not nukedisks:
+                nukedisks = False
+            else:
+                nukedisks = self.str2bool(nukedisks)
+            if not nukecontroller:
+                nukecontroller = False
+            else:
+                nukecontroller = self.str2bool(nukecontroller)
+            self.addOutput(host, (boot[host], nukedisks, nukecontroller))
 
-		self.endOutput(header=['host', 'action', 'nukedisks', 'nukecontroller'])
+        self.endOutput(header=["host", "action", "nukedisks", "nukecontroller"])

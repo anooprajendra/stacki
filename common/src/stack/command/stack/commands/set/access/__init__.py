@@ -11,7 +11,7 @@ from stack.exception import CommandError
 
 
 class Command(stack.commands.set.command):
-	"""
+    """
 	Sets an Access control pattern.
 	
 	<param name="command" optional='0'>
@@ -31,25 +31,21 @@ class Command(stack.commands.set.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		(cmd, group) = self.fillParams([
-			('command', None, True),
-			('group',   None, True)
-		])
+    def run(self, params, args):
+        (cmd, group) = self.fillParams([("command", None, True), ("group", None, True)])
 
-		groupid = None
-		try:
-			groupid = int(group)
-		except ValueError:
-			pass
+        groupid = None
+        try:
+            groupid = int(group)
+        except ValueError:
+            pass
 
-		if groupid is None:
-			try:
-				groupid = grp.getgrnam(group).gr_gid
-			except KeyError:
-				raise CommandError(self, 'cannot find group %s' % group)
+        if groupid is None:
+            try:
+                groupid = grp.getgrnam(group).gr_gid
+            except KeyError:
+                raise CommandError(self, "cannot find group %s" % group)
 
-		self.db.execute(
-			'insert into access(command, groupid) values (%s, %s)',
-			(cmd, groupid)
-		)
+        self.db.execute(
+            "insert into access(command, groupid) values (%s, %s)", (cmd, groupid)
+        )

@@ -5,50 +5,50 @@
 # @copyright@
 
 import json
-import signal
-import zmq
 import pprint
-import stack.mq
+import signal
+
 import stack.commands.list.host
+import stack.mq
+import zmq
 
 
 class Subscriber(stack.mq.Subscriber):
-	def __init__(self, context, channel, host):
-		stack.mq.Subscriber.__init__(self, context, host)
-		self.host = host
-		self.subscribe(channel)
+    def __init__(self, context, channel, host):
+        stack.mq.Subscriber.__init__(self, context, host)
+        self.host = host
+        self.subscribe(channel)
 
-	def callback(self, message):
+    def callback(self, message):
 
-		header = [ message.getTime(), 'publisher=%s' % self.host ]
-		if message.getSource():
-			header.append('source=%s'  % message.getSource())
-		if message.getChannel():
-			header.append('channel=%s' % message.getChannel())
-		if message.getID():
-			header.append('id=%d'      % message.getID())
-		if message.getHops():
-			header.append('hops=%d'    % message.getHops())
-		if message.getTTL():
-			header.append('ttl=%d'     % message.getTTL())
-		print(' '.join(header))
+        header = [message.getTime(), "publisher=%s" % self.host]
+        if message.getSource():
+            header.append("source=%s" % message.getSource())
+        if message.getChannel():
+            header.append("channel=%s" % message.getChannel())
+        if message.getID():
+            header.append("id=%d" % message.getID())
+        if message.getHops():
+            header.append("hops=%d" % message.getHops())
+        if message.getTTL():
+            header.append("ttl=%d" % message.getTTL())
+        print(" ".join(header))
 
-		pp      = pprint.PrettyPrinter()
-		payload = message.getPayload()
-		try:
-			# payload could be json or free form text
-			# try both
-			o = json.loads(payload)
-		except:
-			o = payload
+        pp = pprint.PrettyPrinter()
+        payload = message.getPayload()
+        try:
+            # payload could be json or free form text
+            # try both
+            o = json.loads(payload)
+        except:
+            o = payload
 
-		pp.pprint(o)
-		print()
-
+        pp.pprint(o)
+        print()
 
 
 class Command(stack.commands.list.host.command):
-	"""
+    """
 	Attaches to one or more hosts' Message Queue and displays
 	all messages on the provided channel(s).
 
@@ -66,26 +66,21 @@ class Command(stack.commands.list.host.command):
 	</example>
 	"""
 
-	def handler(self, signal, frame):
-		pass
+    def handler(self, signal, frame):
+        pass
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(channel, ) = self.fillParams([
-				('channel', '')
-				])
+        (channel,) = self.fillParams([("channel", "")])
 
-		context = zmq.Context()
-		hosts = self.getHostnames(args)
-		run_hosts = self.getRunHosts(hosts)
-		for h in run_hosts:
-			host = h['name']
-			subscriber = Subscriber(context, channel, host)
-			subscriber.setDaemon(True)
-			subscriber.start()
+        context = zmq.Context()
+        hosts = self.getHostnames(args)
+        run_hosts = self.getRunHosts(hosts)
+        for h in run_hosts:
+            host = h["name"]
+            subscriber = Subscriber(context, channel, host)
+            subscriber.setDaemon(True)
+            subscriber.start()
 
-		signal.signal(signal.SIGINT, self.handler)
-		signal.pause()
-
-			
-
+        signal.signal(signal.SIGINT, self.handler)
+        signal.pause()

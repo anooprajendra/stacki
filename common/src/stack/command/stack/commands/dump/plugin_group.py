@@ -6,11 +6,10 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "group"
 
-	def provides(self):
-		return 'group'
-
-
-	def run(self, args):
-		return self.owner.command('dump.group')
+    def run(self, args):
+        return self.owner.command("dump.group")

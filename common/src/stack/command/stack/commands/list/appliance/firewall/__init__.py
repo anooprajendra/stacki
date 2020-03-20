@@ -13,9 +13,10 @@
 import stack.commands
 
 
-class Command(stack.commands.NetworkArgumentProcessor,
-	stack.commands.list.appliance.command):
-	"""
+class Command(
+    stack.commands.NetworkArgumentProcessor, stack.commands.list.appliance.command
+):
+    """
 	List the firewall rules for a given appliance type.
 
 	<arg optional='1' type='string' name='appliance' repeat='1'>
@@ -24,6 +25,10 @@ class Command(stack.commands.NetworkArgumentProcessor,
 	</arg>
 	"""
 
-	def run(self, params, args):
-		self.addText(self.command('list.firewall', self._argv + ['scope=appliance'], verbose_errors = False))
-		return self.rc
+    def run(self, params, args):
+        self.addText(
+            self.command(
+                "list.firewall", self._argv + ["scope=appliance"], verbose_errors=False
+            )
+        )
+        return self.rc

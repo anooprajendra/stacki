@@ -1,15 +1,14 @@
-import stack.commands
-
-import stack.django_env
-from stack.exception import *
-
-from stack.restapi.models import BlackList
-from stack.commands.add.api import checkCommand
-
 import re
 
+import stack.commands
+import stack.django_env
+from stack.commands.add.api import checkCommand
+from stack.exception import *
+from stack.restapi.models import BlackList
+
+
 class Command(stack.commands.Command):
-	"""
+    """
 	Add a command to the webservice
 	blacklist. This disallows the
 	command from running, by anyone,
@@ -25,19 +24,18 @@ class Command(stack.commands.Command):
 	Add "list host message" command to the blacklist.
 	</example>
 	"""
-	def run(self, params, args):
-		(command, ) = self.fillParams([
-			("command", None)
-			])
-		if not command:
-			raise ParamRequired(self, "Command")
 
-		checkCommand(self, command)
+    def run(self, params, args):
+        (command,) = self.fillParams([("command", None)])
+        if not command:
+            raise ParamRequired(self, "Command")
 
-		try:
-			b = BlackList.objects.get(command=command)
-			if b:
-				raise CommandError(self, "Command %s is already blacklisted" % command)
-		except BlackList.DoesNotExist:
-			b = BlackList(command=command)
-			b.save()
+        checkCommand(self, command)
+
+        try:
+            b = BlackList.objects.get(command=command)
+            if b:
+                raise CommandError(self, "Command %s is already blacklisted" % command)
+        except BlackList.DoesNotExist:
+            b = BlackList(command=command)
+            b.save()

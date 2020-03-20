@@ -8,12 +8,13 @@ import stack.commands
 import stack.util
 from stack.bool import str2bool
 
-class command(stack.commands.SwitchArgumentProcessor,
-	stack.commands.list.command):
-	pass
+
+class command(stack.commands.SwitchArgumentProcessor, stack.commands.list.command):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	List Appliance, physical position, and model of any hosts with appliance type
 	of `switch`.
 
@@ -36,30 +37,27 @@ class Command(command):
 	List info for all known switches/
 	</example>
 	"""
-	def run(self, params, args):
-		
-		(order, expanded) = self.fillParams([
-			('order', 'asc'),
-			('expanded', False),
-		])
 
-		self.expanded = str2bool(expanded)
+    def run(self, params, args):
 
-		switches = self.getSwitchNames(args)
+        (order, expanded) = self.fillParams([("order", "asc"), ("expanded", False),])
 
-		header = ['switch']
-		values = {}
-		for switch in switches:
-			values[switch] = []
+        self.expanded = str2bool(expanded)
 
-		for (provides, result) in self.runPlugins(switches):
-			header.extend(result['keys'])
-			for h, v in result['values'].items():
-				values[h].extend(v)
+        switches = self.getSwitchNames(args)
 
-		self.beginOutput()
-		for switch in switches:
-			if values[switch]:
-				self.addOutput(switch, values[switch])
-		self.endOutput(header=header, trimOwner=False)
+        header = ["switch"]
+        values = {}
+        for switch in switches:
+            values[switch] = []
 
+        for (provides, result) in self.runPlugins(switches):
+            header.extend(result["keys"])
+            for h, v in result["values"].items():
+                values[h].extend(v)
+
+        self.beginOutput()
+        for switch in switches:
+            if values[switch]:
+                self.addOutput(switch, values[switch])
+        self.endOutput(header=header, trimOwner=False)

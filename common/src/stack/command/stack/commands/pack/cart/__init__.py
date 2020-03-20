@@ -6,13 +6,13 @@
 
 import os
 import tarfile
+
 import stack.commands
 from stack.exception import *
 
 
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.pack.command):
-	"""
+class Command(stack.commands.CartArgumentProcessor, stack.commands.pack.command):
+    """
 	Pack a cart into a compressed file.
 	Default is tgz.
 
@@ -47,52 +47,48 @@ class Command(stack.commands.CartArgumentProcessor,
 	</example>
 
 	<related>unpack cart file=</related>
-	"""		
-		
-	def packCart(self, cart, path, compression, suff):
-		cartfile = cart + '.%s' % suff
-		with tarfile.open(cartfile,'w:%s' % compression) as tar:
-			os.chdir(os.path.join(path))
-			if self.checkCart(path,cart) == True:
-				for name in os.listdir(cart):
-					if name not in [ 'fingerprint', 'repodata']:
-						print('adding %s' % name)
-						tar.add(cart + '/' + name)
-			else:
-				print("Cart has wrong directory structure.")
-		
-		tar.close()
-		return
+	"""
 
-	def checkCart(self,path,cart):
-		req = ['RPMS', 'graph', 'nodes']
-		found = os.listdir(cart)
-		return set(req).issubset(set(found))
-		
+    def packCart(self, cart, path, compression, suff):
+        cartfile = cart + ".%s" % suff
+        with tarfile.open(cartfile, "w:%s" % compression) as tar:
+            os.chdir(os.path.join(path))
+            if self.checkCart(path, cart) == True:
+                for name in os.listdir(cart):
+                    if name not in ["fingerprint", "repodata"]:
+                        print("adding %s" % name)
+                        tar.add(cart + "/" + name)
+            else:
+                print("Cart has wrong directory structure.")
 
-	def run(self, params, args):
-		comp, suff = self.fillParams([
-			('compression', 'gz'),
-			('suffix', 'tgz')
-			])
+        tar.close()
+        return
 
-		cartdir = '/export/stack/carts'
+    def checkCart(self, path, cart):
+        req = ["RPMS", "graph", "nodes"]
+        found = os.listdir(cart)
+        return set(req).issubset(set(found))
 
-		if not len(args):
-			raise ArgRequired(self, 'cart')
-		if len(args) > 1:
-			raise ArgUnique(self, 'cart')
+    def run(self, params, args):
+        comp, suff = self.fillParams([("compression", "gz"), ("suffix", "tgz")])
 
-		if comp not in ['gz']:
-			raise ParamValue(self, 'compression', '"gz" "gz" is default.')
+        cartdir = "/export/stack/carts"
 
-		cart = args[0]
-		path,cart = (os.path.split(cart))
+        if not len(args):
+            raise ArgRequired(self, "cart")
+        if len(args) > 1:
+            raise ArgUnique(self, "cart")
 
-		if not path:
-			path = cartdir
+        if comp not in ["gz"]:
+            raise ParamValue(self, "compression", '"gz" "gz" is default.')
 
-		if suff != 'tgz':	
-			suff = suff
+        cart = args[0]
+        path, cart = os.path.split(cart)
 
-		self.packCart(cart,path,comp,suff)
+        if not path:
+            path = cartdir
+
+        if suff != "tgz":
+            suff = suff
+
+        self.packCart(cart, path, comp, suff)

@@ -4,17 +4,19 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import subprocess
+
 import stack.commands
 import stack.util
-import subprocess
 from stack.exception import CommandError
 
-class command(stack.commands.SwitchArgumentProcessor,
-	stack.commands.sync.command):
-		pass
+
+class command(stack.commands.SwitchArgumentProcessor, stack.commands.sync.command):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	Reconfigure switch and optionally set the configuration 
 	to the startup configuration.
 
@@ -47,21 +49,19 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		persistent, nukeswitch = self.fillParams([
-			('persistent', 'yes'),
-			('nukeswitch', 'no'),
-		])
-		self.persistent = self.str2bool(persistent)
-		self.nukeswitch = self.str2bool(nukeswitch)
+        persistent, nukeswitch = self.fillParams(
+            [("persistent", "yes"), ("nukeswitch", "no"),]
+        )
+        self.persistent = self.str2bool(persistent)
+        self.nukeswitch = self.str2bool(nukeswitch)
 
-		switches = self.getSwitchNames(args)
+        switches = self.getSwitchNames(args)
 
-		for switch in self.call('list.host.interface', switches):
-			switch_name = switch['host']
+        for switch in self.call("list.host.interface", switches):
+            switch_name = switch["host"]
 
-			self.report('report.switch', [ switch_name ])
-			model = self.getHostAttr(switch_name, 'component.model')
-			self.runImplementation(model, [switch])
-
+            self.report("report.switch", [switch_name])
+            model = self.getHostAttr(switch_name, "component.model")
+            self.runImplementation(model, [switch])

@@ -15,7 +15,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.os.command):
-	"""
+    """
 	Remove a firewall rule for an OS type. To remove
 	a rule, one must supply the name of the rule.
 
@@ -28,9 +28,9 @@ class Command(stack.commands.remove.os.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'os')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "os")
 
-		self.command('remove.firewall', self._argv + ['scope=os'], verbose_errors = False)
-		return self.rc
+        self.command("remove.firewall", self._argv + ["scope=os"], verbose_errors=False)
+        return self.rc

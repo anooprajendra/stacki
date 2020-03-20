@@ -5,13 +5,13 @@
 # @copyright@
 
 import os
+
 import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.CartArgumentProcessor,
-	stack.commands.disable.command):
-	"""
+class Command(stack.commands.CartArgumentProcessor, stack.commands.disable.command):
+    """
 	Disables a cart. The cart must already be copied on the
 	system using the command "stack add cart".
 
@@ -34,30 +34,34 @@ class Command(stack.commands.CartArgumentProcessor,
 	<related>list cart</related>
 	"""
 
-	def run(self, params, args):
-		if len(args) < 1:
-			raise ArgRequired(self, 'cart')
+    def run(self, params, args):
+        if len(args) < 1:
+            raise ArgRequired(self, "cart")
 
-		box, = self.fillParams([ ('box', 'default') ])
+        (box,) = self.fillParams([("box", "default")])
 
-		# Make sure our box exists
-		rows = self.db.select('ID from boxes where name=%s', (box,))
-		if len(rows) == 0:
-			raise CommandError(self, 'unknown box "%s"' % box)
+        # Make sure our box exists
+        rows = self.db.select("ID from boxes where name=%s", (box,))
+        if len(rows) == 0:
+            raise CommandError(self, 'unknown box "%s"' % box)
 
-		# Remember the box ID to simply queries down below
-		box_id = rows[0][0]
+        # Remember the box ID to simply queries down below
+        box_id = rows[0][0]
 
-		for cart in self.getCartNames(args):
-			self.db.execute("""
+        for cart in self.getCartNames(args):
+            self.db.execute(
+                """
 				delete from cart_stacks where
 				box=%s and cart=(select id from carts where name=%s)
-				""", (box_id, cart)
-			)
+				""",
+                (box_id, cart),
+            )
 
-		# Regenerate stacki.repo
-		os.system("""
+        # Regenerate stacki.repo
+        os.system(
+            """
 			/opt/stack/bin/stack report host repo localhost |
 			/opt/stack/bin/stack report script |
 			/bin/sh
-			""")
+			"""
+        )

@@ -5,31 +5,27 @@
 # @copyright@
 
 import stack
-from stack.bool import str2bool
 from stack.api import Call
+from stack.bool import str2bool
 
 
 def test_command():
-	"""
+    """
 	Make sure we are using the local stack.py and not
 	the system one.
 	"""
-	assert stack.api.__stack__ == './stack.py'
-	
-	
+    assert stack.api.__stack__ == "./stack.py"
+
+
 def test_call():
-	"""
+    """
 	Test the stack.api.Call function to verify it returns
 	a list of dictionaries.
 	"""
 
-	found = False
-	for dict in Call('list appliance'):
-		if dict['appliance'] == 'backend':
-			found = True
-			assert str2bool(dict['public'])
-	assert found
-	
-		
-
-	
+    found = False
+    for dict in Call("list appliance"):
+        if dict["appliance"] == "backend":
+            found = True
+            assert str2bool(dict["public"])
+    assert found

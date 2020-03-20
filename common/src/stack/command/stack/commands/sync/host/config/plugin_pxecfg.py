@@ -11,16 +11,16 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
-	"Sets the hosts' bootaction to install"
+    "Sets the hosts' bootaction to install"
 
-	def provides(self):
-		return 'pxeconfig'
+    def provides(self):
+        return "pxeconfig"
 
-	def requires(self):
-		return []
+    def requires(self):
+        return []
 
-	def run(self, h):
-		hosts = h['hosts']
-		attrs = h['attrs']
+    def run(self, h):
+        hosts = h["hosts"]
+        attrs = h["attrs"]
 
-		self.owner.command('sync.host.boot', hosts)
+        self.owner.command("sync.host.boot", hosts)

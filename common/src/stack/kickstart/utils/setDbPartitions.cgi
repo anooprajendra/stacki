@@ -12,11 +12,13 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
+import json
 import os
 import sys
-import json
 import syslog
+
 import stack.api
+
 
 def setPartitionInfo(host, part):
 	cmd = [ host ]
@@ -87,4 +89,3 @@ print('')
 print('')
 
 syslog.closelog()
-

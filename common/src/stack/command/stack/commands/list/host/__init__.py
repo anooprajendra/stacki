@@ -13,13 +13,12 @@
 import stack.commands
 
 
-class command(stack.commands.HostArgumentProcessor,
-	stack.commands.list.command):
-	pass
-	
+class command(stack.commands.HostArgumentProcessor, stack.commands.list.command):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	List the Appliance, and physical position info for a list of hosts.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
@@ -44,30 +43,28 @@ class Command(command):
 	</example>
 
 	"""
-	def run(self, params, args):
-	    
-		(order, expanded, hashit) = self.fillParams([
-			('order',    'asc'), 
-			('expanded', False),
-			('hash',     False) 
-		])
-		
-		hosts    = self.getHostnames(args, order=order)
-		expanded = self.str2bool(expanded)
-		hashit   = self.str2bool(hashit)
-	    
-		header = [ 'host' ]
-		values = { }
-		for host in hosts:
-			values[host] = [ ]
-			
-		for (provides, result) in self.runPlugins((hosts, expanded, hashit)):
-			header.extend(result['keys'])
-			for h, v in result['values'].items():
-				values[h].extend(v)
 
-		self.beginOutput()
-		for host in hosts:
-			self.addOutput(host, values[host])
-		self.endOutput(header=header, trimOwner=False)
+    def run(self, params, args):
 
+        (order, expanded, hashit) = self.fillParams(
+            [("order", "asc"), ("expanded", False), ("hash", False)]
+        )
+
+        hosts = self.getHostnames(args, order=order)
+        expanded = self.str2bool(expanded)
+        hashit = self.str2bool(hashit)
+
+        header = ["host"]
+        values = {}
+        for host in hosts:
+            values[host] = []
+
+        for (provides, result) in self.runPlugins((hosts, expanded, hashit)):
+            header.extend(result["keys"])
+            for h, v in result["values"].items():
+                values[h].extend(v)
+
+        self.beginOutput()
+        for host in hosts:
+            self.addOutput(host, values[host])
+        self.endOutput(header=header, trimOwner=False)

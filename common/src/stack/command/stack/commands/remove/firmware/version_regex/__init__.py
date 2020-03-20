@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.remove.firmware.command):
-	"""
+    """
 	Removes firmware version_regexes from the stacki database.
 
 	<arg type='string' name='version_regexes'>
@@ -25,5 +26,5 @@ class Command(stack.commands.remove.firmware.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.runPlugins(args = args)
+    def run(self, params, args):
+        self.runPlugins(args=args)

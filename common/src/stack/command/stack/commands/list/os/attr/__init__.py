@@ -9,7 +9,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.os.command):
-	"""
+    """
 	Lists the set of attributes for OSes.
 
 	<arg optional='1' type='string' name='os'>
@@ -21,7 +21,8 @@ class Command(stack.commands.list.os.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.addText(self.command('list.attr', self._argv + [ 'scope=os' ], verbose_errors = False))
-		return self.rc
-
+    def run(self, params, args):
+        self.addText(
+            self.command("list.attr", self._argv + ["scope=os"], verbose_errors=False)
+        )
+        return self.rc

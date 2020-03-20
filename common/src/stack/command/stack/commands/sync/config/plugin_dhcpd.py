@@ -10,13 +10,13 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
-	"Writes /etc/dhcpd.conf"
+    "Writes /etc/dhcpd.conf"
 
-	def provides(self):
-		return 'dhcpd'
+    def provides(self):
+        return "dhcpd"
 
-	def requires(self):
-		return ['hostfile']
+    def requires(self):
+        return ["hostfile"]
 
-	def run(self, args):
-		self.owner.command('sync.dhcpd')
+    def run(self, args):
+        self.owner.command("sync.dhcpd")

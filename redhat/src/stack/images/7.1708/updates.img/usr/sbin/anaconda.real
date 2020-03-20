@@ -44,7 +44,12 @@ if ("debug=1" in proc_cmdline) or ("debug" in proc_cmdline):
     cov.start()
 
 
-import atexit, sys, os, time, signal
+import atexit
+import os
+import signal
+import sys
+import time
+
 
 def exitHandler(rebootData, storage, payload, exitCode=None):
     # Clear the list of watched PIDs.

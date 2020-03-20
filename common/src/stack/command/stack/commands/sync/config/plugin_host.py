@@ -8,14 +8,14 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
-	"Writes /etc/hosts"
+    "Writes /etc/hosts"
 
-	def provides(self):
-		return 'hostfile'
+    def provides(self):
+        return "hostfile"
 
-	def requires(self):
-		return []
+    def requires(self):
+        return []
 
-	def run(self, args):
-		if self.owner.getAttr('platform') not in [ 'docker', 'aws' ]:
-			self.owner.command('sync.host')
+    def run(self, args):
+        if self.owner.getAttr("platform") not in ["docker", "aws"]:
+            self.owner.command("sync.host")

@@ -9,7 +9,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.add.host.command):
-	"""
+    """
 	Add a storage partition configuration for the specified hosts.
 
 	<arg type='string' name='host' repeat='1' optional='0'>
@@ -46,9 +46,11 @@ class Command(stack.commands.add.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'host')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "host")
 
-		self.command('add.storage.partition', self._argv + ['scope=host'], verbose_errors = False)
-		return self.rc
+        self.command(
+            "add.storage.partition", self._argv + ["scope=host"], verbose_errors=False
+        )
+        return self.rc

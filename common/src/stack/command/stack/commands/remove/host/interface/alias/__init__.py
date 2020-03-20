@@ -16,7 +16,7 @@ from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
 class Command(stack.commands.remove.host.command):
-	"""
+    """
 	Remove an alias from a host interface.
 
 	<arg type='string' name='host' optional='0'>
@@ -44,38 +44,35 @@ class Command(stack.commands.remove.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'host')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "host")
 
-		hosts = self.getHostnames(args)
+        hosts = self.getHostnames(args)
 
-		if not hosts:
-			raise ArgRequired(self, 'host')
+        if not hosts:
+            raise ArgRequired(self, "host")
 
-		if not len(hosts) == 1:
-			raise ArgUnique(self, 'host')
+        if not len(hosts) == 1:
+            raise ArgUnique(self, "host")
 
-		alias, interface, = self.fillParams([
-			('alias', None),
-			('interface', None)
-		])
+        alias, interface, = self.fillParams([("alias", None), ("interface", None)])
 
-		query = """
+        query = """
 			DELETE aliases
 			FROM aliases
 			LEFT JOIN networks ON aliases.network = networks.id
 			LEFT JOIN nodes ON networks.node = nodes.id
 			WHERE nodes.name = %s
 		"""
-		values = [hosts[0]]
+        values = [hosts[0]]
 
-		if alias:
-			query += ' AND aliases.name = %s'
-			values.append(alias)
+        if alias:
+            query += " AND aliases.name = %s"
+            values.append(alias)
 
-		if interface:
-			query += ' AND networks.device = %s'
-			values.append(interface)
+        if interface:
+            query += " AND networks.device = %s"
+            values.append(interface)
 
-		self.db.execute(query, values)
+        self.db.execute(query, values)

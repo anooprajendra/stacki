@@ -14,7 +14,7 @@ import stack.commands
 
 
 class Command(stack.commands.remove.appliance.command):
-	"""
+    """
 	Remove an attribute for an appliance.
 
 	<arg type='string' name='appliance' optional='1' repeat='1'>
@@ -30,6 +30,8 @@ class Command(stack.commands.remove.appliance.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.command('set.attr', self._argv + [ 'scope=appliance', 'value=' ], verbose_errors = False)
-		return self.rc
+    def run(self, params, args):
+        self.command(
+            "set.attr", self._argv + ["scope=appliance", "value="], verbose_errors=False
+        )
+        return self.rc

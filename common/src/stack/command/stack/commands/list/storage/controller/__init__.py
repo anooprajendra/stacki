@@ -9,7 +9,7 @@ from stack.exception import ArgError, ParamValue
 
 
 class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command):
-	"""
+    """
 	List the global storage controller configuration.
 
 	<example cmd='list storage controller'>
@@ -17,48 +17,54 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command
 	</example>
 	"""
 
-	def _clean_data(self, enclosure, adapter, slot, raidlevel, arrayid, options, scope=None):
-		if enclosure == -1:
-			enclosure = None
+    def _clean_data(
+        self, enclosure, adapter, slot, raidlevel, arrayid, options, scope=None
+    ):
+        if enclosure == -1:
+            enclosure = None
 
-		if adapter == -1:
-			adapter = None
+        if adapter == -1:
+            adapter = None
 
-		if slot == -1:
-			slot = '*'
+        if slot == -1:
+            slot = "*"
 
-		if raidlevel == '-1':
-			raidlevel = 'hotspare'
+        if raidlevel == "-1":
+            raidlevel = "hotspare"
 
-		if arrayid == -1:
-			arrayid = 'global'
-		elif arrayid == -2:
-			arrayid = '*'
+        if arrayid == -1:
+            arrayid = "global"
+        elif arrayid == -2:
+            arrayid = "*"
 
-		options = options.strip('"')
+        options = options.strip('"')
 
-		if scope:
-			return [enclosure, adapter, slot, raidlevel, arrayid, options, scope]
-		else:
-			return [enclosure, adapter, slot, raidlevel, arrayid, options]
+        if scope:
+            return [enclosure, adapter, slot, raidlevel, arrayid, options, scope]
+        else:
+            return [enclosure, adapter, slot, raidlevel, arrayid, options]
 
-	def run(self, params, args):
-		# Get the scope and make sure the args are valid
-		scope, = self.fillParams([('scope', 'global')])
-		scope_mappings = self.getScopeMappings(args, scope)
+    def run(self, params, args):
+        # Get the scope and make sure the args are valid
+        (scope,) = self.fillParams([("scope", "global")])
+        scope_mappings = self.getScopeMappings(args, scope)
 
-		self.beginOutput()
-		for scope_mapping in scope_mappings:
-			if scope == 'host':
-				# Get the host's info for the scope linking
-				host, appliance_id, os_id, environment_id = self.db.select("""
+        self.beginOutput()
+        for scope_mapping in scope_mappings:
+            if scope == "host":
+                # Get the host's info for the scope linking
+                host, appliance_id, os_id, environment_id = self.db.select(
+                    """
 					nodes.name, appliance, boxes.os, environment
 					FROM nodes, boxes
 					WHERE nodes.id = %s AND nodes.box = boxes.id
-				""", (scope_mapping.node_id,))[0]
+				""",
+                    (scope_mapping.node_id,),
+                )[0]
 
-				# Get the controller data for all scopes that match the host's info
-				rows = self.db.select("""
+                # Get the controller data for all scopes that match the host's info
+                rows = self.db.select(
+                    """
 					storage_controller.enclosure, storage_controller.adapter,
 					storage_controller.slot, storage_controller.raidlevel,
 					storage_controller.arrayid, storage_controller.options,
@@ -72,21 +78,24 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command
 					OR (scope_map.scope = 'environment' AND scope_map.environment_id <=> %s)
 					OR (scope_map.scope = 'host' AND scope_map.node_id <=> %s)
 					ORDER BY scope_map.scope DESC, enclosure, adapter, slot
-				""", (appliance_id, os_id, environment_id, scope_mapping.node_id))
+				""",
+                    (appliance_id, os_id, environment_id, scope_mapping.node_id),
+                )
 
-				# The routes come out of the DB with the higher value scopes
-				# first. First scope wins, so we output until the scope changes.
-				last_scope = None
-				for row in rows:
-					if last_scope and last_scope != row[6]:
-						break
+                # The routes come out of the DB with the higher value scopes
+                # first. First scope wins, so we output until the scope changes.
+                last_scope = None
+                for row in rows:
+                    if last_scope and last_scope != row[6]:
+                        break
 
-					self.addOutput(host, self._clean_data(*row))
+                    self.addOutput(host, self._clean_data(*row))
 
-					last_scope = row[6]
-			else:
-				# All the other scopes just list their data
-				rows = self.db.select("""
+                    last_scope = row[6]
+            else:
+                # All the other scopes just list their data
+                rows = self.db.select(
+                    """
 					COALESCE(appliances.name, oses.name, environments.name, ''),
 					storage_controller.enclosure, storage_controller.adapter,
 					storage_controller.slot, storage_controller.raidlevel,
@@ -106,23 +115,47 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command
 					AND scope_map.environment_id <=> %s
 					AND scope_map.node_id <=> %s
 					ORDER BY enclosure, adapter, slot
-				""", scope_mapping)
+				""",
+                    scope_mapping,
+                )
 
-				for row in rows:
-					self.addOutput(row[0], self._clean_data(*row[1:]))
+                for row in rows:
+                    self.addOutput(row[0], self._clean_data(*row[1:]))
 
-		if scope == 'host':
-			self.endOutput(header=[
-				'host', 'enclosure', 'adapter', 'slot',
-				'raidlevel', 'arrayid', 'options', 'source'
-			])
-		elif scope == 'global':
-			self.endOutput(header=[
-				'', 'enclosure', 'adapter', 'slot',
-				'raidlevel', 'arrayid', 'options'
-			])
-		else:
-			self.endOutput(header=[
-				scope, 'enclosure', 'adapter', 'slot',
-				'raidlevel', 'arrayid', 'options'
-			])
+        if scope == "host":
+            self.endOutput(
+                header=[
+                    "host",
+                    "enclosure",
+                    "adapter",
+                    "slot",
+                    "raidlevel",
+                    "arrayid",
+                    "options",
+                    "source",
+                ]
+            )
+        elif scope == "global":
+            self.endOutput(
+                header=[
+                    "",
+                    "enclosure",
+                    "adapter",
+                    "slot",
+                    "raidlevel",
+                    "arrayid",
+                    "options",
+                ]
+            )
+        else:
+            self.endOutput(
+                header=[
+                    scope,
+                    "enclosure",
+                    "adapter",
+                    "slot",
+                    "raidlevel",
+                    "arrayid",
+                    "options",
+                ]
+            )

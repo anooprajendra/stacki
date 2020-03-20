@@ -8,9 +8,10 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class Command(stack.commands.set.host.command,
-	      stack.commands.ApplianceArgumentProcessor):
-	"""
+class Command(
+    stack.commands.set.host.command, stack.commands.ApplianceArgumentProcessor
+):
+    """
 	Set the Appliance for a list of hosts.
 
 	<arg type='string' name='host' repeat='1'>
@@ -22,20 +23,21 @@ class Command(stack.commands.set.host.command,
 	</param>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(appliance, ) = self.fillParams([
-			('appliance', None, True)
-		])
+        (appliance,) = self.fillParams([("appliance", None, True)])
 
-		if appliance not in self.getApplianceNames():
-			raise CommandError(self, 'appliance parameter not valid')
+        if appliance not in self.getApplianceNames():
+            raise CommandError(self, "appliance parameter not valid")
 
-		for host in hosts:
-			self.db.execute("""
+        for host in hosts:
+            self.db.execute(
+                """
 				update nodes set appliance=(
 					select id from appliances where name=%s
 				)
 				where name=%s
-			""", (appliance, host))
+			""",
+                (appliance, host),
+            )

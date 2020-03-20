@@ -15,7 +15,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.host.command):
-	"""
+    """
 	List the static routes that are assigned to a host.
 
 	<arg optional='1' type='string' name='host'>
@@ -27,6 +27,10 @@ class Command(stack.commands.list.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.addText(self.command('list.route', self._argv + ['scope=host'], verbose_errors = False))
-		return self.rc
+    def run(self, params, args):
+        self.addText(
+            self.command(
+                "list.route", self._argv + ["scope=host"], verbose_errors=False
+            )
+        )
+        return self.rc

@@ -12,12 +12,12 @@
 
 
 import stack.commands
-from stack.exception import ParamRequired, CommandError, ArgRequired
+from stack.exception import ArgRequired, CommandError, ParamRequired
 from stack.util import flatten
 
 
 class Command(stack.commands.remove.host.command):
-	"""
+    """
 	Remove a network interface definition for a host.
 
 	<arg type='string' name='host' optional='1' repeat='1'>
@@ -47,46 +47,63 @@ class Command(stack.commands.remove.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'host')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "host")
 
-		hosts = self.getHostnames(args)
-		if not hosts:
-			raise ArgRequired(self, 'host')
+        hosts = self.getHostnames(args)
+        if not hosts:
+            raise ArgRequired(self, "host")
 
-		(interface, mac, all_interfaces) = self.fillParams([
-			('interface', None),
-			('mac',       None),
-			('all',     'false')
-		])
+        (interface, mac, all_interfaces) = self.fillParams(
+            [("interface", None), ("mac", None), ("all", "false")]
+        )
 
-		all_interfaces = self.str2bool(all_interfaces)
-		if not all_interfaces and not interface and not mac:
-			raise ParamRequired(self, ('interface', 'mac'))
+        all_interfaces = self.str2bool(all_interfaces)
+        if not all_interfaces and not interface and not mac:
+            raise ParamRequired(self, ("interface", "mac"))
 
-		networks = ()
-		for host in hosts:
-			if all_interfaces:
-				networks = flatten(self.db.select("""
+        networks = ()
+        for host in hosts:
+            if all_interfaces:
+                networks = flatten(
+                    self.db.select(
+                        """
 					id from networks where
 					node=(select id from nodes where name=%s)
-				""", (host,)))
-			elif interface:
-				networks = flatten(self.db.select("""
+				""",
+                        (host,),
+                    )
+                )
+            elif interface:
+                networks = flatten(
+                    self.db.select(
+                        """
 					id from networks where
 					node=(select id from nodes where name=%s) and device=%s
-				""",  (host, interface)))
+				""",
+                        (host, interface),
+                    )
+                )
 
-				if not networks:
-					raise CommandError(self, 'no interface "%s" exists on %s' % (interface, host))
-			else:
-				networks = flatten(self.db.select("""
+                if not networks:
+                    raise CommandError(
+                        self, 'no interface "%s" exists on %s' % (interface, host)
+                    )
+            else:
+                networks = flatten(
+                    self.db.select(
+                        """
 					id from networks where
 					node=(select id from nodes where name=%s) and mac=%s
-				""", (host, mac)))
+				""",
+                        (host, mac),
+                    )
+                )
 
-				if not networks:
-					raise CommandError(self, 'no mac address "%s" exists on %s' % (mac, host))
+                if not networks:
+                    raise CommandError(
+                        self, 'no mac address "%s" exists on %s' % (mac, host)
+                    )
 
-			self.runPlugins(networks)
+            self.runPlugins(networks)

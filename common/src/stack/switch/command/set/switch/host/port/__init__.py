@@ -6,13 +6,22 @@
 
 import stack.commands
 from stack.exception import (
-	ParamRequired, ParamUnique, ParamType, CommandError, ArgUnique, ArgRequired, ArgError
+    ArgError,
+    ArgRequired,
+    ArgUnique,
+    CommandError,
+    ParamRequired,
+    ParamType,
+    ParamUnique,
 )
 
-class Command(stack.commands.SwitchArgumentProcessor,
-		stack.commands.HostArgumentProcessor,
-		stack.commands.set.switch.host.command):
-	"""
+
+class Command(
+    stack.commands.SwitchArgumentProcessor,
+    stack.commands.HostArgumentProcessor,
+    stack.commands.set.switch.host.command,
+):
+    """
 	In the switch to host relation that Stacki keeps in its database, this command
 	changes the port association on the switch that this host's interface maps to.
 
@@ -37,41 +46,40 @@ class Command(stack.commands.SwitchArgumentProcessor,
 	</example>
 	"""
 
-	def run(self, params, args):
-		switches = self.getSwitchNames(args)
-		if not switches:
-			raise ArgRequired(self, 'switch')
-		elif len(switches) > 1:
-			raise ArgUnique(self, 'switch')
-		switch = switches[0]
+    def run(self, params, args):
+        switches = self.getSwitchNames(args)
+        if not switches:
+            raise ArgRequired(self, "switch")
+        elif len(switches) > 1:
+            raise ArgUnique(self, "switch")
+        switch = switches[0]
 
-		(host, interface, port) = self.fillParams([
-			('host', None),
-			('interface', None),
-			('port', None)
-		])
+        (host, interface, port) = self.fillParams(
+            [("host", None), ("interface", None), ("port", None)]
+        )
 
-		hosts = self.getHostnames([host])
-		if not hosts:
-			raise ParamRequired(self, ('host'))
-		elif len(hosts) > 1:
-			raise ParamUnique(self, 'host')
-		host = hosts[0]
+        hosts = self.getHostnames([host])
+        if not hosts:
+            raise ParamRequired(self, ("host"))
+        elif len(hosts) > 1:
+            raise ParamUnique(self, "host")
+        host = hosts[0]
 
-		try:
-			port = int(port)
-		except:
-			raise ParamType(self, 'port', 'integer')
+        try:
+            port = int(port)
+        except:
+            raise ParamType(self, "port", "integer")
 
-		# Check if the host/interface is defined for this switch
-		for row in self.call('list.switch.host', [switch]):
-			if row['host'] == host and row['interface'] == interface:
-				break
-		else:
-			raise ArgError(self, 'host/interface', f'"{host}/{interface}" not found')
+        # Check if the host/interface is defined for this switch
+        for row in self.call("list.switch.host", [switch]):
+            if row["host"] == host and row["interface"] == interface:
+                break
+        else:
+            raise ArgError(self, "host/interface", f'"{host}/{interface}" not found')
 
-		# Update the switch port
-		self.db.execute("""
+        # Update the switch port
+        self.db.execute(
+            """
 			UPDATE switchports SET port=%s
 			WHERE interface=(
 				SELECT networks.id FROM networks, nodes
@@ -79,4 +87,6 @@ class Command(stack.commands.SwitchArgumentProcessor,
 				AND networks.node=nodes.id
 			)
 			AND switch=(SELECT id FROM nodes WHERE name=%s)
-		""", (port, host, interface, switch))
+		""",
+            (port, host, interface, switch),
+        )

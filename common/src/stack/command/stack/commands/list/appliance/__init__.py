@@ -13,13 +13,12 @@
 import stack.commands
 
 
-class command(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.list.command):
-	pass
+class command(stack.commands.ApplianceArgumentProcessor, stack.commands.list.command):
+    pass
 
 
 class Command(command):
-	"""
+    """
 	Lists the appliances defined in the cluster database.
 
 	<arg optional='1' type='string' name='appliance' repeat='1'>
@@ -31,14 +30,11 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		self.beginOutput()
-		for app in self.getApplianceNames(args):
-			rows = self.db.select(
-				'public from appliances where name=%s',
-				(app,)
-			)
-			self.addOutput(app, rows[0])
+        self.beginOutput()
+        for app in self.getApplianceNames(args):
+            rows = self.db.select("public from appliances where name=%s", (app,))
+            self.addOutput(app, rows[0])
 
-		self.endOutput(header=['appliance', 'public'])
+        self.endOutput(header=["appliance", "public"])

@@ -7,14 +7,16 @@
 #
 
 import pathlib
+
 import stack.commands
 
-class Plugin(stack.commands.Plugin):
-	def provides(self):
-		return 'local_iso'
 
-	def run(self, args):
-		'''
+class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "local_iso"
+
+    def run(self, args):
+        """
 		Iterate through args, and if arg is an iso already on the filesystem,
 		mount it in the provided temporary directory
 
@@ -25,9 +27,9 @@ class Plugin(stack.commands.Plugin):
 				exploded_path: tempdir
 				},
 		}
-		'''
+		"""
 
-		for arg in args:
-			p = pathlib.Path(args[arg]['canonical_arg'])
-			if p.is_file() and p.suffix == '.iso':
-				self.owner.mount(str(p), args[arg]['exploded_path'])
+        for arg in args:
+            p = pathlib.Path(args[arg]["canonical_arg"])
+            if p.is_file() and p.suffix == ".iso":
+                self.owner.mount(str(p), args[arg]["exploded_path"])

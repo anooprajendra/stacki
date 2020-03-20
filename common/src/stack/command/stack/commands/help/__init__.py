@@ -11,15 +11,16 @@
 # @rocks@
 
 import string
+
 import stack.commands
 
 
 class command(stack.commands.Command):
-	MustBeRoot = 0
+    MustBeRoot = 0
 
 
 class Command(command):
-	"""
+    """
 	List help for the command line client.  With no arguments it lists
 	all the commands available.  Otherwise it will list the subset
 	of command with the specified string (see examples).
@@ -41,13 +42,13 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		command_list = self.command('list.help', [ 'cols=0' ])
-		substring = ' '.join(args)
+    def run(self, params, args):
+        command_list = self.command("list.help", ["cols=0"])
+        substring = " ".join(args)
 
-		if not args:
-			self.addText(command_list)
-		else:
-			for line in command_list.split('\n'):
-				if line and substring in line:
-					self.addText('%s\n' % line)
+        if not args:
+            self.addText(command_list)
+        else:
+            for line in command_list.split("\n"):
+                if line and substring in line:
+                    self.addText("%s\n" % line)

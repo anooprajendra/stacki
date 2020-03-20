@@ -12,14 +12,17 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
-	"""Returns the names of all implementations in the database."""
+    """Returns the names of all implementations in the database."""
 
-	def provides(self):
-		return "basic"
+    def provides(self):
+        return "basic"
 
-	def run(self, args):
-		return {
-			"keys": ["imp"],
-			"values": [(row[0], []) for row in self.owner.db.select("name FROM firmware_imp")]
-		}
+    def run(self, args):
+        return {
+            "keys": ["imp"],
+            "values": [
+                (row[0], []) for row in self.owner.db.select("name FROM firmware_imp")
+            ],
+        }

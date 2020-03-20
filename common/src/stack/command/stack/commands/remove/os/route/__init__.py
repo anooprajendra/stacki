@@ -15,7 +15,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.os.command):
-	"""
+    """
 	Remove a static route for an OS type.
 
 	<arg type='string' name='os' optional='0' repeat='1'>
@@ -32,9 +32,9 @@ class Command(stack.commands.remove.os.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'os')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "os")
 
-		self.command('remove.route', self._argv + ['scope=os'], verbose_errors = False)
-		return self.rc
+        self.command("remove.route", self._argv + ["scope=os"], verbose_errors=False)
+        return self.rc

@@ -8,9 +8,9 @@
 # @copyright@
 #
 
+import json
 import os
 import sys
-import json
 
 import wsclient
 
@@ -18,39 +18,42 @@ import wsclient
 # EXAMPLE CLIENT APPLICATION TO ACCESS WEBSERVICE
 #
 
+
 def getCredentialsFile(args):
-	if '-f' in args:
-		idx = args.index('-f')
-		cred_file = args.pop(idx+1)
-		args.pop(idx)
-	else:
-		homedir = os.getenv("HOME")
-		cred_file = "%s/stacki-ws.cred" % homedir
-	if not os.path.exists(cred_file):
-		sys.stderr.write('Cannot file credential file %s\n' % cred_file)
-		sys.exit(1)
-	return cred_file
+    if "-f" in args:
+        idx = args.index("-f")
+        cred_file = args.pop(idx + 1)
+        args.pop(idx)
+    else:
+        homedir = os.getenv("HOME")
+        cred_file = "%s/stacki-ws.cred" % homedir
+    if not os.path.exists(cred_file):
+        sys.stderr.write("Cannot file credential file %s\n" % cred_file)
+        sys.exit(1)
+    return cred_file
+
 
 def parseCredentials(cred_file):
-	cred = open(cred_file, 'r')
-	j = json.load(cred)
-	if type(j) == type([]):
-		j = j[0]
-	hostname = j['hostname']
-	username = j['username']
-	key	 = j['key']
-	return (hostname, username, key)
+    cred = open(cred_file, "r")
+    j = json.load(cred)
+    if type(j) == type([]):
+        j = j[0]
+    hostname = j["hostname"]
+    username = j["username"]
+    key = j["key"]
+    return (hostname, username, key)
 
-if __name__ == '__main__':
-	cred_file = getCredentialsFile(sys.argv)
-	hostname, username, key = parseCredentials(cred_file)
 
-	wsClient = wsclient.StackWSClient(hostname, username, key)
-	wsClient.login()
+if __name__ == "__main__":
+    cred_file = getCredentialsFile(sys.argv)
+    hostname, username, key = parseCredentials(cred_file)
 
-	if len(sys.argv) < 2:
-		sys.exit(1)
+    wsClient = wsclient.StackWSClient(hostname, username, key)
+    wsClient.login()
 
-	cmd = ' '.join(sys.argv[1:])
-	out = wsClient.run(cmd)
-	print(out)
+    if len(sys.argv) < 2:
+        sys.exit(1)
+
+    cmd = " ".join(sys.argv[1:])
+    out = wsClient.run(cmd)
+    print(out)

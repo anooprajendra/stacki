@@ -7,11 +7,13 @@
 import stack.commands
 from stack.exception import ArgRequired
 
+
 class command(stack.commands.HostArgumentProcessor, stack.commands.create.command):
-	pass
+    pass
+
 
 class Command(command):
-	"""
+    """
 	This command dynamically maps the interfaces of hosts to ports of a switch.
 
 	<arg name="host">
@@ -23,13 +25,12 @@ class Command(command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		switch, = self.fillParams([ ('switch', None) ])
+    def run(self, params, args):
+        (switch,) = self.fillParams([("switch", None)])
 
-		switches = self.getHostnames(switch)
-		hosts = self.getHostnames(args)
+        switches = self.getHostnames(switch)
+        hosts = self.getHostnames(args)
 
-		for s in switches:
-			model = self.getHostAttr(s, 'component.model')
-			self.runImplementation(model, (s, hosts))
-
+        for s in switches:
+            model = self.getHostAttr(s, "component.model")
+            self.runImplementation(model, (s, hosts))

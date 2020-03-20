@@ -8,7 +8,7 @@ import stack.commands
 
 
 class Command(stack.commands.remove.pallet.command):
-	"""
+    """
 	Removes a tag to one or more pallets.
 
 	<arg type='string' name='pallet' repeat='1'>
@@ -40,6 +40,6 @@ class Command(stack.commands.remove.pallet.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		self.command('set.pallet.tag', self._argv + [ 'value=' ])
-		return self.rc
+    def run(self, params, args):
+        self.command("set.pallet.tag", self._argv + ["value="])
+        return self.rc

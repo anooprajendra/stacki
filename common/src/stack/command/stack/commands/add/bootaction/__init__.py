@@ -8,7 +8,7 @@ import stack.commands
 
 
 class Command(stack.commands.add.command):
-	"""
+    """
 	Add a bootaction specification to the system.
 
 	<arg optional='0' type='string' name='action'>
@@ -47,6 +47,6 @@ class Command(stack.commands.add.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.command('set.bootaction', self._argv + [ 'force=no' ], verbose_errors = False)
-		return self.rc
+    def run(self, params, args):
+        self.command("set.bootaction", self._argv + ["force=no"], verbose_errors=False)
+        return self.rc

@@ -9,7 +9,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.host.command):
-	"""
+    """
 	Lists the groups for a host.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
@@ -27,46 +27,45 @@ class Command(stack.commands.list.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(group,) = self.fillParams([ ('group', None) ])
+        (group,) = self.fillParams([("group", None)])
 
-		if group:
-			groups = group.split(',')
-		else:
-			groups = None
+        if group:
+            groups = group.split(",")
+        else:
+            groups = None
 
-		self.beginOutput()
+        self.beginOutput()
 
-		hosts = self.getHostnames(args)
-		membership = {}
+        hosts = self.getHostnames(args)
+        membership = {}
 
-		for host in hosts:
-			membership[host] = []
+        for host in hosts:
+            membership[host] = []
 
-		for hostName, groupName in self.db.select(
-			"""
+        for hostName, groupName in self.db.select(
+            """
 			n.name, g.name from
 			groups g, memberships m, nodes n where
 			n.id = m.nodeid and g.id = m.groupid
 			order by g.name
-			"""):
-			if hostName not in membership:
-				membership[hostName] = []
-			membership[hostName].append(groupName)
+			"""
+        ):
+            if hostName not in membership:
+                membership[hostName] = []
+            membership[hostName].append(groupName)
 
-		if groups:
-			for host in hosts:
-				match = []
-				for group in membership[host]:
-					if group in groups:
-						match.append(group)
-				if match:
-					self.addOutput(host, ' '.join(match))
-		else:
-			for host in hosts:
-				self.addOutput(host, ' '.join(membership[host]))
+        if groups:
+            for host in hosts:
+                match = []
+                for group in membership[host]:
+                    if group in groups:
+                        match.append(group)
+                if match:
+                    self.addOutput(host, " ".join(match))
+        else:
+            for host in hosts:
+                self.addOutput(host, " ".join(membership[host]))
 
-
-		self.endOutput(header=['host', 'groups'], trimOwner=False)
-
+        self.endOutput(header=["host", "groups"], trimOwner=False)

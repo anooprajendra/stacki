@@ -8,4 +8,4 @@ import stack.commands
 
 
 class command(stack.commands.ApplianceArgumentProcessor, stack.commands.set.command):
-	pass
+    pass

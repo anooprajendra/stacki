@@ -6,14 +6,15 @@
 # @copyright@
 #
 
-import os
 import hashlib
+import os
+
 import stack.commands
 from stack.argument_processors.box import BoxArgumentProcessor
 
-class Command(stack.commands.list.host.command,
-	BoxArgumentProcessor):
-	"""
+
+class Command(stack.commands.list.host.command, BoxArgumentProcessor):
+    """
 	Calculate and list the MD5 hashes of a host's:
 
 		- pallets
@@ -34,73 +35,78 @@ class Command(stack.commands.list.host.command,
 	</example>
 	"""
 
-	def directoryhash(self, path):
-		m = hashlib.md5()
+    def directoryhash(self, path):
+        m = hashlib.md5()
 
-		for dirpath, dirnames, filenames in os.walk(path):
-			for f in filenames:
-				filepath = os.path.join(dirpath, f)
-				filestat = os.stat(filepath)
-				fsize = '%d' % filestat.st_size
-				fmtime = '%d' % filestat.st_mtime
+        for dirpath, dirnames, filenames in os.walk(path):
+            for f in filenames:
+                filepath = os.path.join(dirpath, f)
+                filestat = os.stat(filepath)
+                fsize = "%d" % filestat.st_size
+                fmtime = "%d" % filestat.st_mtime
 
-				buf = '%s %s %s\n' % (os.path.join(dirpath, f), fsize, fmtime)
+                buf = "%s %s %s\n" % (os.path.join(dirpath, f), fsize, fmtime)
 
-				m.update(buf.encode())
+                m.update(buf.encode())
 
-		return m.hexdigest()
+        return m.hexdigest()
 
+    def run(self, params, args):
 
-	def run(self, params, args):
+        (profile,) = self.fillParams([("profile", "n")])
 
-		(profile, ) = self.fillParams([
-			('profile', 'n') ])
+        self.beginOutput()
 
-		self.beginOutput()
+        hosts = self.getHostnames(args)
+        for host in hosts:
+            #
+            # calculate MD5s for the pallets associated with the host
+            #
+            box = self.getHostAttr(host, "box")
+            for pallet in self.get_box_pallets(box):
+                path = "/export/stack/pallets/%s/%s/%s/%s/%s" % (
+                    pallet.name,
+                    pallet.version,
+                    pallet.rel,
+                    pallet.os,
+                    pallet.arch,
+                )
 
-		hosts = self.getHostnames(args)
-		for host in hosts:
-			#
-			# calculate MD5s for the pallets associated with the host
-			#
-			box = self.getHostAttr(host, 'box')
-			for pallet in self.get_box_pallets(box):
-				path = '/export/stack/pallets/%s/%s/%s/%s/%s' % \
-					(pallet.name, pallet.version, pallet.rel, pallet.os, pallet.arch)
+                dirhash = self.directoryhash(path)
+                self.addOutput(host, "%s  %s" % (dirhash, pallet.name))
 
-				dirhash = self.directoryhash(path)
-				self.addOutput(host, '%s  %s' % (dirhash, pallet.name))
+            #
+            # calculate MD5s for the carts associated with the host
+            #
+            contents = self.call("list.box", [box])
+            if len(contents) > 0:
+                for name in contents[0]["carts"].split():
+                    path = "/export/stack/carts/%s" % name
+                    dirhash = self.directoryhash(path)
+                    self.addOutput(host, "%s  %s" % (dirhash, name))
 
-			#
-			# calculate MD5s for the carts associated with the host
-			#
-			contents = self.call('list.box', [ box ])
-			if len(contents) > 0:
-				for name in contents[0]['carts'].split():
-					path = '/export/stack/carts/%s' % name
-					dirhash = self.directoryhash(path)
-					self.addOutput(host, '%s  %s' % (dirhash, name))
+            if self.str2bool(profile):
+                import subprocess
 
-			if self.str2bool(profile):
-				import subprocess
+                p = subprocess.Popen(
+                    "/opt/stack/bin/stack list host profile hash=y %s" % host,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=True,
+                )
 
-				p = subprocess.Popen(
-					'/opt/stack/bin/stack list host profile hash=y %s' % host,
-					stdin=subprocess.PIPE,
-					stdout=subprocess.PIPE,
-					stderr=subprocess.PIPE, shell=True)
+                (o, e) = p.communicate()
+                line = e.decode()
 
-				(o, e) = p.communicate()
-				line = e.decode()
+                #
+                # strip off the last carriage return
+                #
+                if line[-1] == "\n":
+                    hashline = line[:-1]
+                else:
+                    hashline = line
 
-				#
-				# strip off the last carriage return
-				#
-				if line[-1] == '\n':
-					hashline = line[:-1]
-				else:
-					hashline = line
+                self.addOutput(host, "%s" % hashline)
 
-				self.addOutput(host, '%s' % hashline)
-
-		self.endOutput(padChar='', trimOwner=True)
+        self.endOutput(padChar="", trimOwner=True)

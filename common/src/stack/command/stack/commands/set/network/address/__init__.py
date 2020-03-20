@@ -11,7 +11,7 @@ from stack.exception import ArgUnique, CommandError
 
 
 class Command(stack.commands.set.network.command):
-	"""
+    """
 	Sets the network address of a network.
 
 	<arg type='string' name='network' optional='0' repeat='0'>
@@ -27,23 +27,22 @@ class Command(stack.commands.set.network.command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(networks, address) = self.fillSetNetworkParams(args, 'address')
-		if len(networks) > 1:
-			raise ArgUnique(self, 'network')
+        (networks, address) = self.fillSetNetworkParams(args, "address")
+        if len(networks) > 1:
+            raise ArgUnique(self, "network")
 
-		network = networks[0]
+        network = networks[0]
 
-		# Make sure this is a valid network
-		mask = self.db.select('mask from subnets where name=%s', (network,))[0][0]
-		try:
-			ipaddress.IPv4Network(f'{address}/{mask}')
-		except:
-			msg = '%s/%s is not a valid network address and subnet mask combination'
-			raise CommandError(self, msg % (address, mask))
+        # Make sure this is a valid network
+        mask = self.db.select("mask from subnets where name=%s", (network,))[0][0]
+        try:
+            ipaddress.IPv4Network(f"{address}/{mask}")
+        except:
+            msg = "%s/%s is not a valid network address and subnet mask combination"
+            raise CommandError(self, msg % (address, mask))
 
-		self.db.execute(
-			'update subnets set address=%s where name=%s',
-			(address, network)
-		)
+        self.db.execute(
+            "update subnets set address=%s where name=%s", (address, network)
+        )

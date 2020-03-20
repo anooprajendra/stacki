@@ -8,9 +8,8 @@ import stack.commands
 from stack.exception import ArgUnique
 
 
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.report.command):
-	"""
+class Command(stack.commands.HostArgumentProcessor, stack.commands.report.command):
+    """
 	Output the storage controller configuration for a specific host
 
 	<arg type='string' name='host'>
@@ -22,14 +21,12 @@ class Command(stack.commands.HostArgumentProcessor,
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHostnames(args)
+    def run(self, params, args):
+        hosts = self.getHostnames(args)
 
-		if len(hosts) != 1:
-			raise ArgUnique(self, 'host')
+        if len(hosts) != 1:
+            raise ArgUnique(self, "host")
 
-		self.beginOutput()
-		self.addOutput('', str(
-			self.call('list.host.storage.controller', [hosts[0]])
-		))
-		self.endOutput(padChar='')
+        self.beginOutput()
+        self.addOutput("", str(self.call("list.host.storage.controller", [hosts[0]])))
+        self.endOutput(padChar="")

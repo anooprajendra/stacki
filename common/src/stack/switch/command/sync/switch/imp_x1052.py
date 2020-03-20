@@ -11,32 +11,39 @@ from stack.switch.x1052 import SwitchDellX1052
 
 
 class Implementation(stack.commands.Implementation):
-	def run(self, args):
+    def run(self, args):
 
-		switch = args[0]
+        switch = args[0]
 
-		# Get frontend ip for tftp address
-		try:
-			(frontend, *args) = [host for host in self.owner.call('list.host.interface', ['localhost']) 
-				if host['network'] == switch['network']]	
-		except:
-			raise CommandError(self, '"%s" and the frontend do not share a network' % switch['host'])	
+        # Get frontend ip for tftp address
+        try:
+            (frontend, *args) = [
+                host
+                for host in self.owner.call("list.host.interface", ["localhost"])
+                if host["network"] == switch["network"]
+            ]
+        except:
+            raise CommandError(
+                self, '"%s" and the frontend do not share a network' % switch["host"]
+            )
 
-		frontend_tftp_address = frontend['ip']
-		switch_address = switch['ip']
-		switch_name = switch['host']
-		switch_username = self.owner.getHostAttr(switch_name, 'switch_username')
-		switch_password = self.owner.getHostAttr(switch_name, 'switch_password')
+        frontend_tftp_address = frontend["ip"]
+        switch_address = switch["ip"]
+        switch_name = switch["host"]
+        switch_username = self.owner.getHostAttr(switch_name, "switch_username")
+        switch_password = self.owner.getHostAttr(switch_name, "switch_password")
 
-		# Connect to the switch
-		with SwitchDellX1052(switch_address, switch_name, switch_username, switch_password) as _switch:
-			_switch.set_tftp_ip(frontend_tftp_address)
-			try:
-				_switch.connect()
-				_switch.upload()
-				if self.owner.persistent:
-					_switch.apply_configuration()
-			except SwitchException as switch_error:
-				raise CommandError(self, switch_error)
-			except Exception as found_error:
-				raise CommandError(self, "There was an error syncing the switch")
+        # Connect to the switch
+        with SwitchDellX1052(
+            switch_address, switch_name, switch_username, switch_password
+        ) as _switch:
+            _switch.set_tftp_ip(frontend_tftp_address)
+            try:
+                _switch.connect()
+                _switch.upload()
+                if self.owner.persistent:
+                    _switch.apply_configuration()
+            except SwitchException as switch_error:
+                raise CommandError(self, switch_error)
+            except Exception as found_error:
+                raise CommandError(self, "There was an error syncing the switch")

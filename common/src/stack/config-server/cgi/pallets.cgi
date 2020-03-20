@@ -12,6 +12,7 @@ to stacki, we can just use probepal to get the info we need.
 """
 
 import json
+
 import stack.probepal
 
 pallet_dir = '/export/stack/pallets'

@@ -69,7 +69,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.host.command):
-	"""
+    """
 	Lists the partitions for hosts. For each host supplied on the command
 	line, this command prints the hostname and partitions for that host.
 
@@ -87,21 +87,33 @@ class Command(stack.commands.list.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.beginOutput()
+    def run(self, params, args):
+        self.beginOutput()
 
-		for host in self.getHostnames(args):
-			for row in self.db.select("""
+        for host in self.getHostnames(args):
+            for row in self.db.select(
+                """
 				p.device, p.mountpoint, p.uuid, p.sectorstart,
 				p.partitionsize, p.partitionid, p.fstype,
 				p.partitionflags, p.formatflags
 				from partitions p, nodes n
 				where n.name = %s and n.id = p.node
-				order by device""", (host,)
-			):
-				self.addOutput(host, row)
+				order by device""",
+                (host,),
+            ):
+                self.addOutput(host, row)
 
-		self.endOutput(header=[
-			'host', 'device', 'mountpoint', 'uuid',
-			'start', 'size', 'id', 'type', 'flags', 'formatflags'
-		])
+        self.endOutput(
+            header=[
+                "host",
+                "device",
+                "mountpoint",
+                "uuid",
+                "start",
+                "size",
+                "id",
+                "type",
+                "flags",
+                "formatflags",
+            ]
+        )

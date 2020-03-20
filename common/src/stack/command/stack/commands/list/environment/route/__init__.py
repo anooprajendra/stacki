@@ -9,7 +9,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.environment.command):
-	"""
+    """
 	List the routes for one or more environments
 
 	<arg optional='1' type='string' name='environment' repeat='1'>
@@ -18,6 +18,10 @@ class Command(stack.commands.list.environment.command):
 
 	"""
 
-	def run(self, params, args):
-		self.addText(self.command('list.route', self._argv + ['scope=environment'], verbose_errors = False))
-		return self.rc
+    def run(self, params, args):
+        self.addText(
+            self.command(
+                "list.route", self._argv + ["scope=environment"], verbose_errors=False
+            )
+        )
+        return self.rc

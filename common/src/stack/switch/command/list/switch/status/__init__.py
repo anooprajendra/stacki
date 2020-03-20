@@ -8,13 +8,17 @@ import stack.commands
 import stack.util
 from stack.exception import CommandError
 
-class command(stack.commands.SwitchArgumentProcessor,
-	      stack.commands.list.command,
-	      stack.commands.HostArgumentProcessor):
-	pass
+
+class command(
+    stack.commands.SwitchArgumentProcessor,
+    stack.commands.list.command,
+    stack.commands.HostArgumentProcessor,
+):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	List Port, Speed, State of the switch  and Mac, VLAN, Hostname, and interface
 	about each port on the switch.
 
@@ -31,14 +35,26 @@ class Command(command):
 	List status info for all known switches/
 	</example>
 	"""
-	def run(self, params, args):
 
-		_switches = self.getSwitchNames(args)
-		self.beginOutput()
-		for switch in self.call('list.host.interface', _switches):
+    def run(self, params, args):
 
-			switch_name = switch['host']
-			model = self.getHostAttr(switch_name, 'component.model')
-			self.runImplementation(model, [switch])
+        _switches = self.getSwitchNames(args)
+        self.beginOutput()
+        for switch in self.call("list.host.interface", _switches):
 
-		self.endOutput(header=['switch', 'port',  'speed', 'state', 'mac', 'vlan', 'host', 'interface'])
+            switch_name = switch["host"]
+            model = self.getHostAttr(switch_name, "component.model")
+            self.runImplementation(model, [switch])
+
+        self.endOutput(
+            header=[
+                "switch",
+                "port",
+                "speed",
+                "state",
+                "mac",
+                "vlan",
+                "host",
+                "interface",
+            ]
+        )

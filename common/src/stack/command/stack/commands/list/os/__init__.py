@@ -8,13 +8,12 @@
 import stack.commands
 
 
-class command(stack.commands.OSArgumentProcessor, 
-	      stack.commands.list.command):
-	pass
-	
+class command(stack.commands.OSArgumentProcessor, stack.commands.list.command):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	Lists the OSes defined.
 	
 	<arg optional='1' type='string' name='os' repeat='1'>
@@ -26,12 +25,11 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		
-		self.beginOutput()
+    def run(self, params, args):
 
-		for x in self.getOSNames(args):
-			self.addOutput(x, None)
-			
-		self.endOutput(header=['os', None])
-	
+        self.beginOutput()
+
+        for x in self.getOSNames(args):
+            self.addOutput(x, None)
+
+        self.endOutput(header=["os", None])

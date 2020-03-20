@@ -8,23 +8,23 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "network"
 
-	def provides(self):
-		return 'network'
+    def run(self, section):
 
-	def run(self, section):
+        self.owner.set_scope("global")
 
-		self.owner.set_scope('global')
+        for n in section:
+            args = n.get("name")
+            params = {
+                "address": n.get("address"),
+                "mask": n.get("mask"),
+                "gateway": n.get("gateway"),
+                "mtu": n.get("mtu"),
+                "zone": n.get("zone"),
+                "dns": n.get("dns"),
+                "pxe": n.get("pxe"),
+            }
 
-		for n in section:
-			args   = n.get('name')
-			params = {'address': n.get('address'),
-				  'mask'   : n.get('mask'),
-				  'gateway': n.get('gateway'),
-				  'mtu'    : n.get('mtu'),
-				  'zone'   : n.get('zone'),
-				  'dns'    : n.get('dns'),
-				  'pxe'    : n.get('pxe')}
-			
-			self.owner.stack('add.network', args, **params)
-
+            self.owner.stack("add.network", args, **params)

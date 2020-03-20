@@ -12,14 +12,15 @@
 
 
 import ast
-import sys
 import subprocess
+import sys
+
 import stack.commands
 import stack.gen
 
 
 class Command(stack.commands.report.command):
-	"""
+    """
 	Take STDIN XML input and create a shell script that can be executed
 	on a host.
 
@@ -41,42 +42,40 @@ class Command(stack.commands.report.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		osname, attrs = self.fillParams([
-			('os', self.os),
-			('attrs', {}) ])
+    def run(self, params, args):
+        osname, attrs = self.fillParams([("os", self.os), ("attrs", {})])
 
-		xml = ''
+        xml = ""
 
-		if attrs:
-			attrs = ast.literal_eval(attrs)
-			xml += '<!DOCTYPE stacki-profile [\n'
-			for (k, v) in attrs.items():
-				xml += '\t<!ENTITY %s "%s">\n' % (k, v)
-			xml += ']>\n'
+        if attrs:
+            attrs = ast.literal_eval(attrs)
+            xml += "<!DOCTYPE stacki-profile [\n"
+            for (k, v) in attrs.items():
+                xml += '\t<!ENTITY %s "%s">\n' % (k, v)
+            xml += "]>\n"
 
-		xml += '<stack:profile '
-		xml += 'stack:os="%s" ' % osname
-		xml += 'xmlns:stack="http://www.stacki.com" '
-		xml += 'stack:attrs="%s">\n' % attrs
-		xml += '<stack:script stack:stage="install-post">\n'
+        xml += "<stack:profile "
+        xml += 'stack:os="%s" ' % osname
+        xml += 'xmlns:stack="http://www.stacki.com" '
+        xml += 'stack:attrs="%s">\n' % attrs
+        xml += '<stack:script stack:stage="install-post">\n'
 
-		for line in sys.stdin.readlines():
-			xml += line
+        for line in sys.stdin.readlines():
+            xml += line
 
-		xml += '</stack:script>\n'
-		xml += '</stack:profile>\n' 
+        xml += "</stack:script>\n"
+        xml += "</stack:profile>\n"
 
-		p = subprocess.Popen('/opt/stack/bin/stack list host profile chapter=main profile=bash',
-				     stdin=subprocess.PIPE,
-				     stdout=subprocess.PIPE,
-				     stderr=subprocess.PIPE, shell=True)
-		p.stdin.write(xml.encode())
-		(o, e) = p.communicate()
-		if p.returncode == 0:
-			sys.stdout.write(o.decode())
-		else:
-			sys.stderr.write(e.decode())
-
-
-
+        p = subprocess.Popen(
+            "/opt/stack/bin/stack list host profile chapter=main profile=bash",
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+        )
+        p.stdin.write(xml.encode())
+        (o, e) = p.communicate()
+        if p.returncode == 0:
+            sys.stdout.write(o.decode())
+        else:
+            sys.stderr.write(e.decode())

@@ -8,13 +8,11 @@
 
 
 class ProfileBase:
+    def pre(self, client):
+        pass
 
-        def pre(self, client):
-                pass
+    def main(self, client):
+        pass
 
-        def main(self, client):
-                pass
-
-        def post(self, client):
-                pass
-
+    def post(self, client):
+        pass

@@ -13,13 +13,12 @@
 import stack.commands
 
 
-class command(stack.commands.SwitchArgumentProcessor,
-	stack.commands.list.command):
-	pass
-	
+class command(stack.commands.SwitchArgumentProcessor, stack.commands.list.command):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	List Interface, Port, Interface, Vlan, and Network of any hosts-to-switch
 	relationships being managed.
 
@@ -36,31 +35,38 @@ class Command(command):
 	List any hosts on all known switches.
 	</example>
 	"""
-	def run(self, params, args):
-		switches = self.getSwitchNames(args)
 
-		self.beginOutput()
+    def run(self, params, args):
+        switches = self.getSwitchNames(args)
 
-		header = ['switch', 'port', 'host', 'mac', 'interface', 'vlan']
+        self.beginOutput()
 
-		for switch in switches:
-			for row in self.db.select("""
+        header = ["switch", "port", "host", "mac", "interface", "vlan"]
+
+        for switch in switches:
+            for row in self.db.select(
+                """
 				switchports.port, switchports.interface
 				FROM switchports, nodes
 				WHERE switchports.switch=nodes.id AND nodes.name=%s
 				ORDER BY switchports.port
-			""", (switch,)):
-				port, iface_id = row
+			""",
+                (switch,),
+            ):
+                port, iface_id = row
 
-				rows = self.db.select("""
+                rows = self.db.select(
+                    """
 					nodes.name, networks.mac, networks.device, networks.vlanid
 					FROM nodes, networks
 					WHERE nodes.id=networks.node AND networks.id=%s
-				""", (iface_id,))
+				""",
+                    (iface_id,),
+                )
 
-				if len(rows) != 1:
-					continue
+                if len(rows) != 1:
+                    continue
 
-				self.addOutput(switch, [port, *rows[0]])
+                self.addOutput(switch, [port, *rows[0]])
 
-		self.endOutput(header=header, trimOwner=False)
+        self.endOutput(header=header, trimOwner=False)

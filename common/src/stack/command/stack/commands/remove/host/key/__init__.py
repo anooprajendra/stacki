@@ -15,7 +15,7 @@ from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
 class Command(stack.commands.remove.host.command):
-	"""
+    """
 	Remove a public key for a host.
 
 	<arg optional='0' type='string' name='host'>
@@ -28,30 +28,34 @@ class Command(stack.commands.remove.host.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'host')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "host")
 
-		hosts = self.getHostnames(args)
-		if not hosts:
-			raise ArgRequired(self, 'host')
+        hosts = self.getHostnames(args)
+        if not hosts:
+            raise ArgRequired(self, "host")
 
-		if len(hosts) > 1:
-			raise ArgUnique(self, 'host')
+        if len(hosts) > 1:
+            raise ArgUnique(self, "host")
 
-		(key_id,) = self.fillParams([ ('id', None, True) ])
+        (key_id,) = self.fillParams([("id", None, True)])
 
-		host = hosts[0]
+        host = hosts[0]
 
-		if self.db.count("""
+        if (
+            self.db.count(
+                """
 			(ID) from public_keys
 			where id=%s and node=(
 				select id from nodes where name=%s
-			)""", (key_id, host)
-		) == 0:
-			raise CommandError(
-				self,
-				f"public key with id {key_id} doesn't exist for host {host}"
-			)
+			)""",
+                (key_id, host),
+            )
+            == 0
+        ):
+            raise CommandError(
+                self, f"public key with id {key_id} doesn't exist for host {host}"
+            )
 
-		self.db.execute('delete from public_keys where id=%s', (key_id,))
+        self.db.execute("delete from public_keys where id=%s", (key_id,))

@@ -14,7 +14,7 @@ import stack.commands
 
 
 class Command(stack.commands.set.host.command):
-	"""
+    """
 	Set the rank number for a list of hosts.
 
 	<arg type='string' name='host' repeat='1'>
@@ -30,15 +30,10 @@ class Command(stack.commands.set.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(rank, ) = self.fillParams([
-			('rank', None, True)
-		])
+        (rank,) = self.fillParams([("rank", None, True)])
 
-		for host in hosts:
-			self.db.execute(
-				'update nodes set rank=%s where name=%s',
-				(rank, host)
-			)
+        for host in hosts:
+            self.db.execute("update nodes set rank=%s where name=%s", (rank, host))

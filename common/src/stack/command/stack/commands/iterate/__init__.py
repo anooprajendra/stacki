@@ -20,4 +20,4 @@ import stack.commands
 
 
 class command(stack.commands.Command):
-	MustBeRoot = 0
+    MustBeRoot = 0

@@ -14,7 +14,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.host.command):
-	"""
+    """
 	List the public keys for hosts.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
@@ -23,18 +23,20 @@ class Command(stack.commands.list.host.command):
 	</arg>
 	"""
 
-	def run(self, params, args):
-		self.beginOutput()
+    def run(self, params, args):
+        self.beginOutput()
 
-		for host in self.getHostnames(args):
-			rows = self.db.select("""
+        for host in self.getHostnames(args):
+            rows = self.db.select(
+                """
 				id, public_key from public_keys
 				where node = (select id from nodes where name = %s)
-				""", (host,)
-			)
+				""",
+                (host,),
+            )
 
-			for key_id, key in rows:
-				for line in key.split('\n'):
-					self.addOutput(host, (key_id, line))
+            for key_id, key in rows:
+                for line in key.split("\n"):
+                    self.addOutput(host, (key_id, line))
 
-		self.endOutput(header=['host', 'id', 'public key'], trimOwner=False)
+        self.endOutput(header=["host", "id", "public key"], trimOwner=False)

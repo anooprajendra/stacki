@@ -11,32 +11,33 @@
 # @rocks@
 
 import stack.commands
+from stack.exception import ArgRequired, ParamError, ParamRequired
 from stack.util import lowered, unique_everseen
-from stack.exception import ArgRequired, ParamRequired, ParamError
+
 
 class Plugin(stack.commands.Plugin):
-	"""Attempts to associate a version_regex with makes."""
+    """Attempts to associate a version_regex with makes."""
 
-	def provides(self):
-		return "basic"
+    def provides(self):
+        return "basic"
 
-	def run(self, args):
-		params, args = args
-		makes = tuple(unique_everseen(lowered(args)))
+    def run(self, args):
+        params, args = args
+        makes = tuple(unique_everseen(lowered(args)))
 
-		version_regex, = lowered(
-			self.owner.fillParams(names = [("version_regex", "")], params = params),
-		)
+        (version_regex,) = lowered(
+            self.owner.fillParams(names=[("version_regex", "")], params=params),
+        )
 
-		# The makes must exist
-		self.owner.ensure_makes_exist(makes = makes)
-		# The version_regex must exist
-		self.owner.ensure_version_regex_exists(name = version_regex)
+        # The makes must exist
+        self.owner.ensure_makes_exist(makes=makes)
+        # The version_regex must exist
+        self.owner.ensure_version_regex_exists(name=version_regex)
 
-		# get the version_regex ID
-		version_regex_id = self.owner.get_version_regex_id(name = version_regex)
-		# associate the makes with the version_regex
-		self.owner.db.execute(
-			"UPDATE firmware_make SET version_regex_id=%s WHERE name in %s",
-			(version_regex_id, makes),
-		)
+        # get the version_regex ID
+        version_regex_id = self.owner.get_version_regex_id(name=version_regex)
+        # associate the makes with the version_regex
+        self.owner.db.execute(
+            "UPDATE firmware_make SET version_regex_id=%s WHERE name in %s",
+            (version_regex_id, makes),
+        )

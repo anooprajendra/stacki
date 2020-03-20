@@ -8,7 +8,7 @@ import stack.commands.set.network
 
 
 class Command(stack.commands.set.network.command):
-	"""
+    """
 	Enables or Disables PXE for one of more networks.
 
 	All hosts must be connected to atleast one network that has
@@ -27,13 +27,10 @@ class Command(stack.commands.set.network.command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		(networks, pxe) = self.fillSetNetworkParams(args, 'pxe')
-		pxe = self.str2bool(pxe)
+        (networks, pxe) = self.fillSetNetworkParams(args, "pxe")
+        pxe = self.str2bool(pxe)
 
-		for network in networks:
-			self.db.execute(
-				'update subnets set pxe=%s where name=%s',
-				(pxe, network)
-			)
+        for network in networks:
+            self.db.execute("update subnets set pxe=%s where name=%s", (pxe, network))

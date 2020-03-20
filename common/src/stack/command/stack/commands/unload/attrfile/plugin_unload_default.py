@@ -9,27 +9,25 @@ import stack.commands
 
 
 class Plugin(stack.commands.ApplianceArgumentProcessor, stack.commands.Plugin):
+    def provides(self):
+        return "default"
 
-	def provides(self):
-		return 'default'
+    def run(self, attrs):
+        appliances = self.getApplianceNames()
 
-	def run(self, attrs):
-		appliances = self.getApplianceNames()
+        for target in attrs.keys():
+            if target == "global":
+                cmd = "remove.attr"
+            elif target in appliances:
+                cmd = "remove.appliance.attr"
+            else:
+                cmd = "remove.host.attr"
 
-		for target in attrs.keys():
-			if target == 'global':
-				cmd = 'remove.attr'
-			elif target in appliances:
-				cmd = 'remove.appliance.attr'
-			else:
-				cmd = 'remove.host.attr'
+            for attr in attrs[target].keys():
+                if target == "global":
+                    cmdargs = []
+                else:
+                    cmdargs = [target]
+                cmdargs.append("attr=%s" % attr)
 
-			for attr in attrs[target].keys():
-				if target == 'global':
-					cmdargs = []
-				else:
-					cmdargs = [ target ]
-				cmdargs.append('attr=%s' % attr)
-
-				self.owner.command(cmd, cmdargs)
-
+                self.owner.command(cmd, cmdargs)

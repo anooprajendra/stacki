@@ -8,17 +8,13 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class command(stack.commands.set.command,
-	      stack.commands.NetworkArgumentProcessor):
+class command(stack.commands.set.command, stack.commands.NetworkArgumentProcessor):
+    def fillSetNetworkParams(self, args, paramName):
+        if len(args) == 0:
+            raise ArgRequired(self, "network")
 
-	def fillSetNetworkParams(self, args, paramName):
-		if len(args) == 0:
-			raise ArgRequired(self, 'network')
+        networks = self.getNetworkNames(args)
 
-		networks = self.getNetworkNames(args)
+        (param,) = self.fillParams([(paramName, None, True)])
 
-		(param, ) = self.fillParams([
-			(paramName, None, True)
-		])
-
-		return (networks, param)
+        return (networks, param)

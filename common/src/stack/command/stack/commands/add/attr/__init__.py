@@ -8,7 +8,7 @@ import stack.commands
 
 
 class Command(stack.commands.add.command):
-	"""
+    """
 	Adds a global attribute for all nodes
 
 	<param type='string' name='attr' optional='0'>
@@ -32,6 +32,6 @@ class Command(stack.commands.add.command):
 	<related>remove attr</related>
 	"""
 
-	def run(self, params, args):
-		self.command('set.attr', self._argv + [ 'force=no' ], verbose_errors = False)
-		return self.rc
+    def run(self, params, args):
+        self.command("set.attr", self._argv + ["force=no"], verbose_errors=False)
+        return self.rc

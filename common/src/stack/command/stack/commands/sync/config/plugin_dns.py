@@ -10,11 +10,10 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
-	"Writes DNS configuration"
+    "Writes DNS configuration"
 
-	def provides(self):
-		return 'dns'
+    def provides(self):
+        return "dns"
 
-	def run(self, args):
-		self.owner.command('sync.dns', [])
-
+    def run(self, args):
+        self.owner.command("sync.dns", [])

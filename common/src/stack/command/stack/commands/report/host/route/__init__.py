@@ -14,9 +14,8 @@
 import stack.commands
 
 
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.report.command):
-	"""
+class Command(stack.commands.HostArgumentProcessor, stack.commands.report.command):
+    """
 	Create a report that contains the static routes for a host.
  
 	<arg optional='0' type='string' name='host'>
@@ -28,12 +27,11 @@ class Command(stack.commands.HostArgumentProcessor,
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.beginOutput()
+    def run(self, params, args):
+        self.beginOutput()
 
-		hosts = self.getHostnames(args)
-		for host in hosts:
-			osname = self.db.getHostOS(host)
-			self.runImplementation(osname, [host])
-		self.endOutput(padChar='', trimOwner=True)
-
+        hosts = self.getHostnames(args)
+        for host in hosts:
+            osname = self.db.getHostOS(host)
+            self.runImplementation(osname, [host])
+        self.endOutput(padChar="", trimOwner=True)

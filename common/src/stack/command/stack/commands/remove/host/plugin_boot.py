@@ -14,9 +14,8 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "boot"
 
-	def provides(self):
-		return 'boot'
-
-	def run(self, hosts):
-		self.owner.command('remove.host.boot', hosts)
+    def run(self, hosts):
+        self.owner.command("remove.host.boot", hosts)

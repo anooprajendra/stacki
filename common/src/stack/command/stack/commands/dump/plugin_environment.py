@@ -8,9 +8,8 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "environment"
 
-	def provides(self):
-		return 'environment'
-
-	def run(self, args):
-		return self.owner.command('dump.environment')
+    def run(self, args):
+        return self.owner.command("dump.environment")

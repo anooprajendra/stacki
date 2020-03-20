@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.list.firmware.command):
-	"""
+    """
 	Lists all firmware version regexes tracked by stacki.
 
 	<example cmd="list firmware version_regex">
@@ -21,14 +22,14 @@ class Command(stack.commands.list.firmware.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		header = []
-		values = []
-		for provides, results in self.runPlugins():
-			header.extend(results["keys"])
-			values.extend(results["values"])
+    def run(self, params, args):
+        header = []
+        values = []
+        for provides, results in self.runPlugins():
+            header.extend(results["keys"])
+            values.extend(results["values"])
 
-		self.beginOutput()
-		for owner, vals in values:
-			self.addOutput(owner = owner, vals = vals)
-		self.endOutput(header = header)
+        self.beginOutput()
+        for owner, vals in values:
+            self.addOutput(owner=owner, vals=vals)
+        self.endOutput(header=header)

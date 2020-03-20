@@ -8,10 +8,11 @@
 
 import xml.sax.expatreader
 
-class ExpatParser(xml.sax.expatreader.ExpatParser):
 
+class ExpatParser(xml.sax.expatreader.ExpatParser):
     def external_entity_ref(self, context, base, sysid, pubid):
-	    return 1
+        return 1
+
 
 def create_parser(*args, **kwargs):
     return ExpatParser(*args, **kwargs)

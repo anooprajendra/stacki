@@ -6,11 +6,10 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "host"
 
-	def provides(self):
-		return 'host'
-
-	def run(self, args):
-		return self.owner.command('dump.host')
-
+    def run(self, args):
+        return self.owner.command("dump.host")

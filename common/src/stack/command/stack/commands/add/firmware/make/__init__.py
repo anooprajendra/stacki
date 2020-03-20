@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.add.firmware.command):
-	"""
+    """
 	Adds firmware makes to the stacki database.
 
 	<arg type='string' name='make' repeat='1'>
@@ -25,5 +26,5 @@ class Command(stack.commands.add.firmware.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.runPlugins(args = args)
+    def run(self, params, args):
+        self.runPlugins(args=args)

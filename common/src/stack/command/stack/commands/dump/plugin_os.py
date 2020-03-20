@@ -6,10 +6,10 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "os"
 
-	def provides(self):
-		return 'os'
-
-	def run(self, args):
-		return self.owner.command('dump.os')
+    def run(self, args):
+        return self.owner.command("dump.os")

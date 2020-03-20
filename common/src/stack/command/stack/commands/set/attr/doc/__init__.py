@@ -9,7 +9,7 @@ from stack.exception import CommandError
 
 
 class Command(stack.commands.Command):
-	"""
+    """
 	Changes a string containing documention for an attribute
 
 	<param type='string' name='attr' optional='0'>
@@ -28,18 +28,20 @@ class Command(stack.commands.Command):
 	<related>set attr</related>
 	"""
 
-	def run(self, params, args):
-		(attr, doc) = self.fillParams([
-			('attr', None, True),
-			('doc',  None, True),
-		])
+    def run(self, params, args):
+        (attr, doc) = self.fillParams([("attr", None, True), ("doc", None, True),])
 
-		if self.db.count('(id) FROM attributes WHERE name = %s', (attr,)) == 0:
-			raise CommandError(self, 'Cannot set documentation for a non-existant attribute')
+        if self.db.count("(id) FROM attributes WHERE name = %s", (attr,)) == 0:
+            raise CommandError(
+                self, "Cannot set documentation for a non-existant attribute"
+            )
 
-		self.db.execute('delete from attributes_doc where attr=%s', (attr,))
+        self.db.execute("delete from attributes_doc where attr=%s", (attr,))
 
-		if doc:
-			self.db.execute("""
+        if doc:
+            self.db.execute(
+                """
 				insert into attributes_doc(attr, doc) values (%s, %s)
-			""", (attr, doc))
+			""",
+                (attr, doc),
+            )

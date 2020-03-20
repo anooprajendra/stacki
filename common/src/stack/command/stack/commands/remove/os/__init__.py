@@ -14,13 +14,12 @@ import stack.commands
 from stack.exception import ArgRequired
 
 
-class command(stack.commands.OSArgumentProcessor,
-		stack.commands.remove.command):
-	pass
+class command(stack.commands.OSArgumentProcessor, stack.commands.remove.command):
+    pass
 
 
 class Command(command):
-	"""
+    """
 	Remove an OS definition from the system.
 
 	<arg type='string' name='os' repeat='1'>
@@ -32,10 +31,10 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		if len(args) < 1:
-			raise ArgRequired(self, 'os')
+        if len(args) < 1:
+            raise ArgRequired(self, "os")
 
-		for os in self.getOSNames(args):
-			self.db.execute('delete from oses where name=%s', (os,))
+        for os in self.getOSNames(args):
+            self.db.execute("delete from oses where name=%s", (os,))

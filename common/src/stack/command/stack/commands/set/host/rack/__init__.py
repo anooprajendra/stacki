@@ -14,7 +14,7 @@ import stack.commands
 
 
 class Command(stack.commands.set.host.command):
-	"""
+    """
 	Set the rack number for a list of hosts.
 
 	<arg type='string' name='host' repeat='1'>
@@ -30,15 +30,10 @@ class Command(stack.commands.set.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(rack, ) = self.fillParams([
-			('rack', None, True)
-		])
+        (rack,) = self.fillParams([("rack", None, True)])
 
-		for host in hosts:
-			self.db.execute(
-				'update nodes set rack=%s where name=%s',
-				(rack, host)
-			)
+        for host in hosts:
+            self.db.execute("update nodes set rack=%s where name=%s", (rack, host))

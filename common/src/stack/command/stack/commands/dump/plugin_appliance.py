@@ -6,10 +6,10 @@
 
 import stack.commands
 
+
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "appliance"
 
-	def provides(self):
-		return 'appliance'
-
-	def run(self, args):
-		return self.owner.command('dump.appliance')
+    def run(self, args):
+        return self.owner.command("dump.appliance")

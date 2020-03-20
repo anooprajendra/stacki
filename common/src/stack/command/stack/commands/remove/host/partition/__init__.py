@@ -15,7 +15,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.host.command):
-	"""
+    """
 	Remove a partition definitions from a host.
 
 	<arg type='string' name='host' repeat='1'>
@@ -48,37 +48,35 @@ class Command(stack.commands.remove.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		if not len(args):
-			raise ArgRequired(self, 'host')
+    def run(self, params, args):
+        if not len(args):
+            raise ArgRequired(self, "host")
 
-		hosts = self.getHostnames(args)
-		if not hosts:
-			raise ArgRequired(self, 'host')
+        hosts = self.getHostnames(args)
+        if not hosts:
+            raise ArgRequired(self, "host")
 
-		(partition, device, uuid) = self.fillParams([
-			('partition', None),
-			('device', None),
-			('uuid', None)
-		])
+        (partition, device, uuid) = self.fillParams(
+            [("partition", None), ("device", None), ("uuid", None)]
+        )
 
-		for host in hosts:
-			sql = """
+        for host in hosts:
+            sql = """
 				delete from partitions
 				where node=(select id from nodes where name=%s)
 			"""
-			values = [host]
+            values = [host]
 
-			if uuid:
-				sql += ' and uuid=%s'
-				values.append(uuid)
+            if uuid:
+                sql += " and uuid=%s"
+                values.append(uuid)
 
-			if partition:
-				sql += ' and mountpoint=%s'
-				values.append(partition)
+            if partition:
+                sql += " and mountpoint=%s"
+                values.append(partition)
 
-			if device:
-				sql += ' and device=%s'
-				values.append(device)
+            if device:
+                sql += " and device=%s"
+                values.append(device)
 
-			self.db.execute(sql, values)
+            self.db.execute(sql, values)

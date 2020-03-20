@@ -8,16 +8,16 @@
 
 import os
 import sys
-import stack.django_env
+
 import stack.commands
-
-from stack.exception import *
-
+import stack.django_env
 from django.contrib.auth.models import User
-from stack.restapi.models import UserAccess,GroupAccess
+from stack.exception import *
+from stack.restapi.models import GroupAccess, UserAccess
+
 
 class Command(stack.commands.Command):
-	"""
+    """
 	List all user permissions. The permissions
 	are classified as either permissions that
 	belong to the User, or those that are inherited
@@ -27,29 +27,28 @@ class Command(stack.commands.Command):
 	</arg>
 	"""
 
-	def run(self, params, args):
-		self.users = []
-		if len(args) == 0:
-			self.users = User.objects.all()
-		for arg in args: 
-			try:
-				u = User.objects.get(username=arg)
-			except:
-				continue
-			self.users.append(u)
-		self.beginOutput()
-		for u in self.users:
-			perms = {}
-			for group in u.groups.all():
-				ga = GroupAccess.objects.values('command').filter(group=group)
-				for c in ga:
-					perms[c['command']] = "G"
+    def run(self, params, args):
+        self.users = []
+        if len(args) == 0:
+            self.users = User.objects.all()
+        for arg in args:
+            try:
+                u = User.objects.get(username=arg)
+            except:
+                continue
+            self.users.append(u)
+        self.beginOutput()
+        for u in self.users:
+            perms = {}
+            for group in u.groups.all():
+                ga = GroupAccess.objects.values("command").filter(group=group)
+                for c in ga:
+                    perms[c["command"]] = "G"
 
-			ua = UserAccess.objects.values('command').filter(user=u)
-			for c in ua:
-				perms[c['command']] = "U"
-				
-			for command in perms:
-				self.addOutput(u.username, [command, perms[command]] )
-		self.endOutput(header=['user', 'command', 'source'], trimOwner=False)
-				
+            ua = UserAccess.objects.values("command").filter(user=u)
+            for c in ua:
+                perms[c["command"]] = "U"
+
+            for command in perms:
+                self.addOutput(u.username, [command, perms[command]])
+        self.endOutput(header=["user", "command", "source"], trimOwner=False)

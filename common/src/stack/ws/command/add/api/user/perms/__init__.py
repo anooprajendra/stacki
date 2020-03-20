@@ -6,18 +6,19 @@
 # @copyright@
 #
 
-import os, sys
+import os
+import sys
+
 import stack.commands
 import stack.django_env
-
-from stack.exception import *
-
 from django.contrib.auth.models import User
-from stack.restapi.models import UserAccess
 from stack.commands.add.api import checkCommand
+from stack.exception import *
+from stack.restapi.models import UserAccess
+
 
 class Command(stack.commands.Command):
-	"""
+    """
 	Set permission for user
 	<arg type="string" name="user">
 	Username
@@ -30,25 +31,23 @@ class Command(stack.commands.Command):
 	regular expression "list.host.*".
 	</example>
 	"""
-	def run(self, params, args):
-		if len(args) != 1:
-			raise ArgRequired(self, "Username")
-		username = args[0]
-		(perm,) = self.fillParams([
-			("perm", None),
-			])
-		
-		if not perm:
-			raise ParamRequired(self, "Permission")
-		try:
-			u = User.objects.get(username=username)
-		except User.DoesNotExist:
-			raise CommandError('User %s does not exist' % username)
 
-		checkCommand(self, perm)
-		try:
-			ua = UserAccess.objects.get(user = u, command=perm)
-		except UserAccess.DoesNotExist:
-			ua = UserAccess.objects.create(user=u, command=perm)
-			ua.save()
-			
+    def run(self, params, args):
+        if len(args) != 1:
+            raise ArgRequired(self, "Username")
+        username = args[0]
+        (perm,) = self.fillParams([("perm", None),])
+
+        if not perm:
+            raise ParamRequired(self, "Permission")
+        try:
+            u = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise CommandError("User %s does not exist" % username)
+
+        checkCommand(self, perm)
+        try:
+            ua = UserAccess.objects.get(user=u, command=perm)
+        except UserAccess.DoesNotExist:
+            ua = UserAccess.objects.create(user=u, command=perm)
+            ua.save()

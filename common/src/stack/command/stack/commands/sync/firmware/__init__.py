@@ -7,12 +7,13 @@
 import stack.commands
 from stack.argument_processors.firmware import FirmwareArgumentProcessor
 
+
 class command(stack.commands.sync.command, FirmwareArgumentProcessor):
-	pass
+    pass
 
 
 class Command(command):
-	"""
+    """
 	Syncs the firmware files on the frontend with what the expected firmware is in the stacki database
 
 	<arg optional='1' type='string' name='version' repeat='1'>
@@ -38,6 +39,6 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.notify('Sync Firmware')
-		self.runPlugins(args = (params, args))
+    def run(self, params, args):
+        self.notify("Sync Firmware")
+        self.runPlugins(args=(params, args))

@@ -9,13 +9,13 @@
 import os
 import os.path
 import shutil
+
 import stack.commands
 from stack.exception import CommandError
 
 
-class Command(stack.commands.load.command,
-		stack.commands.NetworkArgumentProcessor):
-	"""
+class Command(stack.commands.load.command, stack.commands.NetworkArgumentProcessor):
+    """
 	Take rows from a spreadsheet that describe the logical networks that
 	should be configured and then place those values into the database.
 	
@@ -36,44 +36,42 @@ class Command(stack.commands.load.command,
 	<related>report networkfile</related>
 	<related>load</related>
 	<related>dump network</related>
-	"""		
+	"""
 
-	def run(self, params, args):
-		filename, processor = self.fillParams([
-			('file', None, True),
-			('processor', 'default') ])
+    def run(self, params, args):
+        filename, processor = self.fillParams(
+            [("file", None, True), ("processor", "default")]
+        )
 
-		if not os.path.exists(filename):
-			raise CommandError(self, 'file "%s" does not exist' % filename)
+        if not os.path.exists(filename):
+            raise CommandError(self, 'file "%s" does not exist' % filename)
 
-		#
-		# implementations can't return values
-		#
-		self.networks = {}
-		self.columns = {}
-		self.runImplementation('load_%s' % processor, (filename, ))
-		args = self.networks, self.current_networks
-		self.runPlugins(args)
+        #
+        # implementations can't return values
+        #
+        self.networks = {}
+        self.columns = {}
+        self.runImplementation("load_%s" % processor, (filename,))
+        args = self.networks, self.current_networks
+        self.runPlugins(args)
 
-		#
-		# checkin the spreadsheet
-		#
-		sheetsdir = '/export/stack/spreadsheets'
-		if not os.path.exists(sheetsdir):
-			os.makedirs(sheetsdir)
-			
-		RCSdir = '%s/RCS' % sheetsdir
-		if not os.path.exists(RCSdir):
-			os.makedirs(RCSdir)
+        #
+        # checkin the spreadsheet
+        #
+        sheetsdir = "/export/stack/spreadsheets"
+        if not os.path.exists(sheetsdir):
+            os.makedirs(sheetsdir)
 
-		sheetsfile = '%s/%s' % (sheetsdir, os.path.basename(filename))
-		if not os.path.exists(sheetsfile) or not \
-			os.path.samefile(filename, sheetsfile):
-			shutil.copyfile(filename, '%s' % sheetsfile)
-		
-		cmd = 'date | /opt/stack/bin/ci "%s"' % sheetsfile
-		os.system(cmd)
+        RCSdir = "%s/RCS" % sheetsdir
+        if not os.path.exists(RCSdir):
+            os.makedirs(RCSdir)
 
-		cmd = '/opt/stack/bin/co -f -l "%s"' % sheetsfile
-		os.system(cmd)
+        sheetsfile = "%s/%s" % (sheetsdir, os.path.basename(filename))
+        if not os.path.exists(sheetsfile) or not os.path.samefile(filename, sheetsfile):
+            shutil.copyfile(filename, "%s" % sheetsfile)
 
+        cmd = 'date | /opt/stack/bin/ci "%s"' % sheetsfile
+        os.system(cmd)
+
+        cmd = '/opt/stack/bin/co -f -l "%s"' % sheetsfile
+        os.system(cmd)

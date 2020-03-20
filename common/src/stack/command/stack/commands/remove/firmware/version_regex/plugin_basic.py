@@ -11,20 +11,23 @@
 # @rocks@
 
 import stack.commands
-from stack.util import lowered, unique_everseen
 from stack.exception import ArgRequired
+from stack.util import lowered, unique_everseen
+
 
 class Plugin(stack.commands.Plugin):
-	"""Attempts to remove version_regexes."""
+    """Attempts to remove version_regexes."""
 
-	def provides(self):
-		return "basic"
+    def provides(self):
+        return "basic"
 
-	def run(self, args):
-		# lowercase all args and remove any duplicates
-		names = tuple(unique_everseen(lowered(args)))
-		# The version_regexes must exist
-		self.owner.ensure_version_regexes_exist(names = names)
+    def run(self, args):
+        # lowercase all args and remove any duplicates
+        names = tuple(unique_everseen(lowered(args)))
+        # The version_regexes must exist
+        self.owner.ensure_version_regexes_exist(names=names)
 
-		# remove the version_regexes
-		self.owner.db.execute("DELETE FROM firmware_version_regex WHERE name IN %s", (names,))
+        # remove the version_regexes
+        self.owner.db.execute(
+            "DELETE FROM firmware_version_regex WHERE name IN %s", (names,)
+        )

@@ -7,15 +7,14 @@
 import stack.commands
 from stack.exception import CommandError
 
-class command(stack.commands.SwitchArgumentProcessor, 
-	      stack.commands.set.command):
 
-	def fillSetSwitchParams(self, args, paramName):
-		
-		switches = self.getSwitchNames(args)
-		if not switches:
-			raise CommandError(self, 'switch "%s" is not defined' %s)
+class command(stack.commands.SwitchArgumentProcessor, stack.commands.set.command):
+    def fillSetSwitchParams(self, args, paramName):
 
-			(param,) = self.fillParams([ (paramName, None, True) ])
+        switches = self.getSwitchNames(args)
+        if not switches:
+            raise CommandError(self, 'switch "%s" is not defined' % s)
 
-			return (switches, param)
+            (param,) = self.fillParams([(paramName, None, True)])
+
+            return (switches, param)

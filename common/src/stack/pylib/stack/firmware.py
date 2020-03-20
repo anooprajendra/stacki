@@ -1,49 +1,56 @@
 import hashlib
-from pathlib import Path
 import uuid
-from urllib.parse import urlparse
 from enum import Enum, auto, unique
+from pathlib import Path
+from urllib.parse import urlparse
+
 import stack.download
 
 # Base path to store managed firmware files under
 BASE_PATH = Path("/export/stack/firmware/")
 
+
 @unique
 class SUPPORTED_SCHEMES(Enum):
-	"""Supported schemes to fetch firmware from a source to be managed by stacki"""
-	file = auto()
-	http = auto()
-	https = auto()
+    """Supported schemes to fetch firmware from a source to be managed by stacki"""
 
-	@classmethod
-	def pretty_string(cls):
-		"""Return a nice human readable list of names."""
-		return ", ".join(cls.__members__.keys())
+    file = auto()
+    http = auto()
+    https = auto()
 
-	def __str__(self):
-		"""Return the human readable name of the enum when printing or stringifying."""
-		return f"{self.name}"
+    @classmethod
+    def pretty_string(cls):
+        """Return a nice human readable list of names."""
+        return ", ".join(cls.__members__.keys())
+
+    def __str__(self):
+        """Return the human readable name of the enum when printing or stringifying."""
+        return f"{self.name}"
 
 
 # Require the supported hash algorithms to be the always present ones
 SUPPORTED_HASH_ALGS = hashlib.algorithms_guaranteed
 
+
 class FirmwareError(Exception):
-	"""The exception type raised by the firmware utilities in this module."""
-	pass
+    """The exception type raised by the firmware utilities in this module."""
+
+    pass
+
 
 def ensure_hash_alg_supported(hash_alg):
-	"""Ensures that the provided hash algorithm is supported.
+    """Ensures that the provided hash algorithm is supported.
 
 	If it is not supported, a FirmwareError is raised.
 	"""
-	if hash_alg not in SUPPORTED_HASH_ALGS:
-		raise FirmwareError(
-			f"hash_alg must be one of the following: {SUPPORTED_HASH_ALGS}"
-		)
+    if hash_alg not in SUPPORTED_HASH_ALGS:
+        raise FirmwareError(
+            f"hash_alg must be one of the following: {SUPPORTED_HASH_ALGS}"
+        )
 
-def calculate_hash(file_path, hash_alg, hash_value = "", digest_length = 256):
-	"""Calculates the hash of the provided file using the provided algorithm and returns it as a hex string.
+
+def calculate_hash(file_path, hash_alg, hash_value="", digest_length=256):
+    """Calculates the hash of the provided file using the provided algorithm and returns it as a hex string.
 
 	hash_alg is required to be one of the SUPPORTED_HASH_ALGS and a FirmwareError will be raised if it is not.
 
@@ -54,25 +61,26 @@ def calculate_hash(file_path, hash_alg, hash_value = "", digest_length = 256):
 	parameter allows the overriding of the default length used. This parameter is ignored if the algorithm does not
 	allow specifying the digest length.
 	"""
-	ensure_hash_alg_supported(hash_alg = hash_alg)
+    ensure_hash_alg_supported(hash_alg=hash_alg)
 
-	hasher = hashlib.new(name = hash_alg, data = Path(file_path).read_bytes())
-	# Handle case where the hash algorithm requires a digest length.
-	try:
-		calculated_hash = hasher.hexdigest()
-	except TypeError:
-		calculated_hash = hasher.hexdigest(digest_length)
+    hasher = hashlib.new(name=hash_alg, data=Path(file_path).read_bytes())
+    # Handle case where the hash algorithm requires a digest length.
+    try:
+        calculated_hash = hasher.hexdigest()
+    except TypeError:
+        calculated_hash = hasher.hexdigest(digest_length)
 
-	# check the hash if one was provided to check against
-	if hash_value and hash_value != calculated_hash:
-		raise FirmwareError(
-			f"Calculated hash {calculated_hash} does not match expected hash {hash_value}. Algorithm was {hash_alg}."
-		)
+    # check the hash if one was provided to check against
+    if hash_value and hash_value != calculated_hash:
+        raise FirmwareError(
+            f"Calculated hash {calculated_hash} does not match expected hash {hash_value}. Algorithm was {hash_alg}."
+        )
 
-	return calculated_hash
+    return calculated_hash
 
-def fetch_firmware(source, make, model, filename = None, **kwargs):
-	"""Fetches the firmware file from the provided source and copies it into a stacki managed file.
+
+def fetch_firmware(source, make, model, filename=None, **kwargs):
+    """Fetches the firmware file from the provided source and copies it into a stacki managed file.
 
 	source should be the URL from which to pull the firmware image from. If this is not one of the
 	supported schemes, a FirmwareError is raised.
@@ -88,50 +96,52 @@ def fetch_firmware(source, make, model, filename = None, **kwargs):
 
 	A FirmwareError is raised if fetching the file from the source fails.
 	"""
-	# parse the URL to figure out how we're going to fetch it
-	url = urlparse(url = source)
+    # parse the URL to figure out how we're going to fetch it
+    url = urlparse(url=source)
 
-	# build file path to write out to
-	dest_dir = BASE_PATH / make / model
-	dest_dir = dest_dir.resolve()
-	dest_dir.mkdir(parents = True, exist_ok = True)
-	# set a random file name if the name is not set
-	final_file = dest_dir / (uuid.uuid4().hex if filename is None else filename)
+    # build file path to write out to
+    dest_dir = BASE_PATH / make / model
+    dest_dir = dest_dir.resolve()
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    # set a random file name if the name is not set
+    final_file = dest_dir / (uuid.uuid4().hex if filename is None else filename)
 
-	try:
-		scheme = SUPPORTED_SCHEMES[url.scheme]
-	except KeyError as exception:
-		# Assume if there is no scheme but there is a path,
-		# assume that we were passed a local file path.
-		if not url.scheme and url.path:
-			scheme = SUPPORTED_SCHEMES.file
-		else:
-			raise FirmwareError(
-				f"Scheme {url.scheme} is not supported. The source must use one of the following supported"
-				f" schemes: {SUPPORTED_SCHEMES.pretty_string()}."
-			) from exception
+    try:
+        scheme = SUPPORTED_SCHEMES[url.scheme]
+    except KeyError as exception:
+        # Assume if there is no scheme but there is a path,
+        # assume that we were passed a local file path.
+        if not url.scheme and url.path:
+            scheme = SUPPORTED_SCHEMES.file
+        else:
+            raise FirmwareError(
+                f"Scheme {url.scheme} is not supported. The source must use one of the following supported"
+                f" schemes: {SUPPORTED_SCHEMES.pretty_string()}."
+            ) from exception
 
-	if scheme == SUPPORTED_SCHEMES.file:
-		# grab the source file and copy it into the destination file
-		try:
-			source_file = Path(url.path).resolve(strict = True)
-		except FileNotFoundError as exception:
-			raise FirmwareError(f"{exception}") from exception
+    if scheme == SUPPORTED_SCHEMES.file:
+        # grab the source file and copy it into the destination file
+        try:
+            source_file = Path(url.path).resolve(strict=True)
+        except FileNotFoundError as exception:
+            raise FirmwareError(f"{exception}") from exception
 
-		final_file.write_bytes(source_file.read_bytes())
+        final_file.write_bytes(source_file.read_bytes())
 
-	elif scheme in (SUPPORTED_SCHEMES.http, SUPPORTED_SCHEMES.https):
-		try:
-			stack.download.fetch(url = source, file_path = final_file, verbose = True, **kwargs)
-		except stack.download.FetchError as exception:
-			raise FirmwareError(f"{exception}") from exception
+    elif scheme in (SUPPORTED_SCHEMES.http, SUPPORTED_SCHEMES.https):
+        try:
+            stack.download.fetch(
+                url=source, file_path=final_file, verbose=True, **kwargs
+            )
+        except stack.download.FetchError as exception:
+            raise FirmwareError(f"{exception}") from exception
 
-	# add more supported schemes here
-	# elif scheme == SUPPORTED_SCHEMES.foo:
-	else:
-		# Case where we forgot to add a elif case for a new scheme that was added.
-		raise RuntimeError(
-			f"Someone wrote a bug! Code needs to be added to handle the {scheme} scheme."
-		)
+    # add more supported schemes here
+    # elif scheme == SUPPORTED_SCHEMES.foo:
+    else:
+        # Case where we forgot to add a elif case for a new scheme that was added.
+        raise RuntimeError(
+            f"Someone wrote a bug! Code needs to be added to handle the {scheme} scheme."
+        )
 
-	return final_file
+    return final_file

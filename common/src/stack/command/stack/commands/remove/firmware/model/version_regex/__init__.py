@@ -12,8 +12,9 @@
 
 import stack.commands
 
+
 class Command(stack.commands.remove.firmware.command):
-	"""
+    """
 	Disassociates firmware version_regexes from one or more models.
 
 	<arg type='string' name='models'>
@@ -29,5 +30,5 @@ class Command(stack.commands.remove.firmware.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.runPlugins(args = (params, args))
+    def run(self, params, args):
+        self.runPlugins(args=(params, args))

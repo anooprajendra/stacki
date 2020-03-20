@@ -7,12 +7,13 @@
 import os
 import os.path
 import shutil
+
 import stack.commands
 from stack.exception import CommandError
 
 
 class Command(stack.commands.load.command, stack.commands.HostArgumentProcessor):
-	"""
+    """
 	Take rows from a spreadsheet that describe how a host's disk controller
 	should be configured and then place those values into the database.
 
@@ -31,34 +32,33 @@ class Command(stack.commands.load.command, stack.commands.HostArgumentProcessor)
 	</example>
 	"""
 
-	def run(self, params, args):
-		filename, processor = self.fillParams([
-			('file', None, True),
-			('processor', 'default')
-		])
+    def run(self, params, args):
+        filename, processor = self.fillParams(
+            [("file", None, True), ("processor", "default")]
+        )
 
-		if not os.path.exists(filename):
-			raise CommandError(self, 'file "%s" does not exist' % filename)
+        if not os.path.exists(filename):
+            raise CommandError(self, 'file "%s" does not exist' % filename)
 
-		# Implementations can't return values
-		self.hosts = {}
-		self.runImplementation('load_%s' % processor, (filename, ))
+        # Implementations can't return values
+        self.hosts = {}
+        self.runImplementation("load_%s" % processor, (filename,))
 
-		self.runPlugins(self.hosts)
+        self.runPlugins(self.hosts)
 
-		# Check-in the spreadsheet
-		sheetsdir = '/export/stack/spreadsheets'
-		if not os.path.exists(sheetsdir):
-			os.makedirs(sheetsdir)
+        # Check-in the spreadsheet
+        sheetsdir = "/export/stack/spreadsheets"
+        if not os.path.exists(sheetsdir):
+            os.makedirs(sheetsdir)
 
-		RCSdir = '%s/RCS' % sheetsdir
-		if not os.path.exists(RCSdir):
-			os.makedirs(RCSdir)
+        RCSdir = "%s/RCS" % sheetsdir
+        if not os.path.exists(RCSdir):
+            os.makedirs(RCSdir)
 
-		sheetsfile = '%s/%s' % (sheetsdir, os.path.basename(filename))
-		if not os.path.exists(sheetsfile) or not os.path.samefile(filename, sheetsfile):
-			shutil.copyfile(filename, '%s' % sheetsfile)
+        sheetsfile = "%s/%s" % (sheetsdir, os.path.basename(filename))
+        if not os.path.exists(sheetsfile) or not os.path.samefile(filename, sheetsfile):
+            shutil.copyfile(filename, "%s" % sheetsfile)
 
-		os.system('date | /opt/stack/bin/ci "%s"' % sheetsfile)
+        os.system('date | /opt/stack/bin/ci "%s"' % sheetsfile)
 
-		os.system('/opt/stack/bin/co -f -l "%s"' % sheetsfile)
+        os.system('/opt/stack/bin/co -f -l "%s"' % sheetsfile)

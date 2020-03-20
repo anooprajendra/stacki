@@ -6,14 +6,13 @@
 
 import stack.commands
 from stack.commands.sync.switch.ib import enforce_subnet_manager
-from stack.exception import ArgRequired, ParamValue, CommandError
+from stack.exception import ArgRequired, CommandError, ParamValue
 
 
 class Command(
-	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
+    stack.commands.Command, stack.commands.SwitchArgumentProcessor,
 ):
-	"""
+    """
 	Lists the infiniband partition members in the Stacki database for one or
 	more switches.
 
@@ -35,46 +34,49 @@ class Command(
 
 	"""
 
-	def run(self, params, args):
-		if not len(args):
-			raise ArgRequired(self, 'switch')
+    def run(self, params, args):
+        if not len(args):
+            raise ArgRequired(self, "switch")
 
-		name, expanded, enforce_sm = self.fillParams([
-			('name', None),
-			('expanded', False),
-			('enforce_sm', False),
-		])
-		expanded = self.str2bool(expanded)
+        name, expanded, enforce_sm = self.fillParams(
+            [("name", None), ("expanded", False), ("enforce_sm", False),]
+        )
+        expanded = self.str2bool(expanded)
 
-		if name:
-			name = name.lower()
-		if name == 'default':
-			name = 'Default'
-		elif name != None:
-			try:
-				name = '0x{0:04x}'.format(int(name, 16))
-			except ValueError:
-				raise ParamValue(self, 'name', 'a hex value between 0x0001 and 0x7ffe, or "default"')
+        if name:
+            name = name.lower()
+        if name == "default":
+            name = "Default"
+        elif name != None:
+            try:
+                name = "0x{0:04x}".format(int(name, 16))
+            except ValueError:
+                raise ParamValue(
+                    self, "name", 'a hex value between 0x0001 and 0x7ffe, or "default"'
+                )
 
+        switches = self.getSwitchNames(args)
+        switch_attrs = self.getHostAttrDict(switches)
+        for switch in switches:
+            if switch_attrs[switch].get("switch_type") != "infiniband":
+                raise CommandError(
+                    self, f'{switch} does not have a switch_type of "infiniband"'
+                )
 
-		switches = self.getSwitchNames(args)
-		switch_attrs = self.getHostAttrDict(switches)
-		for switch in switches:
-			if switch_attrs[switch].get('switch_type') != 'infiniband':
-				raise CommandError(self, f'{switch} does not have a switch_type of "infiniband"')
+        if self.str2bool(enforce_sm):
+            enforce_subnet_manager(self, switches)
 
-		if self.str2bool(enforce_sm):
-			enforce_subnet_manager(self, switches)
+        sql_columns = "swnodes.name AS switch, nodes.name AS host, networks.device, networks.mac, ib_p.part_name, ib_m.member_type"
 
-		sql_columns = 'swnodes.name AS switch, nodes.name AS host, networks.device, networks.mac, ib_p.part_name, ib_m.member_type'
-		
-		table_headers = ['switch', 'host', 'device', 'guid', 'partition', 'membership']
-		if expanded:
-			sql_columns += ', ib_p.part_key, ib_p.options'
-			table_headers.extend(['partition key', 'options'])
+        table_headers = ["switch", "host", "device", "guid", "partition", "membership"]
+        if expanded:
+            sql_columns += ", ib_p.part_key, ib_p.options"
+            table_headers.extend(["partition key", "options"])
 
-		format_str = ','.join(['%s'] * len(switches))
-		member_select = sql_columns + '''
+        format_str = ",".join(["%s"] * len(switches))
+        member_select = (
+            sql_columns
+            + """
 		FROM nodes swnodes, nodes, networks, ib_partitions ib_p, ib_memberships ib_m
 		WHERE
 			swnodes.name in (%s) AND
@@ -82,20 +84,22 @@ class Command(
 			nodes.id=networks.node AND
 			networks.id=ib_m.interface AND
 			ib_p.id=ib_m.part_name
-		''' % format_str
+		"""
+            % format_str
+        )
 
-		vals = list(switches)
+        vals = list(switches)
 
-		if name:
-			member_select += ' AND ib_p.part_name in (%s)'
-			vals.append(name)
+        if name:
+            member_select += " AND ib_p.part_name in (%s)"
+            vals.append(name)
 
-		member_select += ' ORDER BY switch, host, part_name'
+        member_select += " ORDER BY switch, host, part_name"
 
-		self.beginOutput()
-		for line in self.db.select(member_select, vals):
-			if expanded:
-				line = list(line)
-				line[6] = '0x{0:04x}'.format(line[6])
-			self.addOutput(line[0], (line[1:]))
-		self.endOutput(header=table_headers)
+        self.beginOutput()
+        for line in self.db.select(member_select, vals):
+            if expanded:
+                line = list(line)
+                line[6] = "0x{0:04x}".format(line[6])
+            self.addOutput(line[0], (line[1:]))
+        self.endOutput(header=table_headers)

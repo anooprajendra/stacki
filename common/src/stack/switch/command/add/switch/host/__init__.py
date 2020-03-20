@@ -7,13 +7,17 @@
 import stack.commands
 from stack.exception import ArgUnique, CommandError
 
-class command(stack.commands.SwitchArgumentProcessor,
-	      stack.commands.HostArgumentProcessor,
-	      stack.commands.Command):
-	pass
+
+class command(
+    stack.commands.SwitchArgumentProcessor,
+    stack.commands.HostArgumentProcessor,
+    stack.commands.Command,
+):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	Add a new host to a switch
 
 	<arg type='string' name='switch' optional='0' repeat='0'>
@@ -39,25 +43,23 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		host, port, interface, = self.fillParams([
-			('host', None, True),
-			('port', None, True),
-			('interface', None, False),
-			])
-		switches = self.getSwitchNames(args)
-		if len(switches) > 1:
-			raise ArgUnique(self, 'switch')
+        host, port, interface, = self.fillParams(
+            [("host", None, True), ("port", None, True), ("interface", None, False),]
+        )
+        switches = self.getSwitchNames(args)
+        if len(switches) > 1:
+            raise ArgUnique(self, "switch")
 
-		# Check if host exists
-		hosts = self.getHostnames([host])
+        # Check if host exists
+        hosts = self.getHostnames([host])
 
-		for switch in switches:
-			# Make sure switch has an interface
-			if self.getSwitchNetwork(switch):
-				self.addSwitchHost(switch, port, host, interface)
-			else:
-				raise CommandError(self,
-					"switch '%s' doesn't have a management interface" % switch)
-
+        for switch in switches:
+            # Make sure switch has an interface
+            if self.getSwitchNetwork(switch):
+                self.addSwitchHost(switch, port, host, interface)
+            else:
+                raise CommandError(
+                    self, "switch '%s' doesn't have a management interface" % switch
+                )

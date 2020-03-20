@@ -6,12 +6,13 @@
 
 import re
 from copy import copy
+
 import stack.commands
-from stack.exception import CommandError, ArgRequired
+from stack.exception import ArgRequired, CommandError
 
 
 class Command(stack.commands.set.pallet.command):
-	"""
+    """
 	Sets a tag for one or more pallets.
 
 	<arg type='string' name='pallet' repeat='1'>
@@ -43,61 +44,65 @@ class Command(stack.commands.set.pallet.command):
 	</param>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		if len(args) < 1:
-			raise ArgRequired(self, 'pallet')
+        if len(args) < 1:
+            raise ArgRequired(self, "pallet")
 
-		(tag, value, force) = self.fillParams([
-			('tag',    None, True),
-			('value',  None, True),
-			('force',  True),
-			])
+        (tag, value, force) = self.fillParams(
+            [("tag", None, True), ("value", None, True), ("force", True),]
+        )
 
-		force = self.str2bool(force)
+        force = self.str2bool(force)
 
-		if value and not re.match('^[a-zA-Z_][a-zA-Z0-9_.]*$', tag):
-			raise CommandError(self, f'invalid tag name "{tag}"')
+        if value and not re.match("^[a-zA-Z_][a-zA-Z0-9_.]*$", tag):
+            raise CommandError(self, f'invalid tag name "{tag}"')
 
+        pallets = self.get_pallets(args, params)
 
-		pallets = self.get_pallets(args, params)
+        # If the tag is already defined and force=False
+        # complain
+        #
+        # 	add := force=false
+        # 	set := force=true
+        if not force:
+            for p in pallets:
+                name = f"{p.name}-{p.version}-{p.rel}-{p.arch}-{p.os}"
+                for row in self.call(
+                    "list.pallet.tag",
+                    [
+                        p.name,
+                        f"version={p.version}",
+                        f"release={p.rel}",
+                        f"arch={p.arch}",
+                        f"os={p.os}",
+                        f"tag={tag}",
+                    ],
+                ):
+                    raise CommandError(self, f'tag "{tag}" exists for {name}')
 
-		# If the tag is already defined and force=False
-		# complain
-		#
-		# 	add := force=false
-		# 	set := force=true
-		if not force:
-			for p in pallets:
-				name = f'{p.name}-{p.version}-{p.rel}-{p.arch}-{p.os}'
-				for row in self.call('list.pallet.tag', [
-					p.name,
-					f'version={p.version}',
-					f'release={p.rel}',
-					f'arch={p.arch}',
-					f'os={p.os}',
-					f'tag={tag}'
-					]):
-					raise CommandError(self,
-							   f'tag "{tag}" exists for {name}')
-
-
-		for p in pallets:
-			# To avoid 'update' vs 'insert' nonsense just remove
-			# the tag first (not an error if it doesn't exist)
-			self.db.execute("""
+        for p in pallets:
+            # To avoid 'update' vs 'insert' nonsense just remove
+            # the tag first (not an error if it doesn't exist)
+            self.db.execute(
+                """
 				delete from tags where
 				scope   = 'pallet' and
 				scopeid = %s and
 				tag     = %s
-				""", (p.id, tag))
+				""",
+                (p.id, tag),
+            )
 
-			if not value:
-				# Passing `value=` to command will delete
-				continue
+            if not value:
+                # Passing `value=` to command will delete
+                continue
 
-			self.db.execute("""
+            self.db.execute(
+                """
 				insert into tags
 				(scope, tag, value, scopeid)
 				values ('pallet', %s, %s, %s)
-				""", (tag, value, p.id))
+				""",
+                (tag, value, p.id),
+            )

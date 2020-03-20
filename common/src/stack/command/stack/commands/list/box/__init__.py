@@ -13,13 +13,13 @@
 import stack.commands
 from stack.argument_processors.box import BoxArgumentProcessor
 
-class command(stack.commands.list.command,
-	      BoxArgumentProcessor):
-	pass
+
+class command(stack.commands.list.command, BoxArgumentProcessor):
+    pass
 
 
 class Command(command):
-	"""
+    """
 	Lists the pallets and carts that are associated with boxes.
 
 	<arg optional='1' type='string' name='box' repeat='1'>
@@ -31,47 +31,44 @@ class Command(command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		pallets = {}
-		carts	= {}
+    def run(self, params, args):
+        pallets = {}
+        carts = {}
 
-		for box in self.get_box_names(args):
-			for pallet in self.get_box_pallets(box):
-				fullname = '%s-%s' % (pallet.name, pallet.version)
-				if pallet.rel:
-					fullname += '-%s' % pallet.rel
+        for box in self.get_box_names(args):
+            for pallet in self.get_box_pallets(box):
+                fullname = "%s-%s" % (pallet.name, pallet.version)
+                if pallet.rel:
+                    fullname += "-%s" % pallet.rel
 
-				if box not in pallets:
-					pallets[box] = []
-				pallets[box].append(fullname)
+                if box not in pallets:
+                    pallets[box] = []
+                pallets[box].append(fullname)
 
-		for row in self.call('list.cart'):
-			if row['boxes']:
-				for box in row['boxes'].split():
-					if box not in carts:
-						carts[box] = []
-					carts[box].append(row['name'])
+        for row in self.call("list.cart"):
+            if row["boxes"]:
+                for box in row["boxes"].split():
+                    if box not in carts:
+                        carts[box] = []
+                    carts[box].append(row["name"])
 
-		self.beginOutput()
+        self.beginOutput()
 
-		for box in self.get_box_names(args):
-			id, os = self.db.select("""
+        for box in self.get_box_names(args):
+            id, os = self.db.select(
+                """
 				b.id, o.name from boxes b, oses o
 				where b.name=%s	and b.os=o.id
-				""", (box,)
-			)[0]
+				""",
+                (box,),
+            )[0]
 
-			if box not in carts:
-				carts[box] = []
+            if box not in carts:
+                carts[box] = []
 
-			if box not in pallets:
-				pallets[box] = []
+            if box not in pallets:
+                pallets[box] = []
 
-			self.addOutput(box, (
-				os, ' '.join(pallets[box]), ' '.join(carts[box])
-			))
+            self.addOutput(box, (os, " ".join(pallets[box]), " ".join(carts[box])))
 
-		self.endOutput(
-			header=['name', 'os', 'pallets', 'carts'],
-			trimOwner=False
-		)
+        self.endOutput(header=["name", "os", "pallets", "carts"], trimOwner=False)

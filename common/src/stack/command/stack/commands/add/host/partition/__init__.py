@@ -10,7 +10,7 @@ import stack.commands
 
 
 class Command(stack.commands.add.host.command):
-	"""
+    """
 	Add Partitioning information to the database.
 	
 	<arg name="host" type="string" repeat="1">
@@ -54,39 +54,65 @@ class Command(stack.commands.add.host.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
-		
-		(device, mountpoint, uuid, sectorstart, size, partitionid,
-		fs, partitionflags, formatflags) = self.fillParams([
-			("device", None, True),
-			("mountpoint", ""),
-			("uuid", ""),
-			("sectorstart", 0),
-			("size", 0),
-			("partid", ""),
-			("fs", ""),
-			("partitionflags", ""),
-			("formatflags", ""),
-		])
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		for host in hosts:
-			# If we already have partition info, remove it for this host
-			if self.db.count("""(p.ID) from partitions p, nodes n
+        (
+            device,
+            mountpoint,
+            uuid,
+            sectorstart,
+            size,
+            partitionid,
+            fs,
+            partitionflags,
+            formatflags,
+        ) = self.fillParams(
+            [
+                ("device", None, True),
+                ("mountpoint", ""),
+                ("uuid", ""),
+                ("sectorstart", 0),
+                ("size", 0),
+                ("partid", ""),
+                ("fs", ""),
+                ("partitionflags", ""),
+                ("formatflags", ""),
+            ]
+        )
+
+        for host in hosts:
+            # If we already have partition info, remove it for this host
+            if (
+                self.db.count(
+                    """(p.ID) from partitions p, nodes n
 				where p.node=n.id and n.name=%s and p.device=%s""",
-				(host, device)
-			) != 0:
-				self.command("remove.host.partition", (host, f"device={device}"))
-			
-			# Insert the new partition info
-			self.db.execute("""
+                    (host, device),
+                )
+                != 0
+            ):
+                self.command("remove.host.partition", (host, f"device={device}"))
+
+            # Insert the new partition info
+            self.db.execute(
+                """
 				insert into partitions(
 					node, device, mountpoint, uuid, sectorstart, PartitionSize,
 					PartitionID, FsType, PartitionFlags, FormatFlags
 				) values (
 					(select id from nodes where name=%s),
 					%s, %s, %s, %s, %s, %s, %s, %s, %s
-				)""", (
-					host, device, mountpoint, uuid, sectorstart, size,
-					partitionid, fs, partitionflags, formatflags
-				))
+				)""",
+                (
+                    host,
+                    device,
+                    mountpoint,
+                    uuid,
+                    sectorstart,
+                    size,
+                    partitionid,
+                    fs,
+                    partitionflags,
+                    formatflags,
+                ),
+            )

@@ -12,11 +12,12 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 # @rocks@
 
-import os
 import cgi
-import syslog
 import json
+import os
 import sys
+import syslog
+
 import stack.api
 
 syslog.openlog('setPxeBoot.cgi', syslog.LOG_PID, syslog.LOG_LOCAL0)

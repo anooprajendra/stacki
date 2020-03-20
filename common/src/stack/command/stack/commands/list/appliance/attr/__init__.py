@@ -8,7 +8,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.appliance.command):
-	"""
+    """
 	Lists the set of attributes for appliances.
 
 	<arg optional='1' type='string' name='appliance'>
@@ -20,7 +20,10 @@ class Command(stack.commands.list.appliance.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.addText(self.command('list.attr', self._argv + [ 'scope=appliance' ], verbose_errors = False))
-		return self.rc
-
+    def run(self, params, args):
+        self.addText(
+            self.command(
+                "list.attr", self._argv + ["scope=appliance"], verbose_errors=False
+            )
+        )
+        return self.rc

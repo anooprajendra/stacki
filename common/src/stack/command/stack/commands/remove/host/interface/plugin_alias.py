@@ -14,10 +14,9 @@ import stack.commands
 
 
 class Plugin(stack.commands.Plugin):
+    def provides(self):
+        return "alias"
 
-	def provides(self):
-		return 'alias'
-
-	def run(self, networks):
-		for network in networks:
-			self.db.execute('delete from aliases where network=%s', (network,))
+    def run(self, networks):
+        for network in networks:
+            self.db.execute("delete from aliases where network=%s", (network,))

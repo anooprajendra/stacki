@@ -15,7 +15,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.host.command):
-	"""
+    """
 	Remove a firewall rule for a host. To remove a rule,
 	you must supply the name of the rule.
 
@@ -28,9 +28,11 @@ class Command(stack.commands.remove.host.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'host')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "host")
 
-		self.command('remove.firewall', self._argv + ['scope=host'], verbose_errors = False)
-		return self.rc
+        self.command(
+            "remove.firewall", self._argv + ["scope=host"], verbose_errors=False
+        )
+        return self.rc

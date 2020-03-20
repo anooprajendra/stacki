@@ -8,13 +8,17 @@ import stack.commands
 import stack.util
 from stack.exception import CommandError
 
-class command(stack.commands.SwitchArgumentProcessor,
-	      stack.commands.list.command,
-	      stack.commands.HostArgumentProcessor):
-	pass
+
+class command(
+    stack.commands.SwitchArgumentProcessor,
+    stack.commands.list.command,
+    stack.commands.HostArgumentProcessor,
+):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	List information about a host's interfaces and which switch ports they are connected to.
 
 	<arg optional='1' type='string' name='host' repeat='1'>
@@ -32,41 +36,41 @@ class Command(command):
 	</example>
 	"""
 
-	def getPortStatus(self, switch, host, interface):
-		if switch not in self.switchstatus:
-			self.switchstatus[switch] = self.call('list.switch.status',
-				[ switch, 'output-format=json' ])
+    def getPortStatus(self, switch, host, interface):
+        if switch not in self.switchstatus:
+            self.switchstatus[switch] = self.call(
+                "list.switch.status", [switch, "output-format=json"]
+            )
 
-		for o in self.switchstatus[switch]:
-			if o['host'] == host and o['interface'] == interface:
-				return o['speed'], o['state']
+        for o in self.switchstatus[switch]:
+            if o["host"] == host and o["interface"] == interface:
+                return o["speed"], o["state"]
 
-		return None, None
-			
+        return None, None
 
-	def run(self, params, args):
-		self.hosts = self.getHostnames(args)
-		
-		(status, ) = self.fillParams([ ('status', 'n') ])
-		status = self.str2bool(status)
+    def run(self, params, args):
+        self.hosts = self.getHostnames(args)
 
-		header = [ 'host', 'mac', 'interface', 'vlan', 'switch', 'port' ]
-		if status:
-			header.extend([ 'speed', 'state' ])
-			self.switchstatus = {}
+        (status,) = self.fillParams([("status", "n")])
+        status = self.str2bool(status)
 
-		self.beginOutput()
+        header = ["host", "mac", "interface", "vlan", "switch", "port"]
+        if status:
+            header.extend(["speed", "state"])
+            self.switchstatus = {}
 
-		for host in self.hosts:
-			for o in self.call('list.switch.host'):
-				if o['host'] == host:
-					line = [ o['mac'], o['interface'], o['vlan'], o['switch'], o['port'] ]
-					if status:
-						linkspeed, linkstate = self.getPortStatus(
-							o['switch'], host, o['interface'])
-						line.extend([ linkspeed, linkstate ])
+        self.beginOutput()
 
-					self.addOutput(host, line)
+        for host in self.hosts:
+            for o in self.call("list.switch.host"):
+                if o["host"] == host:
+                    line = [o["mac"], o["interface"], o["vlan"], o["switch"], o["port"]]
+                    if status:
+                        linkspeed, linkstate = self.getPortStatus(
+                            o["switch"], host, o["interface"]
+                        )
+                        line.extend([linkspeed, linkstate])
 
-		self.endOutput(header = header, trimOwner = False)
+                    self.addOutput(host, line)
 
+        self.endOutput(header=header, trimOwner=False)

@@ -15,7 +15,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.appliance.command):
-	"""
+    """
 	Remove a firewall service rule for an appliance type.
 	To remove the rule, you must supply the name of the rule.
 
@@ -28,9 +28,11 @@ class Command(stack.commands.remove.appliance.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'appliance')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "appliance")
 
-		self.command('remove.firewall', self._argv + ['scope=appliance'], verbose_errors = False)
-		return self.rc
+        self.command(
+            "remove.firewall", self._argv + ["scope=appliance"], verbose_errors=False
+        )
+        return self.rc

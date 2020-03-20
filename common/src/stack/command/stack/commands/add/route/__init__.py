@@ -16,7 +16,7 @@ from stack.util import blank_str_to_None
 
 
 class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command):
-	"""
+    """
 	Add a route for all hosts in the cluster
 
 	<param type='string' name='address' optional='0'>
@@ -39,35 +39,39 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command)
 	</param>
 	"""
 
-	def run(self, params, args):
-		# Get the scope and make sure the args are valid
-		scope, = self.fillParams([('scope', 'global')])
-		scope_mappings = self.getScopeMappings(args, scope)
+    def run(self, params, args):
+        # Get the scope and make sure the args are valid
+        (scope,) = self.fillParams([("scope", "global")])
+        scope_mappings = self.getScopeMappings(args, scope)
 
-		# Now validate the params
-		(address, gateway, netmask, interface, syncnow) = self.fillParams([
-			('address', None, True),
-			('gateway', None, True),
-			('netmask', '255.255.255.255'),
-			('interface', None),
-			('syncnow', None)
-		])
-		syncnow = self.str2bool(syncnow)
+        # Now validate the params
+        (address, gateway, netmask, interface, syncnow) = self.fillParams(
+            [
+                ("address", None, True),
+                ("gateway", None, True),
+                ("netmask", "255.255.255.255"),
+                ("interface", None),
+                ("syncnow", None),
+            ]
+        )
+        syncnow = self.str2bool(syncnow)
 
-		# Check if the user has put a subnet name in the gateway field
-		rows = self.db.select('id from subnets where name=%s', [gateway])
-		if rows:
-			gateway = None
-			subnet_id = rows[0][0]
-		else:
-			subnet_id = None
+        # Check if the user has put a subnet name in the gateway field
+        rows = self.db.select("id from subnets where name=%s", [gateway])
+        if rows:
+            gateway = None
+            subnet_id = rows[0][0]
+        else:
+            subnet_id = None
 
-		# Make sure interface is None if blank
-		interface = blank_str_to_None(interface)
+        # Make sure interface is None if blank
+        interface = blank_str_to_None(interface)
 
-		for scope_mapping in scope_mappings:
-			# Check that the route is unique for the scope
-			if self.db.count("""
+        for scope_mapping in scope_mappings:
+            # Check that the route is unique for the scope
+            if (
+                self.db.count(
+                    """
 		 		(routes.id) FROM routes,scope_map
 				WHERE routes.scope_map_id = scope_map.id
 				AND routes.address = %s
@@ -76,54 +80,66 @@ class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command)
 				AND scope_map.os_id <=> %s
 				AND scope_map.environment_id <=> %s
 				AND scope_map.node_id <=> %s
-			""", (address, *scope_mapping)) != 0:
-		 		raise CommandError(self, f'route for "{address}" already exists')
+			""",
+                    (address, *scope_mapping),
+                )
+                != 0
+            ):
+                raise CommandError(self, f'route for "{address}" already exists')
 
-		# Everything looks good, add the new routes
-		for scope_mapping in scope_mappings:
-			# First add the scope mapping for the new route
-			self.db.execute("""
+        # Everything looks good, add the new routes
+        for scope_mapping in scope_mappings:
+            # First add the scope mapping for the new route
+            self.db.execute(
+                """
 				INSERT INTO scope_map(
 					scope, appliance_id, os_id, environment_id, node_id
 				)
 				VALUES (%s, %s, %s, %s, %s)
-			""", scope_mapping)
+			""",
+                scope_mapping,
+            )
 
-			# Then add the route itself
-			self.db.execute("""
+            # Then add the route itself
+            self.db.execute(
+                """
 				INSERT INTO routes(
 					scope_map_id, address, netmask, gateway,
 					subnet_id, interface
 				)
 				VALUES (LAST_INSERT_ID(), %s, %s, %s, %s, %s)
-			""", (address, netmask, gateway, subnet_id, interface))
+			""",
+                (address, netmask, gateway, subnet_id, interface),
+            )
 
-		# Sync the routes, if requested and we are 'host' scoped
-		if scope == 'host' and syncnow:
-			# Need to get the node ID for ourselves
-			node_id = self.db.select(
-				'id from nodes where name=%s',
-				self.db.getHostname()
-			)[0][0]
+        # Sync the routes, if requested and we are 'host' scoped
+        if scope == "host" and syncnow:
+            # Need to get the node ID for ourselves
+            node_id = self.db.select(
+                "id from nodes where name=%s", self.db.getHostname()
+            )[0][0]
 
-			for scope_mapping in scope_mappings:
-				if scope_mapping.node_id == node_id:
-					# Add the new route
-					cmd = ['route', 'add', '-host', address]
+            for scope_mapping in scope_mappings:
+                if scope_mapping.node_id == node_id:
+                    # Add the new route
+                    cmd = ["route", "add", "-host", address]
 
-					if interface:
-						cmd.append('dev')
-						cmd.append(interface)
+                    if interface:
+                        cmd.append("dev")
+                        cmd.append(interface)
 
-					if gateway:
-						cmd.append('gw')
-						cmd.append(gateway)
+                    if gateway:
+                        cmd.append("gw")
+                        cmd.append(gateway)
 
-					self._exec(cmd)
+                    self._exec(cmd)
 
-					# Sync the routes file
-					self._exec("""
+                    # Sync the routes file
+                    self._exec(
+                        """
 						/opt/stack/bin/stack report host route localhost |
 						/opt/stack/bin/stack report script |
 						bash > /dev/null 2>&1
-					""", shell=True)
+					""",
+                        shell=True,
+                    )

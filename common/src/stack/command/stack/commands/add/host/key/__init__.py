@@ -11,12 +11,13 @@
 # @rocks@
 
 import os
+
 import stack.commands
 from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
 class Command(stack.commands.add.host.command):
-	"""
+    """
 	Add a public key for a host. One use of this public key is to 
 	authenticate messages sent from remote services.
 
@@ -30,25 +31,31 @@ class Command(stack.commands.add.host.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		host = self.getSingleHost(args)
+    def run(self, params, args):
+        host = self.getSingleHost(args)
 
-		key, = self.fillParams([ ('key', None, True) ])
+        (key,) = self.fillParams([("key", None, True)])
 
-		# See if the key is a file name
-		if os.path.exists(key):
-			with open(key, 'r') as f:
-				key = f.read()
+        # See if the key is a file name
+        if os.path.exists(key):
+            with open(key, "r") as f:
+                key = f.read()
 
-		# Check if the key already exists
-		if self.db.count("""(ID) from public_keys where
+        # Check if the key already exists
+        if (
+            self.db.count(
+                """(ID) from public_keys where
 			node = (select id from nodes where name = %s) and
-			public_key = %s """, (host, key)
-		) != 0:
-			raise CommandError(self, f'the public key already exists for host {host}')
+			public_key = %s """,
+                (host, key),
+            )
+            != 0
+        ):
+            raise CommandError(self, f"the public key already exists for host {host}")
 
-		# Add the key
-		self.db.execute("""insert into public_keys(node, public_key)
+        # Add the key
+        self.db.execute(
+            """insert into public_keys(node, public_key)
 			values ((select id from nodes where name = %s), %s)""",
-			(host, key)
-		)
+            (host, key),
+        )

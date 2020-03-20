@@ -17,20 +17,24 @@ For more information on this file, see
 https://docs.djangoproject.com/en/1.11.6/howto/deployment/wsgi/
 """
 
+import logging
+import logging.handlers
 import os
+
+# Run Django Application
+from django.core.wsgi import get_wsgi_application
 
 # Set the Django environment module
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stack.restapi.settings")
 
-import logging
-import logging.handlers
 
 # Set logging
 log = logging.getLogger("SWS")
 log.setLevel(logging.DEBUG)
 
-handler = logging.handlers.SysLogHandler(address='/dev/log',
-		facility=logging.handlers.SysLogHandler.LOG_LOCAL1)
+handler = logging.handlers.SysLogHandler(
+    address="/dev/log", facility=logging.handlers.SysLogHandler.LOG_LOCAL1
+)
 
 formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
@@ -40,8 +44,7 @@ log.addHandler(handler)
 # Start Logging
 log.info("Starting WSGI Request")
 
-# Run Django Application
-from django.core.wsgi import get_wsgi_application
+
 application = get_wsgi_application()
 
 # Logging End

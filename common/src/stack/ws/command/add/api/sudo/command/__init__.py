@@ -1,16 +1,14 @@
-import stack.commands
-
-import stack.django_env
-from stack.exception import *
-
-from stack.restapi.models import SudoList
-
-from stack.commands.add.api import checkCommand
-
 import re
 
+import stack.commands
+import stack.django_env
+from stack.commands.add.api import checkCommand
+from stack.exception import *
+from stack.restapi.models import SudoList
+
+
 class Command(stack.commands.Command):
-	"""
+    """
 	Add a command, or a set of commands, to the webservice
 	sudo list. This allows the webservice to sudo up to
 	root to run the commands. It can take a regular expression
@@ -26,23 +24,21 @@ class Command(stack.commands.Command):
 	Add "sync config" command to the sudolist.
 	</example>
 	"""
-	def run(self, params, args):
-		(command, sync) = self.fillParams([
-			("command", None),
-			("sync", True)
-			])
-		if not command:
-			raise ParamRequired(self, "Command")
-		
-		sync = self.str2bool(sync)
-		checkCommand(self, command)
 
-		try:
-			s = SudoList.objects.get(command=command)
-			if s:
-				raise CommandError(self, f"Command {command} is already in sudo list")
-		except SudoList.DoesNotExist:
-			s = SudoList(command=command)
-			s.save()
-			if sync:
-				self.command("sync.api.sudo.command")
+    def run(self, params, args):
+        (command, sync) = self.fillParams([("command", None), ("sync", True)])
+        if not command:
+            raise ParamRequired(self, "Command")
+
+        sync = self.str2bool(sync)
+        checkCommand(self, command)
+
+        try:
+            s = SudoList.objects.get(command=command)
+            if s:
+                raise CommandError(self, f"Command {command} is already in sudo list")
+        except SudoList.DoesNotExist:
+            s = SudoList(command=command)
+            s.save()
+            if sync:
+                self.command("sync.api.sudo.command")

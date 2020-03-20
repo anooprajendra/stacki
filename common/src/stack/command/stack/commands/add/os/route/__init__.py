@@ -15,7 +15,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.add.os.command):
-	"""
+    """
 	Add a route for an OS type
 
 	<arg type='string' name='os' repeat='1' optional='0'>
@@ -42,9 +42,9 @@ class Command(stack.commands.add.os.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'os')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "os")
 
-		self.command('add.route', self._argv + ['scope=os'], verbose_errors = False)
-		return self.rc
+        self.command("add.route", self._argv + ["scope=os"], verbose_errors=False)
+        return self.rc

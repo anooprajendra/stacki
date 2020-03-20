@@ -5,12 +5,13 @@
 # @copyright@
 
 import os.path
+
 import stack.commands
 from stack.exception import CommandError
 
 
 class Command(stack.commands.unload.command):
-	"""
+    """
 	Unload (remove) attributes from the database
 	
 	<param type='string' name='file' optional='0'>
@@ -29,19 +30,17 @@ class Command(stack.commands.unload.command):
 	</example>
 	
 	<related>load attrfile</related>
-	"""		
+	"""
 
-	def run(self, params, args):
-		filename, processor = self.fillParams([
-			('file', None, True),
-			('processor', 'default')
-			])
+    def run(self, params, args):
+        filename, processor = self.fillParams(
+            [("file", None, True), ("processor", "default")]
+        )
 
-		if not os.path.exists(filename):
-			raise CommandError(self, 'file "%s" does not exist' % filename)
+        if not os.path.exists(filename):
+            raise CommandError(self, 'file "%s" does not exist' % filename)
 
-		self.attrs = {}
-		self.runImplementation('unload_%s' % processor, (filename, ))
+        self.attrs = {}
+        self.runImplementation("unload_%s" % processor, (filename,))
 
-		self.runPlugins(self.attrs)
-
+        self.runPlugins(self.attrs)

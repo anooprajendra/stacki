@@ -4,15 +4,15 @@
 # https://github.com/Teradata/stacki/blob/master/LICENSE.txt
 # @copyright@
 
+import json
+from collections import OrderedDict
+
 import stack
 import stack.commands
-from collections import OrderedDict
-import json
 
 
-class Command(stack.commands.dump.command,
-	      stack.commands.OSArgumentProcessor):
-	"""
+class Command(stack.commands.dump.command, stack.commands.OSArgumentProcessor):
+    """
 	Dump the contents of the stacki database as json.
 
 	This command dumps specifically the OS level data.
@@ -27,19 +27,21 @@ class Command(stack.commands.dump.command,
 	<related>load</related>
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		self.set_scope('os')
+        self.set_scope("os")
 
-		dump = []
-		for name in self.getOSNames():
-			dump.append(OrderedDict(
-				name          = name,
-				attr          = self.dump_attr(name),
-				controller    = self.dump_controller(name),
-				partition     = self.dump_partition(name),
-				firewall      = self.dump_firewall(name),
-				route         = self.dump_route(name)))
+        dump = []
+        for name in self.getOSNames():
+            dump.append(
+                OrderedDict(
+                    name=name,
+                    attr=self.dump_attr(name),
+                    controller=self.dump_controller(name),
+                    partition=self.dump_partition(name),
+                    firewall=self.dump_firewall(name),
+                    route=self.dump_route(name),
+                )
+            )
 
-		self.addText(json.dumps(OrderedDict(version  = stack.version,
-						    os       = dump), indent=8))
+        self.addText(json.dumps(OrderedDict(version=stack.version, os=dump), indent=8))

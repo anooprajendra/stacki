@@ -17,7 +17,7 @@ from stack.util import is_valid_hostname
 
 
 class Command(stack.commands.set.host.command):
-	"""
+    """
 	Rename a host.
 
 	<arg type='string' name='host' repeat='0'>
@@ -33,17 +33,15 @@ class Command(stack.commands.set.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		host = self.getSingleHost(args)
+    def run(self, params, args):
+        host = self.getSingleHost(args)
 
-		(name, ) = self.fillParams([
-			('name', None, True)
-		])
+        (name,) = self.fillParams([("name", None, True)])
 
-		if not is_valid_hostname(name):
-			raise ParamValue(self, 'name', 'a valid hostname label')
+        if not is_valid_hostname(name):
+            raise ParamValue(self, "name", "a valid hostname label")
 
-		if name in self.getHostnames():
-			raise CommandError(self, 'name already exists')
+        if name in self.getHostnames():
+            raise CommandError(self, "name already exists")
 
-		self.db.execute('update nodes set name=%s where name=%s', (name, host))
+        self.db.execute("update nodes set name=%s where name=%s", (name, host))

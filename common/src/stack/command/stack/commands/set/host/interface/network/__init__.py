@@ -15,7 +15,7 @@ from stack.exception import ParamRequired
 
 
 class Command(stack.commands.set.host.interface.command):
-	"""
+    """
 	Sets the network for named interface on one of more hosts.
 
 	<arg type='string' name='host' repeat='1' optional='0'>
@@ -39,37 +39,35 @@ class Command(stack.commands.set.host.interface.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		hosts = self.getHosts(args)
+    def run(self, params, args):
+        hosts = self.getHosts(args)
 
-		(interface, mac, network) = self.fillParams([
-			('interface', None),
-			('mac', None),
-			('network', None, True)
-		])
+        (interface, mac, network) = self.fillParams(
+            [("interface", None), ("mac", None), ("network", None, True)]
+        )
 
-		# Gotta have one of these
-		if not any([interface, mac]):
-			raise ParamRequired(self, ('interface', 'mac'))
+        # Gotta have one of these
+        if not any([interface, mac]):
+            raise ParamRequired(self, ("interface", "mac"))
 
-		# Make sure interface and/or mac exist on our hosts
-		self.validate(hosts, interface, mac, None)
+        # Make sure interface and/or mac exist on our hosts
+        self.validate(hosts, interface, mac, None)
 
-		for host in hosts:
-			sql = """
+        for host in hosts:
+            sql = """
 				update networks,nodes set networks.subnet=(
 					select id from subnets where subnets.name=%s
 				)
 				where nodes.name=%s and networks.node=nodes.id
 			"""
-			values = [network, host]
+            values = [network, host]
 
-			if interface:
-				sql += " and networks.device=%s"
-				values.append(interface)
+            if interface:
+                sql += " and networks.device=%s"
+                values.append(interface)
 
-			if mac:
-				sql += " and networks.mac=%s"
-				values.append(mac)
+            if mac:
+                sql += " and networks.mac=%s"
+                values.append(mac)
 
-			self.db.execute(sql, values)
+            self.db.execute(sql, values)

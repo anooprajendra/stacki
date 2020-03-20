@@ -8,52 +8,56 @@ import os
 
 # A custom exception just so its easier to differentiate from Switch exceptions and system ones
 class SwitchException(Exception):
-	pass
+    pass
 
-class Switch():
 
-	# you must overload the following function
-	@classmethod
-	def supported(cls):
-		raise NotImplementedError("supported() should return a list of (Make, Model)'s supported by this class")
+class Switch:
 
-	def __init__(self, switch_ip_address, switchname=None, username=None, password=None):
-		# Grab the user supplied info, in case there is a difference (PATCH)
-		self.switch_ip_address = switch_ip_address
-		self.stacki_server_ip = None
+    # you must overload the following function
+    @classmethod
+    def supported(cls):
+        raise NotImplementedError(
+            "supported() should return a list of (Make, Model)'s supported by this class"
+        )
 
-		if switchname:
-			self.switchname = switchname
-		else:
-			self.switchname = 'switch'
+    def __init__(
+        self, switch_ip_address, switchname=None, username=None, password=None
+    ):
+        # Grab the user supplied info, in case there is a difference (PATCH)
+        self.switch_ip_address = switch_ip_address
+        self.stacki_server_ip = None
 
-		if username:
-			self.username = username
-		else:
-			self.username = 'admin'
+        if switchname:
+            self.switchname = switchname
+        else:
+            self.switchname = "switch"
 
-		if password:
-			self.password = password
-		else:
-			self.password = 'admin'
+        if username:
+            self.username = username
+        else:
+            self.username = "admin"
 
-		self.tftpdir = '/tftpboot/pxelinux'
+        if password:
+            self.password = password
+        else:
+            self.password = "admin"
 
-		switchdir = '%s/%s' % (self.tftpdir, self.switchname)
-		if not os.path.exists(switchdir):
-			os.makedirs(switchdir)
+        self.tftpdir = "/tftpboot/pxelinux"
 
-		self.current_config = '%s/current_config' % self.switchname
-		self.new_config = '%s/new_config' % self.switchname
+        switchdir = "%s/%s" % (self.tftpdir, self.switchname)
+        if not os.path.exists(switchdir):
+            os.makedirs(switchdir)
 
-	def __enter__(self):
-		# Entry point of the context manager
-		return self
+        self.current_config = "%s/current_config" % self.switchname
+        self.new_config = "%s/new_config" % self.switchname
 
-	def __exit__(self, *args):
-		try:
-			self.disconnect()
-		except AttributeError:
-			pass
-			## TODO: release file lock here
+    def __enter__(self):
+        # Entry point of the context manager
+        return self
 
+    def __exit__(self, *args):
+        try:
+            self.disconnect()
+        except AttributeError:
+            pass
+            ## TODO: release file lock here

@@ -15,7 +15,7 @@ from stack.exception import ArgUnique
 
 
 class Command(stack.commands.config.host.command):
-	"""
+    """
 	!!! STACKIQ INTERNAL COMMAND ONLY !!!
 
 	Configures host interfaces in the database.
@@ -51,106 +51,127 @@ class Command(stack.commands.config.host.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		(interface, mac, module, flag, sync) = self.fillParams([
-			('interface', None),
-			('mac', None),
-			('module', None),
-			('flag', None),
-			('sync', True) ])
+    def run(self, params, args):
+        (interface, mac, module, flag, sync) = self.fillParams(
+            [
+                ("interface", None),
+                ("mac", None),
+                ("module", None),
+                ("flag", None),
+                ("sync", True),
+            ]
+        )
 
-		hosts = self.getHostnames(args)
+        hosts = self.getHostnames(args)
 
-		sync = self.str2bool(sync)
+        sync = self.str2bool(sync)
 
-		if len(hosts) != 1:
-			raise ArgUnique(self, 'host')
+        if len(hosts) != 1:
+            raise ArgUnique(self, "host")
 
-		host = hosts[0]
+        host = hosts[0]
 
-		discovered_macs = []
+        discovered_macs = []
 
-		if mac:
-			macs = mac.split(',')
-		else:
-			macs = []
+        if mac:
+            macs = mac.split(",")
+        else:
+            macs = []
 
-		if interface:
-			interfaces = interface.split(',')
-		else:
-			interfaces = []
+        if interface:
+            interfaces = interface.split(",")
+        else:
+            interfaces = []
 
-		if module:
-			modules = module.split(',')
-		else:
-			modules = []
+        if module:
+            modules = module.split(",")
+        else:
+            modules = []
 
-		if flag:
-			flags = flag.split(',')
-		else:
-			flags = []
-				
-		for i in range(0, len(macs)):
-			a = (macs[i], )
+        if flag:
+            flags = flag.split(",")
+        else:
+            flags = []
 
-			if len(interfaces) > i:
-				a += (interfaces[i], )
-			else:
-				a += ('', )
+        for i in range(0, len(macs)):
+            a = (macs[i],)
 
-			if len(modules) > i:
-				a += (modules[i], )
-			else:
-				a += ('', )
-			
-			if len(flags) > i:
-				a += (flags[i], )
-			else:
-				a += ('', )
-			
-			discovered_macs.append(a)
+            if len(interfaces) > i:
+                a += (interfaces[i],)
+            else:
+                a += ("",)
 
-		pre_config = self.command('list.host.interface', [host])
-		#
-		# First, assign the correct names to the mac addresses
-		#
-		for (mac, interface, module, ks) in discovered_macs:
-			rows = self.db.select("""mac from networks
-				where mac = %s """, mac)
-			if rows:
-				self.command('set.host.interface.interface',
-					[host, 'interface=%s' % interface, 'mac=%s' % mac])
-			else:
-				continue
+            if len(modules) > i:
+                a += (modules[i],)
+            else:
+                a += ("",)
 
-			if module:
-				self.command('set.host.interface.module',
-					[host, 'interface=%s' % interface, 'module=%s' % module])
+            if len(flags) > i:
+                a += (flags[i],)
+            else:
+                a += ("",)
 
-		#
-		# Add any missing/new interfaces to the database
-		#
-		for (mac, interface, module, ks) in discovered_macs:
-			rows = self.db.select("""mac from networks
-				where mac = %s """, mac)
-			if not rows:
-				# Check if the interface exists without a MAC.
-				r = self.db.select("""device from networks, nodes
+            discovered_macs.append(a)
+
+        pre_config = self.command("list.host.interface", [host])
+        #
+        # First, assign the correct names to the mac addresses
+        #
+        for (mac, interface, module, ks) in discovered_macs:
+            rows = self.db.select(
+                """mac from networks
+				where mac = %s """,
+                mac,
+            )
+            if rows:
+                self.command(
+                    "set.host.interface.interface",
+                    [host, "interface=%s" % interface, "mac=%s" % mac],
+                )
+            else:
+                continue
+
+            if module:
+                self.command(
+                    "set.host.interface.module",
+                    [host, "interface=%s" % interface, "module=%s" % module],
+                )
+
+        #
+        # Add any missing/new interfaces to the database
+        #
+        for (mac, interface, module, ks) in discovered_macs:
+            rows = self.db.select(
+                """mac from networks
+				where mac = %s """,
+                mac,
+            )
+            if not rows:
+                # Check if the interface exists without a MAC.
+                r = self.db.select(
+                    """device from networks, nodes
 					where device = %s and networks.node = nodes.id
-					and nodes.name=%s""", (interface, host))
-				if not r:
-					# If it does not, add the interface before setting MAC addresses
-					self.command('add.host.interface',
-						[host, 'interface=%s' % interface])
-				# Update the MAC address of the interface
-				self.command('set.host.interface.mac', [host, 'interface=%s' % interface, 'mac=%s' % mac ])
-			# Update the kernel module if that information is sent back
-			if module:
-				self.command('set.host.interface.module',
-					[host, 'interface=%s' % interface, 'module=%s' % module])
+					and nodes.name=%s""",
+                    (interface, host),
+                )
+                if not r:
+                    # If it does not, add the interface before setting MAC addresses
+                    self.command(
+                        "add.host.interface", [host, "interface=%s" % interface]
+                    )
+                # Update the MAC address of the interface
+                self.command(
+                    "set.host.interface.mac",
+                    [host, "interface=%s" % interface, "mac=%s" % mac],
+                )
+            # Update the kernel module if that information is sent back
+            if module:
+                self.command(
+                    "set.host.interface.module",
+                    [host, "interface=%s" % interface, "module=%s" % module],
+                )
 
+        post_config = self.command("list.host.interface", [host])
 
-		post_config = self.command('list.host.interface', [host])
-
-		if pre_config != post_config and sync:
-			self.command('sync.config')
+        if pre_config != post_config and sync:
+            self.command("sync.config")

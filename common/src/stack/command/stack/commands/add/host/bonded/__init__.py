@@ -15,7 +15,7 @@ from stack.exception import ArgRequired, ArgUnique, CommandError
 
 
 class Command(stack.commands.add.host.command):
-	"""
+    """
 	Add a channel bonded interface for a host
 
 	<arg type='string' name='host'>
@@ -62,82 +62,89 @@ class Command(stack.commands.add.host.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		host = self.getSingleHost(args)
+    def run(self, params, args):
+        host = self.getSingleHost(args)
 
-		(channel, ifaces, ip, network, name, opts) = self.fillParams([
-			('channel', None, True),
-			('interfaces', None, True),
-			('ip', None, True),
-			('network', None, True),
-			('name', ),
-			('options',) 
-		])
+        (channel, ifaces, ip, network, name, opts) = self.fillParams(
+            [
+                ("channel", None, True),
+                ("interfaces", None, True),
+                ("ip", None, True),
+                ("network", None, True),
+                ("name",),
+                ("options",),
+            ]
+        )
 
-		# if name is not supplied, then give it the host name
-		if not name:
-			name = host
-		
-		# check if the network exists
-		if self.db.count('(ID) from subnets where name=%s', (network,)) == 0:
-			raise CommandError(self, f'network "{network}" does not exist')
+        # if name is not supplied, then give it the host name
+        if not name:
+            name = host
 
-		# If there is a comma, assume comma seperated. Else, assume whitespace.
-		if ',' in ifaces:
-			interfaces = [i.strip() for i in ifaces.split(',')]
-		else:
-			interfaces = [i.strip() for i in ifaces.split()]
-			
-		# Check if the physical interfaces exist. Also check if one of them 
-		# is a default interface. If it is, then the bond becomes the default
-		# interface for the machine.
-		default_if = False
-		for interface in interfaces:
-			rows = self.db.select("""
+        # check if the network exists
+        if self.db.count("(ID) from subnets where name=%s", (network,)) == 0:
+            raise CommandError(self, f'network "{network}" does not exist')
+
+        # If there is a comma, assume comma seperated. Else, assume whitespace.
+        if "," in ifaces:
+            interfaces = [i.strip() for i in ifaces.split(",")]
+        else:
+            interfaces = [i.strip() for i in ifaces.split()]
+
+        # Check if the physical interfaces exist. Also check if one of them
+        # is a default interface. If it is, then the bond becomes the default
+        # interface for the machine.
+        default_if = False
+        for interface in interfaces:
+            rows = self.db.select(
+                """
 				net.main from networks net, nodes n where
 				net.device = %s and n.name = %s	and net.node = n.id
-			""", (interface, host))
+			""",
+                (interface, host),
+            )
 
-			if len(rows) == 0:
-				raise CommandError(self,
-					f'interface "{interface}" does not exist for host "{host}"'
-				)
+            if len(rows) == 0:
+                raise CommandError(
+                    self, f'interface "{interface}" does not exist for host "{host}"'
+                )
 
-			for row in rows:
-				if row[0] == 1:
-					default_if = True
+            for row in rows:
+                if row[0] == 1:
+                    default_if = True
 
-		# add the bonded interface
-		cmd_args = [
-			host,
-			'interface=%s' % channel,
-			'ip=%s' % ip,
-			'module=bonding',
-			'name=%s' % name,
-			'network=%s' % network
-		]
+        # add the bonded interface
+        cmd_args = [
+            host,
+            "interface=%s" % channel,
+            "ip=%s" % ip,
+            "module=bonding",
+            "name=%s" % name,
+            "network=%s" % network,
+        ]
 
-		if default_if:
-			cmd_args.append("default=True")
-		
-		self.command('add.host.interface', cmd_args)
+        if default_if:
+            cmd_args.append("default=True")
 
-		# Set the options for the interface
-		if opts:
-			self.command('set.host.interface.options', [
-				host,
-				'interface=%s' % channel,
-				'options=bonding-opts="%s"' % opts
-			])
-		
-		# clear out all networking info from the physical interfaces and
-		# then associate the interfaces with the bonded channel
-		for i in interfaces:
-			self.command('set.host.interface.network',
-				(host, 'interface=%s' % i, 'network=NULL'))
-			self.command('set.host.interface.ip',
-				(host, 'interface=%s' % i, 'ip=NULL'))
-			self.command('set.host.interface.name',
-				(host, 'interface=%s' % i, 'name=NULL'))
-			self.command('set.host.interface.channel',
-				(host, 'interface=%s' % i, 'channel=%s' % channel))
+        self.command("add.host.interface", cmd_args)
+
+        # Set the options for the interface
+        if opts:
+            self.command(
+                "set.host.interface.options",
+                [host, "interface=%s" % channel, 'options=bonding-opts="%s"' % opts],
+            )
+
+        # clear out all networking info from the physical interfaces and
+        # then associate the interfaces with the bonded channel
+        for i in interfaces:
+            self.command(
+                "set.host.interface.network", (host, "interface=%s" % i, "network=NULL")
+            )
+            self.command("set.host.interface.ip", (host, "interface=%s" % i, "ip=NULL"))
+            self.command(
+                "set.host.interface.name", (host, "interface=%s" % i, "name=NULL")
+            )
+            self.command(
+                "set.host.interface.channel",
+                (host, "interface=%s" % i, "channel=%s" % channel),
+            )

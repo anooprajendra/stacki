@@ -12,15 +12,16 @@
 
 
 import os
-import tempfile
 import shutil
+import string
+import tempfile
+
 import stack
 import stack.commands
-import string
-		
+
 
 class Command(stack.commands.create.command):
-	"""
+    """
 	Create a RedHat or Solaris package from a given directory.  The
 	package will install files in either the same location as the given
 	directory, or a combination of the directory basename and the
@@ -71,47 +72,50 @@ class Command(stack.commands.create.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		dir = None
+    def run(self, params, args):
+        dir = None
 
-		(name, dir, prefix, version,
-			release, rpmextra) = self.fillParams([
-				('name', None, True),
-				('dir', None, True),
-				('prefix',),
-				('version', stack.version),
-				('release', '1'),
-				('rpmextra', 'AutoReqProv: no'),
-			])
+        (name, dir, prefix, version, release, rpmextra) = self.fillParams(
+            [
+                ("name", None, True),
+                ("dir", None, True),
+                ("prefix",),
+                ("version", stack.version),
+                ("release", "1"),
+                ("rpmextra", "AutoReqProv: no"),
+            ]
+        )
 
-		rocksRoot = os.environ['ROCKSBUILD']
+        rocksRoot = os.environ["ROCKSBUILD"]
 
-		if not prefix:
-			prefix = os.path.split(dir)[0]
-		
-		tmp = tempfile.mktemp()
-		os.makedirs(tmp)
-		shutil.copy(os.path.join(rocksRoot, 'etc', 'create-package.mk'),
-			    os.path.join(tmp, 'Makefile'))
-		cwd = os.getcwd()
-		os.chdir(tmp)
+        if not prefix:
+            prefix = os.path.split(dir)[0]
 
-		file = open(os.path.join(tmp, 'version.mk'), 'w')
-		file.write('NAME=%s\n' % name)
-		file.write('VERSION=%s\n' % version)
-		file.write('RELEASE=%s\n' % release)
-		file.write('PREFIX=%s\n' % prefix)
-		file.write('SOURCE_DIRECTORY=%s\n' % dir)
-		file.write('DEST_DIRECTORY=%s\n' % cwd)
+        tmp = tempfile.mktemp()
+        os.makedirs(tmp)
+        shutil.copy(
+            os.path.join(rocksRoot, "etc", "create-package.mk"),
+            os.path.join(tmp, "Makefile"),
+        )
+        cwd = os.getcwd()
+        os.chdir(tmp)
 
-		# Create the RPM.EXTRAS directive that will add
-		# extra information to the specfile
-		rpm_extras = list(map(str.strip, rpmextra.split(',')))
-		rpmextra = '\\\\n'.join(rpm_extras)
-		file.write("RPM.EXTRAS=\"%s\"\n" % rpmextra)
-		file.close()
+        file = open(os.path.join(tmp, "version.mk"), "w")
+        file.write("NAME=%s\n" % name)
+        file.write("VERSION=%s\n" % version)
+        file.write("RELEASE=%s\n" % release)
+        file.write("PREFIX=%s\n" % prefix)
+        file.write("SOURCE_DIRECTORY=%s\n" % dir)
+        file.write("DEST_DIRECTORY=%s\n" % cwd)
 
-		for line in os.popen('make dir2pkg').readlines():
-			self.addText(line)
+        # Create the RPM.EXTRAS directive that will add
+        # extra information to the specfile
+        rpm_extras = list(map(str.strip, rpmextra.split(",")))
+        rpmextra = "\\\\n".join(rpm_extras)
+        file.write('RPM.EXTRAS="%s"\n' % rpmextra)
+        file.close()
 
-		shutil.rmtree(tmp)
+        for line in os.popen("make dir2pkg").readlines():
+            self.addText(line)
+
+        shutil.rmtree(tmp)

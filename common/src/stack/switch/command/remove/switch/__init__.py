@@ -5,14 +5,15 @@
 # @copyright@
 
 import stack.commands
-from stack.exception import CommandError, ArgRequired
+from stack.exception import ArgRequired, CommandError
 
-class command(stack.commands.SwitchArgumentProcessor,
-	      stack.commands.remove.command):
-	pass
+
+class command(stack.commands.SwitchArgumentProcessor, stack.commands.remove.command):
+    pass
+
 
 class Command(command):
-	"""
+    """
 	Remove a host with appliance type 'switch' from the cluster.
 
 	<arg type='string' name='switch'>
@@ -21,11 +22,11 @@ class Command(command):
 
 	"""
 
-	def run(self, params, args):
+    def run(self, params, args):
 
-		if len(args) < 1:
-			raise ArgRequired(self, 'switch')
-		
-		switches = self.getSwitchNames(args)
-		self.delSwitchEntries(switches)
-		self.call('remove.host', switches)
+        if len(args) < 1:
+            raise ArgRequired(self, "switch")
+
+        switches = self.getSwitchNames(args)
+        self.delSwitchEntries(switches)
+        self.call("remove.host", switches)

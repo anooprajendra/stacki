@@ -14,7 +14,7 @@ import stack.commands
 
 
 class Command(stack.commands.list.box.command):
-	"""
+    """
 	List the pallets enabled in each box.
 
 	<arg optional='1' type='string' name='box' repeat='1'>
@@ -26,23 +26,25 @@ class Command(stack.commands.list.box.command):
 	</example>
 	"""
 
-	def run(self, params, args):
-		self.beginOutput()
+    def run(self, params, args):
+        self.beginOutput()
 
-		boxes = self.get_box_names(args)
+        boxes = self.get_box_names(args)
 
-		for box in boxes:
-			rows = self.db.select("""
+        for box in boxes:
+            rows = self.db.select(
+                """
 				r.name, r.arch, r.version, r.rel, r.os
 				from stacks s, rolls r, boxes b
 				where s.roll=r.id and s.box=b.id and b.name=%s
-				""", (box,)
-			)
+				""",
+                (box,),
+            )
 
-			for (roll, arch, version, release, osname) in rows:
-				self.addOutput(box, (roll, arch, version, release, osname))
+            for (roll, arch, version, release, osname) in rows:
+                self.addOutput(box, (roll, arch, version, release, osname))
 
-		self.endOutput(
-			header=['box', 'pallet', 'arch', 'version', 'release', 'os'],
-			trimOwner=False
-		)
+        self.endOutput(
+            header=["box", "pallet", "arch", "version", "release", "os"],
+            trimOwner=False,
+        )

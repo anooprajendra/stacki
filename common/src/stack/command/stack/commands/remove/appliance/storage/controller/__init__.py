@@ -9,7 +9,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.appliance.command):
-	"""
+    """
 	Remove a storage controller configuration for an appliance type.
 
 	<arg type='string' name='appliance' repeat='1' optional='0'>
@@ -32,9 +32,13 @@ class Command(stack.commands.remove.appliance.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'appliance')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "appliance")
 
-		self.command('remove.storage.controller', self._argv + ['scope=appliance'], verbose_errors = False)
-		return self.rc
+        self.command(
+            "remove.storage.controller",
+            self._argv + ["scope=appliance"],
+            verbose_errors=False,
+        )
+        return self.rc

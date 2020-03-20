@@ -9,7 +9,7 @@ from stack.exception import ArgRequired
 
 
 class Command(stack.commands.remove.environment.command):
-	"""
+    """
 	Remove a firewall service rule for an environment.
 	To remove the rule, you must supply the name of the rule.
 
@@ -22,9 +22,11 @@ class Command(stack.commands.remove.environment.command):
 	</param>
 	"""
 
-	def run(self, params, args):
-		if len(args) == 0:
-			raise ArgRequired(self, 'environment')
+    def run(self, params, args):
+        if len(args) == 0:
+            raise ArgRequired(self, "environment")
 
-		self.command('remove.firewall', self._argv + ['scope=environment'], verbose_errors = False)
-		return self.rc
+        self.command(
+            "remove.firewall", self._argv + ["scope=environment"], verbose_errors=False
+        )
+        return self.rc
