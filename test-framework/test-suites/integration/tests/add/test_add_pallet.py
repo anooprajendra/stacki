@@ -426,8 +426,6 @@ class TestAddPallet:
 		result = host.run('wsclient add pallet http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso')
 		assert result.rc == 0
 
-		print(result.stdout)
-
 		assert json.loads(result.stdout) == [
 			{
 				'pallet': 'minimal',
