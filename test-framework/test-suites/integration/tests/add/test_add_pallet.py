@@ -34,8 +34,18 @@ class TestAddPallet:
 
 	def test_minimal(self, host, create_pallet_isos, revert_export_stack_pallets):
 		# Add our minimal pallet
-		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso')
+		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso output-format=json')
 		assert result.rc == 0
+
+		assert json.loads(result.stdout) == [
+			{
+				'pallet': 'minimal',
+				'version': '1.0',
+				'release': 'sles12',
+				'arch': 'x86_64',
+				'os': 'sles'
+			}
+		]
 
 		# Check it made it in as expected
 		result = host.run('stack list pallet minimal output-format=json')
@@ -262,8 +272,18 @@ class TestAddPallet:
 
 	def test_network_iso(self, host, run_pallet_isos_server, revert_export_stack_pallets):
 		# Add the minimal pallet ISO from the network
-		result = host.run('stack add pallet http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso')
+		result = host.run('stack add pallet http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso output-format=json')
 		assert result.rc == 0
+
+		assert json.loads(result.stdout) == [
+			{
+				'pallet': 'minimal',
+				'version': '1.0',
+				'release': 'sles12',
+				'arch': 'x86_64',
+				'os': 'sles'
+			}
+		]
 
 		# Check it made it in as expected
 		result = host.run('stack list pallet minimal output-format=json')
@@ -401,38 +421,6 @@ class TestAddPallet:
 			}
 		]
 
-	def test_add_pallet_output(self, host, create_pallet_isos, revert_export_stack_pallets):
-		# Add our minimal pallet
-		result = host.run(f'stack add pallet {create_pallet_isos}/minimal-1.0-sles12.x86_64.disk1.iso output-format=json')
-		assert result.rc == 0
-
-		assert json.loads(result.stdout) == [
-			{
-				'pallet': 'minimal',
-				'version': '1.0',
-				'release': 'sles12',
-				'arch': 'x86_64',
-				'os': 'sles'
-			}
-		]
-
-	def test_add_pallet_output_network(self, host, run_pallet_isos_server, revert_export_stack_pallets):
-		# Add the minimal pallet ISO from the network
-		result = host.run('stack add pallet http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso output-format=json')
-		assert result.rc == 0
-
-		print(result.stdout)
-
-		assert json.loads(result.stdout) == [
-			{
-				'name': 'minimal',
-				'version': '1.0',
-				'release': 'sles12',
-				'arch': 'x86_64',
-				'os': 'sles'
-			}
-		]
-
 	def test_add_pallet_output_wsclient(self, host, run_pallet_isos_server, revert_export_stack_pallets):
 		# Add the minimal pallet ISO from the network
 		result = host.run('wsclient add pallet http://127.0.0.1:8000/minimal-1.0-sles12.x86_64.disk1.iso')
@@ -442,7 +430,7 @@ class TestAddPallet:
 
 		assert json.loads(result.stdout) == [
 			{
-				'name': 'minimal',
+				'pallet': 'minimal',
 				'version': '1.0',
 				'release': 'sles12',
 				'arch': 'x86_64',
