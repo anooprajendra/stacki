@@ -13,6 +13,9 @@
 import os
 import site
 
+# dynamically get arg processors in the 'stack.' namespace
+from stack.argument_processors import *
+
 site_pkgs_path = [p for p in site.getsitepackages() if p.startswith('/opt/stack/lib/python')][0]
 
 # Needed for use-the-src when symlinking pylib
