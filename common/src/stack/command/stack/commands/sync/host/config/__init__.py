@@ -5,11 +5,11 @@
 # @copyright@
 
 import stack.commands
+from stack.commands import HostArgProcessor
 import stack.util
 
 
-class Command(stack.commands.sync.host.command,
-	stack.commands.HostArgProcessor):
+class Command(HostArgProcessor, stack.commands.sync.host.command):
 	"""
 	!!! Rocks+ Internal Only !!!
 	Generate host specific configuration files

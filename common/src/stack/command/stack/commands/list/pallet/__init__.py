@@ -15,8 +15,7 @@ import stack.commands
 from stack.commands import PalletArgProcessor
 from stack.util import flatten
 
-class command(stack.commands.list.command,
-	      PalletArgProcessor):
+class command(stack.commands.list.command, PalletArgProcessor):
 	pass
 
 class Command(command):

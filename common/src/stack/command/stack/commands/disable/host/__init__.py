@@ -5,8 +5,7 @@
 # @copyright@
 
 import stack.commands.disable
+from stack.commands import HostArgProcessor
 
-
-class command(stack.commands.HostArgProcessor,
-	stack.commands.disable.command):
+class command(HostArgProcessor, stack.commands.disable.command):
 	pass

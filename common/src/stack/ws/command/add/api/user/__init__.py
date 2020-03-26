@@ -6,21 +6,21 @@
 # @copyright@
 #
 
-import os
-import sys
-import stack.django_env
-
-from stack.password import Password
 import base64
 import json
-import stack.commands
-
-from stack.exception import *
+import os
+import sys
 
 from django.contrib.auth.models import User, Group
 
-class Command(stack.commands.Command,
-	stack.commands.HostArgProcessor):
+import stack.django_env
+from stack.password import Password
+import stack.commands
+from stack.commands import HostArgProcessor
+from stack.exception import *
+
+
+class Command(HostArgProcessor, stack.commands.Command):
 	"""
 	Create a user to the REST API.
 	This command will print out a JSON

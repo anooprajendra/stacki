@@ -17,8 +17,7 @@ from stack.commands import PalletArgProcessor
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(PalletArgProcessor,
-	stack.commands.disable.command):
+class Command(PalletArgProcessor, stack.commands.disable.command):
 	"""
 	Disable an available pallet. The pallet must already be copied on the
 	system using the command "stack add pallet".

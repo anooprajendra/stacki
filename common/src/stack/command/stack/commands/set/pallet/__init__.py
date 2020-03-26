@@ -7,6 +7,5 @@
 import stack.commands
 from stack.commands import PalletArgProcessor
 
-class command(stack.commands.set.command,
-	      PalletArgProcessor):
+class command(stack.commands.set.command, PalletArgProcessor):
 	pass

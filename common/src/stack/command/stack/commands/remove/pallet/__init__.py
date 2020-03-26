@@ -22,8 +22,7 @@ import stack.commands
 from stack.commands import PalletArgProcessor
 from stack.exception import ArgRequired
 
-class command(PalletArgProcessor,
-	      stack.commands.remove.command):
+class command(PalletArgProcessor, stack.commands.remove.command):
 	pass
 
 class Command(command):

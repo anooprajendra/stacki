@@ -5,11 +5,11 @@
 # @copyright@
 
 import stack.commands
+from stack.commands import HostArgProcessor
 from stack.exception import ArgUnique
 
 
-class Command(stack.commands.HostArgProcessor,
-	stack.commands.report.command):
+class Command(HostArgProcessor, stack.commands.report.command):
 	"""
 	Output the storage controller configuration for a specific host
 

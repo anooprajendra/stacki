@@ -18,8 +18,7 @@ import stack.commands
 from stack.commands import PalletArgProcessor
 
 
-class Command(PalletArgProcessor,
-	stack.commands.list.command):
+class Command(PalletArgProcessor, stack.commands.list.command):
 	"""
 	List the commands provided by a pallet.
 

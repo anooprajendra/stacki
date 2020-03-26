@@ -5,10 +5,9 @@
 # @copyright@
 
 import stack.commands
+from stack.commansd import NetworkArgProcessor
 
-
-class Command(stack.commands.NetworkArgProcessor,
-	stack.commands.list.environment.command):
+class Command(NetworkArgProcessor, stack.commands.list.environment.command):
 	"""
 	List the firewall rules for a given environment.
 

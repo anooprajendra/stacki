@@ -6,10 +6,10 @@
 
 
 import stack.commands
+from stack.commansd import OSArgProcessor
 
 
-class command(stack.commands.OSArgProcessor, 
-	      stack.commands.list.command):
+class command(OSArgProcessor, stack.commands.list.command):
 	pass
 	
 

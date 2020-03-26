@@ -28,9 +28,8 @@
 #
 
 import stack.commands
+from stack.commands import HostArgProcessor
 
-
-class command(stack.commands.HostArgProcessor,
-	stack.commands.config.command):
+class command(HostArgProcessor, stack.commands.config.command):
 	pass
 

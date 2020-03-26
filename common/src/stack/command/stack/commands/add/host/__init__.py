@@ -20,13 +20,18 @@ from stack.exception import (
 	ArgValue,
 )
 from stack.util import is_valid_hostname
-from stack.commands import BoxArgProcessor
+from stack.commands import (
+	ApplianceArgProcessor,
+	BoxArgProcessor,
+	EnvironmentArgProcessor,
+	HostArgProcessor,
+)
 
 class command(
-	stack.commands.HostArgProcessor,
-	stack.commands.ApplianceArgProcessor,
+	ApplianceArgProcessor,
 	BoxArgProcessor,
-	stack.commands.EnvironmentArgProcessor,
+	EnvironmentArgProcessor,
+	HostArgProcessor,
 	stack.commands.add.command
 ):
 	pass

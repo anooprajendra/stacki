@@ -11,10 +11,9 @@
 # @rocks@
 
 import stack.commands
+from stack.commansd import NetworkArgProcessor
 
-
-class Command(stack.commands.NetworkArgProcessor,
-	stack.commands.list.os.command):
+class Command(NetworkArgProcessor, stack.commands.list.os.command):
 	"""
 	List the firewall rules for an OS.
 

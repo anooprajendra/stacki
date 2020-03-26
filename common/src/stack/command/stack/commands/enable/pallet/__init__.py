@@ -17,8 +17,7 @@ from stack.commands import PalletArgProcessor
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(PalletArgProcessor,
-	stack.commands.enable.command):
+class Command(PalletArgProcessor, stack.commands.enable.command):
 	"""
 	Enable an available pallet. The pallet must already be copied on the
 	system using the command "stack add pallet".
