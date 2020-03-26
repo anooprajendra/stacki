@@ -16,10 +16,10 @@ from stack.exception import CommandError, ArgRequired, ParamError
 from stack.util import flatten
 
 from . import (
-	ApplianceArgProcessor
-	OSArgProcessor
-	EnvironmentArgProcessor
-	HostArgProcessor
+	ApplianceArgProcessor,
+	OSArgProcessor,
+	EnvironmentArgProcessor,
+	HostArgProcessor,
 )
 
 class ScopeArgProcessor(
