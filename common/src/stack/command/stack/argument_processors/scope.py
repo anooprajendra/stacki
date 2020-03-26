@@ -16,17 +16,17 @@ from stack.exception import CommandError, ArgRequired, ParamError
 from stack.util import flatten
 
 from . import (
-	ApplianceArgumentProcessor
-	OSArgumentProcessor
-	EnvironmentArgumentProcessor
-	HostArgumentProcessor
+	ApplianceArgProcessor
+	OSArgProcessor
+	EnvironmentArgProcessor
+	HostArgProcessor
 )
 
-class ScopeArgumentProcessor(
-	ApplianceArgumentProcessor,
-	OSArgumentProcessor,
-	EnvironmentArgumentProcessor,
-	HostArgumentProcessor
+class ScopeArgProcessor(
+	ApplianceArgProcessor,
+	OSArgProcessor,
+	EnvironmentArgProcessor,
+	HostArgProcessor
 ):
 	def getScopeMappings(self, args=None, scope=None):
 		# We will return a list of these

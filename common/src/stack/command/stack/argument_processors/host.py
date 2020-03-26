@@ -17,7 +17,7 @@ from stack.exception import CommandError, ArgRequired, ArgUnique
 from stack.bool import str2bool
 from stack.util import flatten
 
-class HostArgumentProcessor:
+class HostArgProcessor:
 	"""
 	An Interface class to add the ability to process host arguments.
 	"""
