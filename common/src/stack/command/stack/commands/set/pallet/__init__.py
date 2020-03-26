@@ -5,8 +5,8 @@
 # @copyright@
 
 import stack.commands
-from stack.argument_processors.pallet import PalletArgumentProcessor
+from stack.argument_processors.pallet import PalletArgProcessor
 
 class command(stack.commands.set.command,
-	      PalletArgumentProcessor):
+	      PalletArgProcessor):
 	pass

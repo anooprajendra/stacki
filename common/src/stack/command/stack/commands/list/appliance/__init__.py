@@ -13,7 +13,7 @@
 import stack.commands
 
 
-class command(stack.commands.ApplianceArgumentProcessor,
+class command(stack.commands.ApplianceArgProcessor,
 	stack.commands.list.command):
 	pass
 

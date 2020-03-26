@@ -20,7 +20,7 @@ from stack.exception import *
 from django.contrib.auth.models import User, Group
 
 class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+	stack.commands.HostArgProcessor):
 	"""
 	Create a user to the REST API.
 	This command will print out a JSON

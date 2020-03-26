@@ -14,7 +14,7 @@ import stack.commands
 from stack.exception import ArgRequired
 
 
-class command(stack.commands.OSArgumentProcessor,
+class command(stack.commands.OSArgProcessor,
 		stack.commands.remove.command):
 	pass
 

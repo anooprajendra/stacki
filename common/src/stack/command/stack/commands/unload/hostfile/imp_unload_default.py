@@ -10,8 +10,8 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class Implementation(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor, stack.commands.Implementation):	
+class Implementation(stack.commands.ApplianceArgProcessor,
+	stack.commands.HostArgProcessor, stack.commands.Implementation):	
 
 	"""
 	Unload (remove) hosts from the database based on comma-separated

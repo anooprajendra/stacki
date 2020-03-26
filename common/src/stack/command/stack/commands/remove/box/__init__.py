@@ -12,9 +12,9 @@
 
 import stack.commands
 from stack.exception import ArgRequired, CommandError
-from stack.argument_processors.box import BoxArgumentProcessor
+from stack.argument_processors.box import BoxArgProcessor
 
-class Command(BoxArgumentProcessor,
+class Command(BoxArgProcessor,
 	stack.commands.remove.command):
 	"""
 	Remove a box specification from the database.

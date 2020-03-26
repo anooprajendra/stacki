@@ -36,7 +36,7 @@ filename = """	if option client-arch = 00:07 {
 	}"""
 
 
-class Command(stack.commands.HostArgumentProcessor,
+class Command(stack.commands.HostArgProcessor,
 	stack.commands.report.command):
 	"""
 	Output the DHCP server configuration file.

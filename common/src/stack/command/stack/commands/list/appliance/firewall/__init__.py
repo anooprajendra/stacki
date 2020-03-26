@@ -13,7 +13,7 @@
 import stack.commands
 
 
-class Command(stack.commands.NetworkArgumentProcessor,
+class Command(stack.commands.NetworkArgProcessor,
 	stack.commands.list.appliance.command):
 	"""
 	List the firewall rules for a given appliance type.

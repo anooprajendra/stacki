@@ -13,7 +13,7 @@
 import stack.commands
 
 
-class Command(stack.commands.NetworkArgumentProcessor,
+class Command(stack.commands.NetworkArgProcessor,
 	stack.commands.list.host.command):
 	"""
 	List the current firewall rules for the named hosts.

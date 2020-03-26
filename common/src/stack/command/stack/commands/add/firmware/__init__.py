@@ -11,12 +11,12 @@
 # @rocks@
 
 import stack.commands
-from stack.argument_processors.firmware import FirmwareArgumentProcessor
+from stack.argument_processors.firmware import FirmwareArgProcessor
 
-class command(stack.commands.add.command, FirmwareArgumentProcessor):
+class command(stack.commands.add.command, FirmwareArgProcessor):
 	pass
 
-class Command(command, stack.commands.HostArgumentProcessor):
+class Command(command, stack.commands.HostArgProcessor):
 	"""
 	Adds a firmware image to stacki.
 

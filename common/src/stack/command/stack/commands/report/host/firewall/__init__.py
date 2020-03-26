@@ -15,7 +15,7 @@ from collections import defaultdict
 import stack.commands
 
 
-class Command(stack.commands.HostArgumentProcessor,
+class Command(stack.commands.HostArgProcessor,
 	stack.commands.report.command):
 	"""
 	Create a report that outputs the firewall rules for a host.

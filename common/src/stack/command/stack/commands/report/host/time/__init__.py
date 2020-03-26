@@ -30,8 +30,8 @@ from stack.exception import *
 # 6. If Stacki shouldn't be managing time at all, then the time.protocol attribute can
 #    be unset, and the admin can manage the time by themselves
 
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.NetworkArgumentProcessor,
+class Command(stack.commands.HostArgProcessor,
+	stack.commands.NetworkArgProcessor,
 	stack.commands.report.command):
 	"""
 	Create a time configuration report (NTP or chrony).

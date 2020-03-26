@@ -7,5 +7,5 @@
 import stack.commands
 
 
-class command(stack.commands.OSArgumentProcessor, stack.commands.add.command):
+class command(stack.commands.OSArgProcessor, stack.commands.add.command):
 	pass

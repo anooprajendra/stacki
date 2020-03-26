@@ -13,10 +13,10 @@
 #
 
 import stack.commands
-from stack.argument_processors.box import BoxArgumentProcessor
+from stack.argument_processors.box import BoxArgProcessor
 
-class Command(stack.commands.HostArgumentProcessor,
-	BoxArgumentProcessor, stack.commands.report.command):
+class Command(stack.commands.HostArgProcessor,
+	BoxArgProcessor, stack.commands.report.command):
 	"""
 	Create a report that describes the repository configuration file
 	that should be put on hosts.

@@ -9,10 +9,10 @@
 import os
 import hashlib
 import stack.commands
-from stack.argument_processors.box import BoxArgumentProcessor
+from stack.argument_processors.box import BoxArgProcessor
 
 class Command(stack.commands.list.host.command,
-	BoxArgumentProcessor):
+	BoxArgProcessor):
 	"""
 	Calculate and list the MD5 hashes of a host's:
 

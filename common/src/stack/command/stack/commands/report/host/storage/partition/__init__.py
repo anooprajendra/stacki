@@ -8,7 +8,7 @@ import stack.commands
 from stack.exception import ArgUnique
 
 
-class Command(stack.commands.HostArgumentProcessor, stack.commands.report.command):
+class Command(stack.commands.HostArgProcessor, stack.commands.report.command):
 	"""
 	Output the storage partition configuration for a specific host
 

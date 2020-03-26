@@ -8,7 +8,7 @@ from stack.exception import ArgRequired, ArgUnique, ParamValue, CommandError
 import stack.commands
 
 
-class command(stack.commands.set.command, stack.commands.OSArgumentProcessor):
+class command(stack.commands.set.command, stack.commands.OSArgProcessor):
 	def getBootActionTypeOS(self, params, args):
 		if not len(args):
 			raise ArgRequired(self, 'action')

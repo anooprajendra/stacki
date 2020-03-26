@@ -9,7 +9,7 @@ import stack.util
 
 
 class Command(stack.commands.sync.host.command,
-	stack.commands.HostArgumentProcessor):
+	stack.commands.HostArgProcessor):
 	"""
 	!!! Rocks+ Internal Only !!!
 	Generate host specific configuration files

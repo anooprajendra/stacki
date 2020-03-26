@@ -8,7 +8,7 @@ import stack.commands
 from stack.exception import ArgError, ParamValue
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command):
+class Command(stack.commands.ScopeArgProcessor, stack.commands.list.command):
 	"""
 	List the global storage controller configuration.
 

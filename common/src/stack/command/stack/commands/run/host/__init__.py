@@ -106,7 +106,7 @@ class Parallel(threading.Thread):
 		return
 
 class command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+	stack.commands.HostArgProcessor):
 	pass
 
 

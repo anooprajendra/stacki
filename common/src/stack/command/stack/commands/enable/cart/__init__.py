@@ -9,7 +9,7 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.CartArgumentProcessor,
+class Command(stack.commands.CartArgProcessor,
 	stack.commands.enable.command):
 	"""
 	Enable an available cart. The cart must already be initialized on the

@@ -9,7 +9,7 @@
 import stack.commands
 
 
-class Plugin(stack.commands.NetworkArgumentProcessor, stack.commands.Plugin):
+class Plugin(stack.commands.NetworkArgProcessor, stack.commands.Plugin):
 
 	def provides(self):
 		return 'default'

@@ -10,7 +10,7 @@ from stack.exception import ArgRequired, ParamValue, CommandError
 
 class Command(
 	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
+	stack.commands.SwitchArgProcessor,
 ):
 	"""
 	Adds a partition for an Infiniband switch to the Stacki database.

@@ -9,7 +9,7 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class Implementation(stack.commands.ApplianceArgumentProcessor, stack.commands.Implementation):
+class Implementation(stack.commands.ApplianceArgProcessor, stack.commands.Implementation):
 	"""
 	Put storage controller configuration into the database based on
 	a comma-separated formatted file.

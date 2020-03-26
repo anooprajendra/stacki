@@ -8,7 +8,7 @@
 import stack.commands
 
 
-class command(stack.commands.OSArgumentProcessor, 
+class command(stack.commands.OSArgProcessor, 
 	      stack.commands.list.command):
 	pass
 	

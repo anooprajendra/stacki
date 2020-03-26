@@ -7,7 +7,7 @@
 import stack.commands
 from stack.exception import ArgRequired
 
-class command(stack.commands.HostArgumentProcessor, stack.commands.create.command):
+class command(stack.commands.HostArgProcessor, stack.commands.create.command):
 	pass
 
 class Command(command):

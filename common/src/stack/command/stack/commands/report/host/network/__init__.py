@@ -13,7 +13,7 @@
 import stack.commands
 
 
-class Command(stack.commands.HostArgumentProcessor,
+class Command(stack.commands.HostArgProcessor,
 	stack.commands.report.command):
 	"""
 	Outputs the network configuration file for a host (on RHEL-based

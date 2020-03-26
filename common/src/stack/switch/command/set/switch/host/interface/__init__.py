@@ -10,8 +10,8 @@ from stack.exception import (
 )
 
 
-class Command(stack.commands.SwitchArgumentProcessor,
-		stack.commands.HostArgumentProcessor,
+class Command(stack.commands.SwitchArgProcessor,
+		stack.commands.HostArgProcessor,
 		stack.commands.set.switch.host.command):
 	"""
 	In the switch to host relation that Stacki keeps in its database, this command

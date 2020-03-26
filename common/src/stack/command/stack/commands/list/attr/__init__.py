@@ -22,7 +22,7 @@ from stack.exception import CommandError
 from stack.util import flatten
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.list.command):
+class Command(stack.commands.ScopeArgProcessor, stack.commands.list.command):
 	"""
 	Lists the set of global attributes.
 

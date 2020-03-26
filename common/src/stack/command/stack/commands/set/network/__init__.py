@@ -9,7 +9,7 @@ from stack.exception import ArgRequired, CommandError
 
 
 class command(stack.commands.set.command,
-	      stack.commands.NetworkArgumentProcessor):
+	      stack.commands.NetworkArgProcessor):
 
 	def fillSetNetworkParams(self, args, paramName):
 		if len(args) == 0:

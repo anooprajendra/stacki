@@ -10,8 +10,8 @@ from stack.exception import ArgUnique, CommandError
 from stack.switch.m7800 import SwitchMellanoxM7800
 
 
-class Command(stack.commands.SwitchArgumentProcessor,
-		stack.commands.HostArgumentProcessor,
+class Command(stack.commands.SwitchArgProcessor,
+		stack.commands.HostArgProcessor,
 		stack.commands.set.command):
 	"""
 	Enable the subnet manager for the given switch.

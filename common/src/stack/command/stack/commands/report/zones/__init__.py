@@ -43,7 +43,7 @@ preamble_template = """$TTL 3D
 
 
 class Command(stack.commands.report.command,
-	stack.commands.HostArgumentProcessor):
+	stack.commands.HostArgProcessor):
 	"""
 	Prints out all the named zone.conf and reverse-zone.conf files in XML.
 	To actually create these files, run the output of the command through

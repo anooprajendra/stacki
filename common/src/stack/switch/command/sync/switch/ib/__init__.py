@@ -18,7 +18,7 @@ def enforce_subnet_manager(command_handle, switches):
 		msg = 'The following switches are either non-infiniband or are not subnet managers: '
 		raise CommandError(command_handle, msg + f'{", ".join(bad_switches)}')
 
-class command(stack.commands.SwitchArgumentProcessor,
+class command(stack.commands.SwitchArgProcessor,
 	stack.commands.sync.command):
 		pass
 

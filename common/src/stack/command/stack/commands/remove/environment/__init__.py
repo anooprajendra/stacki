@@ -8,7 +8,7 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class command(stack.commands.EnvironmentArgumentProcessor,
+class command(stack.commands.EnvironmentArgProcessor,
 	      stack.commands.remove.command):
 	pass
 

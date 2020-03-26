@@ -17,7 +17,7 @@ import os.path
 import shlex
 
 
-class command(stack.commands.HostArgumentProcessor,
+class command(stack.commands.HostArgProcessor,
 	      stack.commands.report.command):
 	pass
 

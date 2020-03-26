@@ -14,14 +14,14 @@ import sys
 import subprocess
 
 import stack.commands
-from stack.argument_processors.pallet import PalletArgumentProcessor
+from stack.argument_processors.pallet import PalletArgProcessor
 from stack.exception import ArgRequired, CommandError
-from stack.argument_processors.box import BoxArgumentProcessor
+from stack.argument_processors.box import BoxArgProcessor
 
 class Command(
 	stack.commands.run.command,
-	PalletArgumentProcessor,
-	BoxArgumentProcessor
+	PalletArgProcessor,
+	BoxArgProcessor
 ):
 	"""
 	Installs a pallet on the fly

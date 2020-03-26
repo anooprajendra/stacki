@@ -15,7 +15,7 @@ import stack.commands
 from stack.exception import ArgUnique, CommandError
 
 
-class command(stack.commands.ApplianceArgumentProcessor,
+class command(stack.commands.ApplianceArgProcessor,
 	stack.commands.add.command):
 	pass
 

@@ -11,7 +11,7 @@ from stack.exception import ArgUnique, ParamValue, CommandError
 
 class Command(
 	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
+	stack.commands.SwitchArgProcessor,
 ):
 	"""
 	Remove memberships from infiniband partitions from the Stacki database.

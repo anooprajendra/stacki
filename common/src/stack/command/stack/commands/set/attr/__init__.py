@@ -13,7 +13,7 @@ import stack.commands
 from stack.exception import CommandError, ArgRequired
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.set.command):
+class Command(stack.commands.ScopeArgProcessor, stack.commands.set.command):
 	"""
 	Sets a global attribute for all nodes
 

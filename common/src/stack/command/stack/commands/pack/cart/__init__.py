@@ -10,7 +10,7 @@ import stack.commands
 from stack.exception import *
 
 
-class Command(stack.commands.CartArgumentProcessor,
+class Command(stack.commands.CartArgProcessor,
 	stack.commands.pack.command):
 	"""
 	Pack a cart into a compressed file.

@@ -10,7 +10,7 @@ from stack.exception import ArgUnique, CommandError, ParamValue
 
 class Command(
 	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
+	stack.commands.SwitchArgProcessor,
 ):
 	"""
 	Add members to an infiniband partition in the Stacki database for one or

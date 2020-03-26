@@ -7,6 +7,6 @@
 import stack.commands.enable
 
 
-class command(stack.commands.HostArgumentProcessor,
+class command(stack.commands.HostArgProcessor,
 	stack.commands.enable.command):
 	pass

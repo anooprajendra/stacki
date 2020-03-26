@@ -11,7 +11,7 @@ import json
 
 
 class Command(stack.commands.dump.command,
-	      stack.commands.OSArgumentProcessor):
+	      stack.commands.OSArgProcessor):
 	"""
 	Dump the contents of the stacki database as json.
 

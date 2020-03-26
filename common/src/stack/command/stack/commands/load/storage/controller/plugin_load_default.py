@@ -10,7 +10,7 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class Plugin(stack.commands.ApplianceArgumentProcessor, stack.commands.Plugin):
+class Plugin(stack.commands.ApplianceArgProcessor, stack.commands.Plugin):
 
 	def provides(self):
 		return 'default'

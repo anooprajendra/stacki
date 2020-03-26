@@ -9,7 +9,7 @@ from stack.exception import CommandError, ParamRequired, ParamType, ParamValue, 
 from stack.util import flatten
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.remove.command):
+class Command(stack.commands.ScopeArgProcessor, stack.commands.remove.command):
 	"""
 	Remove a storage controller configuration from the database.
 

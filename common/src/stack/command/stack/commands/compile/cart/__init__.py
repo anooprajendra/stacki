@@ -13,7 +13,7 @@ import stack.commands
 import stack.lock
 
 
-class Command(stack.commands.CartArgumentProcessor,
+class Command(stack.commands.CartArgProcessor,
 	stack.commands.compile.command):
 	"""
 	Compile a repo inside the cart so it can be used by backend nodes

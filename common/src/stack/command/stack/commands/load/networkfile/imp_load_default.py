@@ -16,7 +16,7 @@ from ipaddress import IPv4Address, IPv4Network, IPv6Network, IPv6Address
 from stack.exception import CommandError
 
 
-class Implementation(stack.commands.NetworkArgumentProcessor,
+class Implementation(stack.commands.NetworkArgProcessor,
 	stack.commands.Implementation):	
 
 	"""

@@ -9,8 +9,8 @@
 import stack.commands
 
 
-class Plugin(stack.commands.ApplianceArgumentProcessor, 
-	     stack.commands.HostArgumentProcessor,
+class Plugin(stack.commands.ApplianceArgProcessor, 
+	     stack.commands.HostArgProcessor,
 	     stack.commands.Plugin):
 
 	def provides(self):

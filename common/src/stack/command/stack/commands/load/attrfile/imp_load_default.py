@@ -9,8 +9,8 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class Implementation(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor, stack.commands.Implementation):
+class Implementation(stack.commands.ApplianceArgProcessor,
+	stack.commands.HostArgProcessor, stack.commands.Implementation):
 	"""
 	Create a dictionary of attributes based on comma-separated formatted
 	file.

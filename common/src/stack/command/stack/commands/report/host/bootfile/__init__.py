@@ -10,7 +10,7 @@ from stack.exception import CommandError
 
 
 class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+	stack.commands.HostArgProcessor):
 	"""
 	Output the PXE file for a host
 	<arg name="host" type="string" repeat="1">

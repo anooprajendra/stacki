@@ -9,7 +9,7 @@ from stack.exception import CommandError
 
 
 class Command(stack.commands.set.host.command,
-	      stack.commands.ApplianceArgumentProcessor):
+	      stack.commands.ApplianceArgProcessor):
 	"""
 	Set the Appliance for a list of hosts.
 

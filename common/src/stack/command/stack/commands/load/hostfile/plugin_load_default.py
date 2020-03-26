@@ -12,7 +12,7 @@ from stack.exception import CommandError
 from stack.bool import str2bool
 
 
-class Plugin(stack.commands.HostArgumentProcessor, stack.commands.Plugin):
+class Plugin(stack.commands.HostArgProcessor, stack.commands.Plugin):
 
 	def provides(self):
 		return 'default'

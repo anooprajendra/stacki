@@ -11,7 +11,7 @@ from stack.exception import ArgRequired, ParamValue, CommandError
 
 class Command(
 	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
+	stack.commands.SwitchArgProcessor,
 ):
 	"""
 	Set membership state on an infiniband partition in the Stacki database for

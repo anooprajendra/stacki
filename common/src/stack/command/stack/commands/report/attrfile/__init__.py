@@ -12,7 +12,7 @@ import stack.commands
 
 
 class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+	stack.commands.HostArgProcessor):
 	"""
 	This command outputs all the attributes
 	of a system in a CSV format.

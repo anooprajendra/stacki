@@ -20,10 +20,10 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 from xml.sax import make_parser
 from xml.sax import saxutils
-from stack.argument_processors.box import BoxArgumentProcessor
+from stack.argument_processors.box import BoxArgProcessor
 
 class Command(stack.commands.list.command,
-	      BoxArgumentProcessor):
+	      BoxArgProcessor):
 	"""
 	Lists the XML configuration information for a host. The graph
 	traversal for the XML output is rooted at the XML node file

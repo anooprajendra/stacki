@@ -8,7 +8,7 @@ import stack.commands
 from stack.exception import CommandError, ParamRequired, ParamType, ParamValue, ParamError
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command):
+class Command(stack.commands.ScopeArgProcessor, stack.commands.add.command):
 	"""
 	Add a global storage controller configuration for the all hosts in the cluster.
 

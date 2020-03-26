@@ -21,7 +21,7 @@ timeout	= 30
 
 
 class command(stack.commands.sync.command,
-	stack.commands.HostArgumentProcessor):
+	stack.commands.HostArgProcessor):
 	pass
 
 class Parallel(threading.Thread):

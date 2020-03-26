@@ -8,9 +8,9 @@ import stack.commands
 import stack.util
 from stack.exception import CommandError
 
-class command(stack.commands.SwitchArgumentProcessor,
+class command(stack.commands.SwitchArgProcessor,
 	      stack.commands.list.command,
-	      stack.commands.HostArgumentProcessor):
+	      stack.commands.HostArgProcessor):
 	pass
 
 class Command(command):

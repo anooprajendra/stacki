@@ -14,7 +14,7 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.NetworkArgumentProcessor,
+class Command(stack.commands.NetworkArgProcessor,
 	stack.commands.remove.command):
 	"""
 	Remove network definition from the system. If there are still nodes

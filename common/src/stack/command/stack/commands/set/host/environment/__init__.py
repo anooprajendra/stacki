@@ -8,7 +8,7 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class Command(stack.commands.EnvironmentArgumentProcessor,
+class Command(stack.commands.EnvironmentArgProcessor,
 	      stack.commands.set.host.command):
 	"""
 	Specifies an Environment for the gives hosts.  Environments are

@@ -7,7 +7,7 @@
 import stack.commands
 
 
-class Command(stack.commands.CartArgumentProcessor,
+class Command(stack.commands.CartArgProcessor,
 	stack.commands.list.command):
 	"""
 	List the status of available carts.

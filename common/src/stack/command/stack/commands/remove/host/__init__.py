@@ -14,7 +14,7 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class command(stack.commands.HostArgumentProcessor,
+class command(stack.commands.HostArgProcessor,
 		stack.commands.remove.command):
 	pass
 

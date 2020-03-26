@@ -13,7 +13,7 @@ from stack.exception import CommandError
 
 
 class Command(stack.commands.load.command,
-	       stack.commands.HostArgumentProcessor):
+	       stack.commands.HostArgProcessor):
 	"""
 	Load attributes into the database. The attribute csv file needs to have a mandatory 'target'
 	column with hostnames. There are 2 ways of specifying attribute name, value:

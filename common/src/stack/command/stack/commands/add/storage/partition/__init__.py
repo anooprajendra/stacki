@@ -8,7 +8,7 @@ import stack.commands
 from stack.exception import CommandError, ParamRequired, ParamType, ParamValue
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command):
+class Command(stack.commands.ScopeArgProcessor, stack.commands.add.command):
 	"""
 	Add a global storage partition configuration for the all hosts in the cluster.
 

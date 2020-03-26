@@ -11,7 +11,7 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class Command(stack.commands.load.command, stack.commands.HostArgumentProcessor):
+class Command(stack.commands.load.command, stack.commands.HostArgProcessor):
 	"""
 	Take rows from a spreadsheet that describe how a host's disk partitions
 	should be configured and then place those values into the database.

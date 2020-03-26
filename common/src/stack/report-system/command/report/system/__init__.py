@@ -15,7 +15,7 @@ import os
 import pathlib
 
 class Command(stack.commands.Command,
-	stack.commands.HostArgumentProcessor):
+	stack.commands.HostArgProcessor):
 	"""
 	<arg type='string' name='options' repeat='1'>
 	Zero or more options to pass to pytest.

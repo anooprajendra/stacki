@@ -7,5 +7,5 @@
 import stack.commands
 
 
-class command(stack.commands.ApplianceArgumentProcessor, stack.commands.set.command):
+class command(stack.commands.ApplianceArgProcessor, stack.commands.set.command):
 	pass

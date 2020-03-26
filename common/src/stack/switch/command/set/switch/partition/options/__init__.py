@@ -11,7 +11,7 @@ from stack.exception import ArgRequired, ParamValue, CommandError
 
 class Command(
 	stack.commands.Command,
-	stack.commands.SwitchArgumentProcessor,
+	stack.commands.SwitchArgProcessor,
 ):
 	"""
 	Sets the infiniband partition flags in the Stacki database.

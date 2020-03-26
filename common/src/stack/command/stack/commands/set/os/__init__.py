@@ -25,5 +25,5 @@
 import stack.commands
 
 
-class command(stack.commands.OSArgumentProcessor, stack.commands.set.command):
+class command(stack.commands.OSArgProcessor, stack.commands.set.command):
 	pass

@@ -24,7 +24,7 @@ try:
 except ImportError:
         pass
 
-class Command(stack.commands.CartArgumentProcessor,
+class Command(stack.commands.CartArgProcessor,
 	stack.commands.add.command):
 	"""
 	Add a cart. Files to download are concatenated

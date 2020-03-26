@@ -11,8 +11,8 @@ from stack.exception import CommandError
 
 
 class Plugin(
-	stack.commands.OSArgumentProcessor,
-	stack.commands.ApplianceArgumentProcessor,
+	stack.commands.OSArgProcessor,
+	stack.commands.ApplianceArgProcessor,
 	stack.commands.Plugin
 ):
 	"""

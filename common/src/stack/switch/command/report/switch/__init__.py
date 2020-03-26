@@ -8,7 +8,7 @@
 import re
 import stack.commands
 
-class command(stack.commands.HostArgumentProcessor,
+class command(stack.commands.HostArgProcessor,
 	stack.commands.report.command,
 	stack.commands.DatabaseConnection):
 	pass

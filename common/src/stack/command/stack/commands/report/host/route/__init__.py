@@ -14,7 +14,7 @@
 import stack.commands
 
 
-class Command(stack.commands.HostArgumentProcessor,
+class Command(stack.commands.HostArgProcessor,
 	stack.commands.report.command):
 	"""
 	Create a report that contains the static routes for a host.

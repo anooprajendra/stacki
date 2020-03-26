@@ -13,7 +13,7 @@
 import stack.commands
 
 
-class Command(stack.commands.NetworkArgumentProcessor,
+class Command(stack.commands.NetworkArgProcessor,
 	stack.commands.list.os.command):
 	"""
 	List the firewall rules for an OS.

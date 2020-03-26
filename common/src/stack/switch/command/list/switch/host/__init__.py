@@ -13,7 +13,7 @@
 import stack.commands
 
 
-class command(stack.commands.SwitchArgumentProcessor,
+class command(stack.commands.SwitchArgProcessor,
 	stack.commands.list.command):
 	pass
 	

@@ -8,7 +8,7 @@ import stack.commands
 import stack.util
 from stack.bool import str2bool
 
-class command(stack.commands.SwitchArgumentProcessor,
+class command(stack.commands.SwitchArgProcessor,
 	stack.commands.list.command):
 	pass
 

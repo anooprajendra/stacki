@@ -12,11 +12,11 @@
 
 
 import stack.commands
-from stack.argument_processors.pallet import PalletArgumentProcessor
+from stack.argument_processors.pallet import PalletArgProcessor
 from stack.util import flatten
 
 class command(stack.commands.list.command,
-	      PalletArgumentProcessor):
+	      PalletArgProcessor):
 	pass
 
 class Command(command):

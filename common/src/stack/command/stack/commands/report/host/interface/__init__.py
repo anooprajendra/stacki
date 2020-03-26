@@ -14,8 +14,8 @@ import re
 import stack.commands
 
 
-class Command(stack.commands.HostArgumentProcessor,
-	stack.commands.SwitchArgumentProcessor,
+class Command(stack.commands.HostArgProcessor,
+	stack.commands.SwitchArgProcessor,
 	stack.commands.report.command):
 	"""
 	Output the network configuration file for a host's interface.

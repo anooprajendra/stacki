@@ -7,7 +7,7 @@
 import stack.commands
 
 
-class command(stack.commands.EnvironmentArgumentProcessor,
+class command(stack.commands.EnvironmentArgProcessor,
 	stack.commands.list.command):
 	pass
 

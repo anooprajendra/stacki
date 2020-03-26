@@ -14,7 +14,7 @@ import stack.commands
 from stack.exception import CommandError
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.remove.command):
+class Command(stack.commands.ScopeArgProcessor, stack.commands.remove.command):
 	"""
 	Remove a global firewall rule. To remove a rule, you must supply
 	the name of the rule.

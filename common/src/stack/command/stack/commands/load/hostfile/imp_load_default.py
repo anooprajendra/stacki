@@ -14,12 +14,12 @@ import stack.csv
 import stack.commands
 from stack.bool import str2bool
 from stack.exception import CommandError
-from stack.argument_processors.box import BoxArgumentProcessor
+from stack.argument_processors.box import BoxArgProcessor
 
-class Implementation(stack.commands.ApplianceArgumentProcessor,
-	stack.commands.HostArgumentProcessor,
-	stack.commands.NetworkArgumentProcessor,
-	BoxArgumentProcessor,
+class Implementation(stack.commands.ApplianceArgProcessor,
+	stack.commands.HostArgProcessor,
+	stack.commands.NetworkArgProcessor,
+	BoxArgProcessor,
 	stack.commands.Implementation):
 
 	"""

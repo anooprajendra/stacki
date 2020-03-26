@@ -9,7 +9,7 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 
 
-class Command(stack.commands.CartArgumentProcessor,
+class Command(stack.commands.CartArgProcessor,
 	stack.commands.disable.command):
 	"""
 	Disables a cart. The cart must already be copied on the

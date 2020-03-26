@@ -9,7 +9,7 @@ import csv
 from io import StringIO
 
 
-class Command(stack.commands.Command, stack.commands.HostArgumentProcessor):
+class Command(stack.commands.Command, stack.commands.HostArgProcessor):
 	"""
 	Outputs a network file in CSV format.
 	<dummy />

@@ -14,7 +14,7 @@ from stack.exception import CommandError
 
 
 class Command(stack.commands.load.command,
-		stack.commands.NetworkArgumentProcessor):
+		stack.commands.NetworkArgProcessor):
 	"""
 	Take rows from a spreadsheet that describe the logical networks that
 	should be configured and then place those values into the database.

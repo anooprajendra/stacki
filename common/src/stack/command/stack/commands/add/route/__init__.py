@@ -15,7 +15,7 @@ from stack.exception import CommandError
 from stack.util import blank_str_to_None
 
 
-class Command(stack.commands.ScopeArgumentProcessor, stack.commands.add.command):
+class Command(stack.commands.ScopeArgProcessor, stack.commands.add.command):
 	"""
 	Add a route for all hosts in the cluster
 

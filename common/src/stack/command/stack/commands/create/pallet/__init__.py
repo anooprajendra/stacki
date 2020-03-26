@@ -729,7 +729,7 @@ class GitRollBuilder(Builder):
 
 
 class Command(stack.commands.create.command,
-		stack.commands.HostArgumentProcessor):
+		stack.commands.HostArgProcessor):
 
 	"""
 	Create a pallet.  You may specify either a single XML file or git URL 

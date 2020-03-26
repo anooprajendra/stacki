@@ -9,7 +9,7 @@ import stack.util
 import subprocess
 from stack.exception import CommandError
 
-class command(stack.commands.SwitchArgumentProcessor,
+class command(stack.commands.SwitchArgProcessor,
 	stack.commands.sync.command):
 		pass
 
