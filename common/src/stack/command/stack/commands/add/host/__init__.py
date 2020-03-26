@@ -20,7 +20,7 @@ from stack.exception import (
 	ArgValue,
 )
 from stack.util import is_valid_hostname
-from stack.argument_processors.box import BoxArgProcessor
+from stack.commands import BoxArgProcessor
 
 class command(
 	stack.commands.HostArgProcessor,

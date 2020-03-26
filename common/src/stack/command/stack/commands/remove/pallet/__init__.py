@@ -19,7 +19,7 @@ import pathlib
 import shutil
 
 import stack.commands
-from stack.argument_processors.pallet import PalletArgProcessor
+from stack.commands import PalletArgProcessor
 from stack.exception import ArgRequired
 
 class command(PalletArgProcessor,

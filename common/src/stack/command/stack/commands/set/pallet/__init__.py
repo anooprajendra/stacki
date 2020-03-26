@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-from stack.argument_processors.pallet import PalletArgProcessor
+from stack.commands import PalletArgProcessor
 
 class command(stack.commands.set.command,
 	      PalletArgProcessor):

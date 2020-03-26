@@ -12,7 +12,7 @@
 
 
 import stack.commands
-from stack.argument_processors.pallet import PalletArgProcessor
+from stack.commands import PalletArgProcessor
 from stack.util import flatten
 
 class command(stack.commands.list.command,

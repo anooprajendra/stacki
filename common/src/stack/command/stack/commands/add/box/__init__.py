@@ -13,7 +13,7 @@
 import stack
 import stack.commands
 from stack.exception import ArgUnique, CommandError, ArgNotFound
-from stack.argument_processors.box import BoxArgProcessor
+from stack.commands import BoxArgProcessor
 
 class Command(BoxArgProcessor,
 	stack.commands.OSArgProcessor,

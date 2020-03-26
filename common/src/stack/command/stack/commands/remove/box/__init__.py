@@ -12,7 +12,7 @@
 
 import stack.commands
 from stack.exception import ArgRequired, CommandError
-from stack.argument_processors.box import BoxArgProcessor
+from stack.commands import BoxArgProcessor
 
 class Command(BoxArgProcessor,
 	stack.commands.remove.command):

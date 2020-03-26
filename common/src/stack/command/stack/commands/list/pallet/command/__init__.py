@@ -15,7 +15,7 @@ import importlib
 import pathlib
 
 import stack.commands
-from stack.argument_processors.pallet import PalletArgProcessor
+from stack.commands import PalletArgProcessor
 
 
 class Command(PalletArgProcessor,

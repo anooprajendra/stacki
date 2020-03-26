@@ -11,7 +11,7 @@ from dataclasses import make_dataclass
 import itertools
 import stack.commands
 import stack.firmware
-from stack.argument_processors.firmware import FirmwareArgProcessor
+from stack.commands import FirmwareArgProcessor
 
 class Command(stack.commands.sync.host.command, FirmwareArgProcessor):
 	"""

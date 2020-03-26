@@ -20,7 +20,7 @@ import stack.commands
 from stack.exception import ArgRequired, CommandError
 from xml.sax import make_parser
 from xml.sax import saxutils
-from stack.argument_processors.box import BoxArgProcessor
+from stack.commands import BoxArgProcessor
 
 class Command(stack.commands.list.command,
 	      BoxArgProcessor):

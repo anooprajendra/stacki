@@ -6,7 +6,7 @@
 
 import fnmatch
 import stack.commands
-from stack.argument_processors.pallet import PalletArgProcessor
+from stack.commands import PalletArgProcessor
 
 class Command(stack.commands.list.command,
 	      PalletArgProcessor):

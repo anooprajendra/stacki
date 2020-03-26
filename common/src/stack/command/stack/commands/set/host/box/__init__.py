@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-from stack.argument_processors.box import BoxArgProcessor
+from stack.commands import BoxArgProcessor
 
 class Command(stack.commands.set.host.command,
 	      BoxArgProcessor):

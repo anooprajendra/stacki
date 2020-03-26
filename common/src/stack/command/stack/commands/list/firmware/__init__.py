@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.argument_processors.firmware import FirmwareArgProcessor
+from stack.commands import FirmwareArgProcessor
 
 class command(stack.commands.list.command, FirmwareArgProcessor):
 	pass

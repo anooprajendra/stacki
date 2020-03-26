@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.argument_processors.box import BoxArgumentProcessor
+from stack.commands import BoxArgumentProcessor
 
 class command(stack.commands.list.command,
 	      BoxArgumentProcessor):

@@ -14,7 +14,7 @@ import stack.commands
 import os
 import re
 from collections import namedtuple
-from stack.argument_processors.firmware import FirmwareArgProcessor
+from stack.commands import FirmwareArgProcessor
 
 class command(
 	stack.commands.HostArgProcessor,
