@@ -11,10 +11,9 @@
 # @rocks@
 
 import stack.commands
-from stack.commands import BoxArgumentProcessor
+from stack.commands import BoxArgProcessor
 
-class command(stack.commands.list.command,
-	      BoxArgumentProcessor):
+class command(stack.commands.list.command, BoxArgProcessor):
 	pass
 
 

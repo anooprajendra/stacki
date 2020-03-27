@@ -6,7 +6,7 @@
 
 
 import stack.commands
-from stack.commansd import OSArgProcessor
+from stack.commands import OSArgProcessor
 
 
 class command(OSArgProcessor, stack.commands.list.command):
