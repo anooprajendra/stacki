@@ -446,7 +446,7 @@ class TestFirmwareArgProcessor:
 			argument_processor.get_common_frontend_ip(hostname = mock_hostname)
 
 	@patch.object(target = FirmwareArgProcessor, attribute = "get_common_frontend_ip", autospec = True)
-	@patch(target = "stack.commands.firmware.Path", autospec = True)
+	@patch(target = "stack.argument_processors.firmware.Path", autospec = True)
 	def test_get_firmware_url(self, mock_path, mock_get_common_frontend_ip, argument_processor):
 		"""Test that get_firmware_url returns the correct URL."""
 		mock_get_common_frontend_ip.return_value = "1.2.3.4"
@@ -486,7 +486,7 @@ class TestFirmwareArgProcessor:
 		mock_path.return_value.joinpath.assert_called_once_with(*expected_path_parts)
 
 	@patch.object(target = FirmwareArgProcessor, attribute = "get_common_frontend_ip", autospec = True)
-	@patch(target = "stack.commands.firmware.Path", autospec = True)
+	@patch(target = "stack.argument_processors.firmware.Path", autospec = True)
 	def test_get_firmware_url_file_does_not_exist(self, mock_path, mock_get_common_frontend_ip, argument_processor):
 		"""Test that get_firmware_url raises a CommandError if the firmware file does not exist."""
 		mock_path.return_value.resolve.side_effect = FileNotFoundError("Test error")
@@ -498,7 +498,7 @@ class TestFirmwareArgProcessor:
 			)
 
 	@patch.object(target = FirmwareArgProcessor, attribute = "get_common_frontend_ip", autospec = True)
-	@patch(target = "stack.commands.firmware.Path", autospec = True)
+	@patch(target = "stack.argument_processors.firmware.Path", autospec = True)
 	def test_get_firmware_url_no_common_ip(self, mock_path, mock_get_common_frontend_ip, argument_processor):
 		"""Test that get_firmware_url passes through the CommandError if get_common_frontend_ip fails."""
 		mock_get_common_frontend_ip.side_effect = CommandError(cmd = "", msg = "Test error")
