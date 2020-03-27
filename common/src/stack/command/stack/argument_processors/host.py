@@ -15,6 +15,7 @@ from functools import partial
 
 from stack.exception import CommandError, ArgRequired, ArgUnique
 from stack.bool import str2bool
+from stack.cond import EvalCondExpr
 from stack.util import flatten
 
 class HostArgProcessor:
