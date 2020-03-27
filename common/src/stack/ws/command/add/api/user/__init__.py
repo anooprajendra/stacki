@@ -11,9 +11,10 @@ import json
 import os
 import sys
 
+# note to future linters: stack.django_env must come before the actual django imports
+import stack.django_env
 from django.contrib.auth.models import User, Group
 
-import stack.django_env
 from stack.password import Password
 import stack.commands
 from stack.commands import HostArgProcessor
