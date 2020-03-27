@@ -12,7 +12,7 @@
 
 
 import stack.commands
-from stack.commansd import HostArgProcessor
+from stack.commands import HostArgProcessor
 
 class Command(HostArgProcessor, stack.commands.report.command):
 	"""

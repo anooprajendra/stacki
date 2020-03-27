@@ -11,7 +11,7 @@
 # @rocks@
 
 import stack.commands
-from stack.commansd import NetworkArgProcessor
+from stack.commands import NetworkArgProcessor
 
 class Command(NetworkArgProcessor, stack.commands.list.os.command):
 	"""

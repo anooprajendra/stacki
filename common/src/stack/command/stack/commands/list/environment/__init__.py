@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-from stack.commansd import EnvironmentArgProcessor
+from stack.commands import EnvironmentArgProcessor
 
 class command(EnvironmentArgProcessor, stack.commands.list.command):
 	pass

@@ -5,7 +5,7 @@
 # @copyright@
 
 import stack.commands
-from stack.commansd import HostArgProcessor
+from stack.commands import HostArgProcessor
 from stack.exception import ArgUnique
 
 

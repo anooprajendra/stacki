@@ -13,7 +13,7 @@
 import re
 
 import stack.commands
-from stack.commansd import HostArgProcessor, SwitchArgProcessor
+from stack.commands import HostArgProcessor, SwitchArgProcessor
 
 class Command(HostArgProcessor, SwitchArgProcessor, stack.commands.report.command):
 	"""
