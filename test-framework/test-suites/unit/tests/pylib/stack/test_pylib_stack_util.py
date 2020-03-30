@@ -1,7 +1,8 @@
 import pytest
-
 import stack.util
 import subprocess
+from unittest.mock import create_autospec, patch, call
+from pathlib import Path
 
 class TestUtil:
 	def test_exec_wrapper(self):
@@ -109,3 +110,18 @@ class TestUtil:
 		assert stack.util.is_valid_hostname(max_len_name)
 		longer_name = "a" * 64
 		assert not stack.util.is_valid_hostname(longer_name)
+
+	def exec_return_code(self, mock_completed_process, mock_calls, *args, **kwargs):
+		"""
+		Helper function for giving different
+		return codes for _exec based on the input args
+		"""
+		mock_completed_process.returncode = 1
+
+		# Return a successful return code if the input
+		# dict specifies it for the call to _exec
+		for arg_text, success in mock_calls.items():
+			if arg_text in args[0]:
+				if success:
+					mock_completed_process.returncode = 0
+		return mock_completed_process

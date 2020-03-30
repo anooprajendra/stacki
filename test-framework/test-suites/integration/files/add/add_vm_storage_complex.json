@@ -1,0 +1,52 @@
+[
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sda",
+                "Type": "disk",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": 100,
+                "Image Name": "vm-backend-0-3_disk1.qcow2",
+                "Mountpoint": null,
+                "Pending Deletion": false
+        },
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sdb",
+                "Type": "disk",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": 200,
+                "Image Name": "vm-backend-0-3_disk2.qcow2",
+                "Mountpoint": null,
+                "Pending Deletion": false
+        },
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sdc",
+                "Type": "image",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": null,
+                "Image Name": "image1.raw",
+                "Mountpoint": null,
+                "Pending Deletion": false
+        },
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sdd",
+                "Type": "image",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": null,
+                "Image Name": "image2.qcow2",
+                "Mountpoint": null,
+                "Pending Deletion": false
+        },
+        {
+                "Virtual Machine": "vm-backend-0-3",
+                "Name": "sde",
+                "Type": "mountpoint",
+                "Location": "/export/pools/stacki/vm-backend-0-3",
+                "Size": null,
+                "Image Name": "",
+                "Mountpoint": "/dev/sdb",
+                "Pending Deletion": false
+        }
+]
