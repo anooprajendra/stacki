@@ -1068,13 +1068,13 @@ def get_mysql_connection(user=None, password=None):
 				# Couldn't read the password, try connecting without one
 				pass
 
-		if os.path.exists('/var/run/mysql/mysql.sock'):
+		if os.path.exists('/var/lib/mysql/mysql.sock'):
 			connection = pymysql.connect(
 				db='cluster',
 				user=user,
 				passwd=password,
 				host='localhost',
-				unix_socket='/var/run/mysql/mysql.sock',
+				unix_socket='/var/lib/mysql/mysql.sock',
 				autocommit=True
 			)
 		else:
@@ -1083,7 +1083,7 @@ def get_mysql_connection(user=None, password=None):
 				user=user,
 				passwd=password,
 				host='localhost',
-				port=40000,
+				port=3306,
 				autocommit=True
 			)
 

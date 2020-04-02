@@ -3,3 +3,4 @@ graph
 manifest.d
 nodes
 src
+.config

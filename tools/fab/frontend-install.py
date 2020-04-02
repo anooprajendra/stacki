@@ -288,9 +288,6 @@ pkgs = [
 	'stack-kickstart',
 ]
 
-if osname == 'redhat':
-	pkgs.append('foundation-redhat')
-
 # Workaround to add new packages but not break this script for older stacki releases
 new_pkgs = [
 	'stack-templates',
