@@ -44,7 +44,7 @@ django_conf_file = "/opt/stack/etc/django.my.cnf"
 f = open(django_conf_file, 'w+')
 f.write("""[client]
 user		= django
-port		= 40000
+port		= 3306
 socket		= /var/lib/mysql/mysql.sock
 password	= %s
 """ % django_pass)
