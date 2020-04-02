@@ -15,7 +15,7 @@ Base class for all nodes.
 	ipmitool
 	OpenIPMI
 	wget
-	bridge-utils
+	<!-- bridge-utils -->
 	rsyslog
 </stack:package>
 

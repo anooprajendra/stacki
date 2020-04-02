@@ -12,9 +12,9 @@
 	</stack:copyright>
 
 	<stack:package stack:cond="os == 'redhat'">
-	libbdevid-python
 	pykickstart
-	python-pyblock
+	<!-- libbdevid-python
+	python-pyblock -->
 	</stack:package> 
 
 	<stack:package>

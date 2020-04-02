@@ -17,10 +17,11 @@
 	</stack:rocks>
 
 
+	<!--
 	<stack:package>
 		ntp
 	</stack:package>
-
+	-->
 <stack:script stack:stage="install-post">
 /sbin/hwclock --systohc --utc
 </stack:script>

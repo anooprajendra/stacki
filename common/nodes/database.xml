@@ -50,7 +50,7 @@ root_pw=`/opt/stack/sbin/gen_random_pw`
 	    stack:owner="root:root" stack:vars="expanded">
 [client]
 user		= root
-socket		= /var/run/mysql/mysql.sock
+socket		= /var/lib/mysql/mysql.sock
 password	= $root_pw
 </stack:file>
 
@@ -63,11 +63,12 @@ apache_pw=`/opt/stack/sbin/gen_random_pw`
 	    stack:owner="root:apache" stack:perms="0640" stack:vars="expanded">
 [client]
 user		= apache
-socket		= /var/run/mysql/mysql.sock
+socket		= /var/lib/mysql/mysql.sock
 password	= $apache_pw
 </stack:file>
 
 <!-- this is the config file mysql tools look at by default -->
+<!--
 <stack:file stack:name="/etc/my.cnf"
 	    stack:owner="root:mysql" stack:perms="0640">
 [mysqld]
@@ -78,11 +79,11 @@ max_allowed_packet = 1024M
 [client]
 socket		= /var/run/mysql/mysql.sock
 </stack:file>
-
+-->
 <!--
 	centos needs a new service file to set command line args as well as /var/run/mysql
 -->
-
+<!--
 <stack:file stack:name="/etc/systemd/system/mariadb.service"
             stack:owner="root:root" stack:perms="0644"
             stack:cond="os == 'redhat'">
@@ -91,15 +92,16 @@ socket		= /var/run/mysql/mysql.sock
 # note: 'defaults-file' must be the first arg here.
 [Service]
 RuntimeDirectory=mysql
-Environment="MYSQLD_OPTS=--defaults-file=/etc/my.cnf --user=mysql --basedir=/usr"
+Environment="MYSQLD_OPTS=-\-defaults-file=/etc/my.cnf -\-user=mysql -\-basedir=/usr"
 # weird systemd behavior that requires an empty ExecStart before overwriting ExecStart
 ExecStart=
 ExecStart=/usr/bin/mysqld_safe $MYSQLD_OPTS
 </stack:file>
-
+-->
 <!-- we added a systemd file, so reload -->
+<!--
 systemctl daemon-reload
-
+-->
 <!--
 	sql file to nuke default anonymous user inside mysql,
 	set our password on root, nuke some unused tables,
@@ -135,12 +137,12 @@ wait_for_mysql_up()
 	permissions for running the database
 	we nuke this later because systemD wants to own it
 	but need it because the first start of maria is sans systemd
--->
 
 mkdir -p       /var/run/mysql
 chgrp -R mysql /var/run/mysql
 chmod -R g+rwx /var/run/mysql
 chmod a+rx     /var/run/mysql
+-->
 
 <!--
 	install the basic mysql tables,
@@ -164,7 +166,7 @@ then
 	kill -9 `pidof mysqld`
 
 	<!-- systemd needs to create /var/run/mysql itself now -->
-	rm -rf /var/run/mysql
+	<!-- rm -rf /var/run/mysql -->
 else
 	echo "cannot find the mariadb installation command"
 fi
@@ -183,15 +185,15 @@ systemctl start  $MARIA_OR_MYSQL
 
 	one use case where the above line will not start the database is for a bare-metal
 	install. this is because systemd cannot start services in a chrooted environment.
--->
 
 mysqladmin -s ping > /dev/null
 if [ $? -ne 0 ]
 then
 	mkdir -p /var/run/mysql
 	chown mysql.mysql /var/run/mysql
-	nohup /usr/bin/mysqld_safe --defaults-file=/etc/my.cnf --user=root &amp;
+	nohup /usr/bin/mysqld_safe -/-defaults-file=/etc/my.cnf -/-user=root &amp;
 fi
+-->
 
 wait_for_mysql_up
 
