@@ -29,7 +29,7 @@ conf_file.close()
 
 # Connect to the database
 d = pymysql.connect(user='root', db='mysql', passwd=root_pass,
-	unix_socket='/var/run/mysql/mysql.sock',
+	unix_socket='/var/lib/mysql/mysql.sock',
 	autocommit=True)
 
 db = d.cursor()

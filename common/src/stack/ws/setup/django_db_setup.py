@@ -25,7 +25,7 @@ conf_file.close()
 
 # Connect to the database
 d = pymysql.connect(user='root', db='mysql', passwd=root_pass,
-	unix_socket='/var/run/mysql/mysql.sock',
+	unix_socket='/var/lib/mysql/mysql.sock',
 	autocommit=True)
 
 db = d.cursor()
@@ -45,7 +45,7 @@ f = open(django_conf_file, 'w+')
 f.write("""[client]
 user		= django
 port		= 40000
-socket		= /var/run/mysql/mysql.sock
+socket		= /var/lib/mysql/mysql.sock
 password	= %s
 """ % django_pass)
 # Set owner and group to root:apache
