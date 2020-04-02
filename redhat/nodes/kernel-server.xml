@@ -25,7 +25,6 @@ https://github.com/Teradata/stacki/blob/master/LICENSE-ROCKS.txt
 <stack:package>iscsi-initiator-utils</stack:package>
 <stack:package>ludicrous-speed</stack:package>
 <stack:package>libblkid-devel</stack:package>
-<stack:package>isomd5sum-devel</stack:package>
 <stack:package>slang-devel</stack:package>
 <stack:package>newt-devel</stack:package>
 <stack:package>yum-utils</stack:package>
