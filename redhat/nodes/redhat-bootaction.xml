@@ -7,7 +7,7 @@
 	</stack:copyright>
 
 <stack:script stack:stage="install-post">
-<stack:file stack:name="/tmp/dump-bootaction.json" stack:cond="release == 'redhat7'">
+<stack:file stack:name="/tmp/dump-bootaction.json">
 {
         "bootaction": [
                 {
