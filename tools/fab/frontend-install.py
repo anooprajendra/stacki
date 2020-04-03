@@ -263,7 +263,7 @@ for iso in extra_isos:
 banner("Bootstrap Stack Command Line")
 
 # turn off NetworkManager so it doesn't overwrite our networking info
-run_and_warn(['service', 'NetworkManager', 'stop'])
+# run_and_warn(['service', 'NetworkManager', 'stop'])
 
 stacki_iso = os.path.abspath(stacki_iso)
 
